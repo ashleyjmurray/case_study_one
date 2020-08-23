@@ -8,5 +8,5 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r}
-
+leaders_data <- get(load("Leaders.RData"))
 ```
