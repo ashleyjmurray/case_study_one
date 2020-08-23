@@ -13,9 +13,39 @@ leaders_data <- get(load("Leaders.RData"))
 
 ```{r}
 library(dynsurv)
+library(survival)
+data(tooth)
+```
+
+
+```{r}
+library(tidyverse)
+mydata = leaders_data
+mygrid <- tooth.grid # Amy said the time variable is not relevant
+myformula <- Surv(leaders_data$Birth.Date, leaders_data$Event.Date, type = "interval2") ~ leaders_data$Birth.Date + leaders_data$Type
 ```
 
 ```{r}
-mygrid <- leaders_data.grid
-myformula <- Surv(Birth.Date, Event.Date) ~
+fit <- bayesCox(myformula, mydata, mygrid, 
+                 out = "leadersCox.txt", 
+                 model = "TimeIndep", 
+                 base.prior = list(type = "Gamma", shape = 0.1, rate = 0.1),    
+                 coef.prior = list(type = "Normal", mean = 0, sd = 1),  
+                 gibbs = list(iter = 100, burn = 20, thin = 1, verbose = TRUE, nReport = 5))
+plotCoef(coef(fit, level = 0.9))
+```
+```{r}
+# https://www.rdocumentation.org/packages/dynsurv/versions/0.3-3/topics/bayesCox
+mydata0 <- tooth
+mygrid0 = tooth.grid
+myformula0<- Surv(left, right, type = "interval2") ~ dmf + sex
+```
+
+```{r}
+fit0 <- bayesCox(myformula0, mydata0, mygrid0, out = "tiCox.txt",
+                 model = "TimeIndep",
+                 base.prior = list(type = "Gamma", shape = 0.1, rate = 0.1),
+                 coef.prior = list(type = "Normal", mean = 0, sd = 1),
+                 gibbs = list(iter = 100, burn = 20, thin = 1, verbose = TRUE, nReport = 5))
+plotCoef(coef(fit0, level = 0.9))
 ```
