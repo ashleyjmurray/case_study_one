@@ -14,6 +14,13 @@ log(\mu) = \beta_0 + \beta_1x_{i1}+\beta_2x_{i2}+...+\beta_px_{ip}\\
 $$
 Log of mu is done so that the mu parameter is always positive (the support on mu in Weibull is that mu > 0)
 
+# MORE SPECIFICALLY
+$$
+T_i \sim Weibull(\alpha, \mu_i) \\
+\log(\mu_i) = \beta_0+\beta_1 \text{(Year of Birth_i)}+\beta_2 \text{(Leadership_i = UsPres)} + \beta_3\text{(Leadership_i = ChinaEmp)} \\
++ \beta_4\text{(Leadership_i = DalaiLama)} +\beta_5\text{(Leadership_i = JapanEmp)}
+$$
+
 According to Graham, the following is being done by the model above. So basically Stander et al is doing cox proportional, but they just didn't write out this hazard function explicity in the paper.
 $$
 h_i(t)=h_0(t)\exp(\beta_1x_{i1}+\beta_2x_{i2}+...+\beta_px_{ip}) \\
@@ -28,7 +35,7 @@ run JAGS mcmc on the betas, follow Stander et al code as a guide
 
 
 
-
+# EXPERIMENTAL CODE
 ```{r}
 leaders_data <- get(load("Leaders.RData"))
 ```
