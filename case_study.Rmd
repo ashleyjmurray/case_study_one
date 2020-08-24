@@ -25,6 +25,9 @@ mygrid <- tooth.grid # Amy said the time variable is not relevant
 myformula <- Surv(leaders_data$Birth.Date, leaders_data$Event.Date, type = "interval2") ~ leaders_data$Birth.Date + leaders_data$Type
 ```
 
+# https://amy-herring.github.io/STA440/decks/survival.html#/proportional-hazards-models
+# maybe find posterior probably of Obama living longer than Naruhito by hazard ratio
+
 ```{r}
 fit <- bayesCox(myformula, mydata, mygrid, 
                  out = "leadersCox.txt", 
