@@ -130,16 +130,16 @@ run JAGS mcmc on the betas, follow Stander et al code as a guide
 # filter out the 4 leaders we need to predict
 
 leaders_data <- leaders_data %>%
-  mutate(TypeChinaEmp = case_when(Type == "ChinaEmp" ~ 1,
-                             TRUE ~ 0),
-         TypeDalaiLama = case_when(Type == "DalaiLama" ~ 1,
-                                   TRUE ~ 0),
-         TypeJapanEmp = case_when(Type == "JapanEmp" ~ 1, 
-                                  TRUE ~ 0),
-         TypePope = case_when(Type == "Pope" ~ 1, 
-                              TRUE ~ 0),
-         TypeUsPres = case_when(Type == "UsPres" ~ 1,
-                                TRUE ~ 0))
+  mutate(TypeChinaEmp = as.factor(case_when(Type == "ChinaEmp" ~ 1,
+                             TRUE ~ 0)),
+         TypeDalaiLama = as.factor(case_when(Type == "DalaiLama" ~ 1,
+                                   TRUE ~ 0)),
+         TypeJapanEmp = as.factor(case_when(Type == "JapanEmp" ~ 1, 
+                                  TRUE ~ 0)),
+         TypePope = as.factor(case_when(Type == "Pope" ~ 1, 
+                              TRUE ~ 0)),
+         TypeUsPres = as.factor(case_when(Type == "UsPres" ~ 1,
+                                TRUE ~ 0)))
 
 leaders_nopred <- leaders_data %>%
   filter(!(Name %in% c("14th Dalai Lama (Tenzin Gyatso)", "Naruhito (Emperor Reiwa)", "Barack Obama", "Francis")))
@@ -147,6 +147,8 @@ leaders_nopred <- leaders_data %>%
 leaders_nopred$Birth.Year <- year(leaders_nopred$Birth.Date)
 
 survival_raw <- leaders_nopred$Age.Event
+n <- length(survival_raw)
+
 censored <- leaders_nopred$Censored
 survival <- ifelse(censored == 0, survival_raw, NA)
 
@@ -201,9 +203,9 @@ first_approach <- function(){
   # percentage_increase_year <- 100*(exp(alpha_2) - 1)
   
   # Posterior median at various covariate values
-  beta_med <- beta_0 + beta_1*x_1_new + beta_2*x_2 + beta_3*x_3 + beta_4*x_4 + beta_5*x_5 
-  # New values need to be supplied
-  t_median <- pow(log(2) * exp(-beta_med), 1 / r)
+  # beta_med <- beta_0 + beta_1*x_1_new + beta_2*x_2 + beta_3*x_3 + beta_4*x_4 + beta_5*x_5 
+  # # New values need to be supplied
+  # t_median <- pow(log(2) * exp(-beta_med), 1 / r)
   
   # Predictive distribution of age at the new values
   
@@ -227,14 +229,13 @@ x_1_new <-  age_new - mean(leaders_nopred$Birth.Year)
 # x_2_new <- year_new - mean(popes$Year.Elected)
 
 # Data specific to Francis
-age_at_election <- 76.29
-age_Francis <- age_at_election - mean(popes$Age.Election)
-year_Francis <- 2013 - mean(popes$Year.Elected)
+birth_year_Francis <- 1936
+year_Francis <- birth_year_Francis - mean(leaders_nopred$Birth.Year)
 
 # Predictive distribution of pontificate length for Francis at election
 # Conditional on being greater than 7.46 years (Aug 24, 2020)
-present_length <- 7.46
-upper_length <- 25
+present_length <- leaders_data$Age.Event[leaders_data$Name =="Francis"]
+upper_length <- 120
 data_Popes_first_approach <- list("n",
                    "censored",
                    "survival",
@@ -247,7 +248,7 @@ data_Popes_first_approach <- list("n",
                    "x_1_new",
                    #"x_2_new",
                    "age_at_election",
-                   "age_Francis",
+                   #"age_Francis",
                    "year_Francis",
                    "present_length",
                    "upper_length")
@@ -267,7 +268,7 @@ Bayesian_Popes_first_approach <- jags(data = data_Popes_first_approach,
                                               #"percentage_increase_age",
                                               #"percentage_increase_year",
                                               "r",
-                                              "t_median",
+                                              #"t_median",
                                               "survival_Francis",
                                               "age_Francis_predictive"), 
                        n.iter = 50000, 
