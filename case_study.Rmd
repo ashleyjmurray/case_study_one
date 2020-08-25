@@ -43,6 +43,8 @@ leaders_data <- get(load("Leaders.RData"))
 ```{r}
 library(dynsurv)
 library(survival)
+library(tidyverse)
+library(lubridate)
 data(tooth)
 ```
 
@@ -83,3 +85,190 @@ fit0 <- bayesCox(myformula0, mydata0, mygrid0, out = "tiCox.txt",
                  gibbs = list(iter = 100, burn = 20, thin = 1, verbose = TRUE, nReport = 5))
 plotCoef(coef(fit0, level = 0.9))
 ```
+
+# EDA
+
+```{r EDA}
+leaders_data$Censored <- as.factor(leaders_data$Censored)
+leaders_data$Type <- as.factor(leaders_data$Type)
+leaders_data$Age.Event <- as.numeric(leaders_data$Age.Event)
+summary(leaders_data)
+
+# boxplot of age (Age.Event) by Type
+ggplot(data = leaders_data) +
+  geom_boxplot(aes(x = Type, y = Age.Event))
+
+ggplot(data = leaders_data) +
+  geom_point(aes(x = Birth.Date, y = Age.Event))
+
+```
+# THIS IS OUR MODEL
+$$
+T_i \sim Weibull(\alpha, \mu) \\
+log(\mu) = \beta_0 + \beta_1x_{i1}+\beta_2x_{i2}+...+\beta_px_{ip}\\
+$$
+Log of mu is done so that the mu parameter is always positive (the support on mu in Weibull is that mu > 0)
+
+# MORE SPECIFICALLY
+$$
+T_i \sim Weibull(\alpha, \mu_i) \\
+\log(\mu_i) = \beta_0+\beta_1 \text{(Year of Birth_i)}+\beta_2 \text{(Leadership_i = UsPres)} + \beta_3\text{(Leadership_i = ChinaEmp)} \\
++ \beta_4\text{(Leadership_i = DalaiLama)} +\beta_5\text{(Leadership_i = JapanEmp)}
+$$
+According to Graham, the following is being done by the model above. So basically Stander et al is doing cox proportional, but they just didn't write out this hazard function explicity in the paper.
+$$
+h_i(t)=h_0(t)\exp(\beta_1x_{i1}+\beta_2x_{i2}+...+\beta_px_{ip}) \\
+$$
+hazard of death is a rate -- instantaneous failure rate (probability is integral from 0 to J over it dt)
+
+$$
+f(t) = \alpha\lambda t^{\alpha-1}\exp(-\lambda t^\alpha)
+$$
+run JAGS mcmc on the betas, follow Stander et al code as a guide
+
+```{r}
+# filter out the 4 leaders we need to predict
+
+leaders_data <- leaders_data %>%
+  mutate(TypeChinaEmp = case_when(Type == "ChinaEmp" ~ 1,
+                             TRUE ~ 0),
+         TypeDalaiLama = case_when(Type == "DalaiLama" ~ 1,
+                                   TRUE ~ 0),
+         TypeJapanEmp = case_when(Type == "JapanEmp" ~ 1, 
+                                  TRUE ~ 0),
+         TypePope = case_when(Type == "Pope" ~ 1, 
+                              TRUE ~ 0),
+         TypeUsPres = case_when(Type == "UsPres" ~ 1,
+                                TRUE ~ 0))
+
+leaders_nopred <- leaders_data %>%
+  filter(!(Name %in% c("14th Dalai Lama (Tenzin Gyatso)", "Naruhito (Emperor Reiwa)", "Barack Obama", "Francis")))
+
+leaders_nopred$Birth.Year <- year(leaders_nopred$Birth.Date)
+
+survival_raw <- leaders_nopred$Age.Event
+censored <- leaders_nopred$Censored
+survival <- ifelse(censored == 0, survival_raw, NA)
+
+censoring_limits <- ifelse(censored == 0, 120, survival_raw)
+x_1 <- leaders_nopred$Birth.Year - mean(leaders_nopred$Birth.Year)
+x_2 <- leaders_nopred$TypeUsPres
+x_3 <- leaders_nopred$TypeChinaEmp
+x_4 <- leaders_nopred$TypeDalaiLama
+x_5 <- leaders_nopred$TypeJapanEmp
+```
+
+```{r Censor-1st-approach-1}
+first_approach <- function(){
+  for(i in 1:n){
+    #
+    # Likelihood part
+    #
+    censored[i] ~ dinterval(survival[i], censoring_limits[i]) 
+    # To deal with censoring: 
+    # censored equals 1 for Benedict XVI as of 25/12/2016, 
+    # 0 for the other popes.
+    # survival equals NA for Benedict XVI,
+    # and the survival times of the other popes.
+    # censoring_limits equals 11.7 for Benedict XVI,
+    # and values (e.g. 32) greater than or equal to 
+    # the survival times of the other popes.
+    survival[i] ~ dweib(r, mu[i]) # Basic Weibull assumption
+    mu[i] <- exp(beta[i])  # Defining beta as log(mu)
+    beta[i] <- beta_0 + beta_1*x_1[i] + beta_2*x_2[i] + beta_3*x_3[i] + beta_4*x_4[i] + beta_5*x_5[i]
+    # beta = log(mu) is a linear function of the covariates
+  }
+  
+  # Priors
+  beta_0 ~ dnorm(0.0, 1.0E-4) # Prior on beta_0 is normal with low precision
+  beta_1 ~ dnorm(0.0, 1.0E-4) # Prior on beta_1 is normal with low precision
+  beta_2 ~ dnorm(0.0, 1.0E-4) # Prior on beta_2 is normal with low precision
+  beta_3 ~ dnorm(0.0, 1.0E-4) # Prior on beta_1 is normal with low precision
+  beta_4 ~ dnorm(0.0, 1.0E-4) # Prior on beta_2 is normal with low precision
+  beta_5 ~ dnorm(0.0, 1.0E-4) # Prior on beta_2 is normal with low precision
+  r ~ dexp(0.001) # Prior on r
+  
+  # Define the alphas
+  alpha_0 <- - beta_0 / r
+  alpha_1 <- - beta_1 / r
+  alpha_2 <- - beta_2 / r
+  alpha_3 <- - beta_3 / r
+  alpha_4 <- - beta_4 / r
+  alpha_5 <- - beta_5 / r
+
+  # Percentage increases
+  # percentage_increase_age <- 100*(exp(alpha_1) - 1)
+  # percentage_increase_year <- 100*(exp(alpha_2) - 1)
+  
+  # Posterior median at various covariate values
+  beta_med <- beta_0 + beta_1*x_1_new + beta_2*x_2 + beta_3*x_3 + beta_4*x_4 + beta_5*x_5 
+  # New values need to be supplied
+  t_median <- pow(log(2) * exp(-beta_med), 1 / r)
+  
+  # Predictive distribution of age at the new values
+  
+  beta_Francis <- beta_0 + beta_1*year_Francis 
+  # Values of age_Francis and year_Francis need to be provided
+  mu_Francis <- exp(beta_Francis)
+  survival_Francis ~ dweib(r, mu_Francis) %_% T(present_length, upper_length) 
+  # Take into account the current pontificate length
+  # Also specify a sensible upper bound
+  age_Francis_predictive <- survival_Francis 
+  # Work also with age
+}
+```
+
+```{r 1st-approach-Francis-pred, warning=F, message=F}
+library(R2jags)
+# Prepare the data
+age_new <- 60
+x_1_new <-  age_new - mean(leaders_nopred$Birth.Year)
+# year_new <- 1750
+# x_2_new <- year_new - mean(popes$Year.Elected)
+
+# Data specific to Francis
+age_at_election <- 76.29
+age_Francis <- age_at_election - mean(popes$Age.Election)
+year_Francis <- 2013 - mean(popes$Year.Elected)
+
+# Predictive distribution of pontificate length for Francis at election
+# Conditional on being greater than 7.46 years (Aug 24, 2020)
+present_length <- 7.46
+upper_length <- 25
+data_Popes_first_approach <- list("n",
+                   "censored",
+                   "survival",
+                   "censoring_limits",
+                   "x_1",
+                   "x_2",
+                   "x_1_new",
+                   #"x_2_new",
+                   "age_at_election",
+                   "age_Francis",
+                   "year_Francis",
+                   "present_length",
+                   "upper_length")
+Bayesian_Popes_first_approach <- jags(data = data_Popes_first_approach,  
+                       parameters.to.save = c("beta_0",
+                                              "beta_1",
+                                              "beta_2",
+                                              "alpha_0",
+                                              "alpha_1",
+                                              "alpha_2",
+                                              #"percentage_increase_age",
+                                              #"percentage_increase_year",
+                                              "r",
+                                              "t_median",
+                                              "survival_Francis",
+                                              "age_Francis_predictive"), 
+                       n.iter = 50000, 
+                       n.chains = 3,
+                       model.file = first_approach)
+
+Bayesian_Popes_first_approach
+```
+
+
+
+
+
