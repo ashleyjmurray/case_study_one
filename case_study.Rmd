@@ -158,6 +158,7 @@ x_2 <- leaders_nopred$TypeUsPres
 x_3 <- leaders_nopred$TypeChinaEmp
 x_4 <- leaders_nopred$TypeDalaiLama
 x_5 <- leaders_nopred$TypeJapanEmp
+
 ```
 
 ```{r Censor-1st-approach-1}
@@ -178,6 +179,7 @@ first_approach <- function(){
     survival[i] ~ dweib(r, mu[i]) # Basic Weibull assumption
     mu[i] <- exp(beta[i])  # Defining beta as log(mu)
     beta[i] <- beta_0 + beta_1*x_1[i] + beta_2*x_2[i] + beta_3*x_3[i] + beta_4*x_4[i] + beta_5*x_5[i]
+    
     # beta = log(mu) is a linear function of the covariates
   }
   
@@ -198,6 +200,7 @@ first_approach <- function(){
   alpha_3 <- - beta_3 / r
   alpha_4 <- - beta_4 / r
   alpha_5 <- - beta_5 / r
+  
 
   # Percentage increases
   # percentage_increase_age <- 100*(exp(alpha_1) - 1)
