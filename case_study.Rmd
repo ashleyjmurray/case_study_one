@@ -157,8 +157,10 @@ first_approach <- function(){
   alpha_3 <- - beta_3 / r
   alpha_4 <- - beta_4 / r
   alpha_5 <- - beta_5 / r
-  
-
+  alpha_6 <- - beta_6 / r  
+  alpha_7 <- - beta_7 / r
+  alpha_8 <- - beta_8 / r
+  alpha_9 <- - beta_9 / r
   # Percentage increases
   # percentage_increase_age <- 100*(exp(alpha_1) - 1)
   # percentage_increase_year <- 100*(exp(alpha_2) - 1)
@@ -233,6 +235,10 @@ Bayesian_Popes_first_approach <- jags(data = data_Popes_first_approach,
                                               "alpha_3",
                                               "alpha_4",
                                               "alpha_5",
+                                              "alpha_6",
+                                              "alpha_7",
+                                              "alpha_8",
+                                              "alpha_9",
                                               #"percentage_increase_age",
                                               #"percentage_increase_year",
                                               "r",
