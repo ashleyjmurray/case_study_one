@@ -181,6 +181,7 @@ first_approach <- function(){
     # beta = log(mu) is a linear function of the covariates
   }
   
+  
   # Priors
   beta_0 ~ dnorm(0.0, 1.0E-4) # Prior on beta_0 is normal with low precision
   beta_1 ~ dnorm(0.0, 1.0E-4) # Prior on beta_1 is normal with low precision
