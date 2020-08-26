@@ -181,6 +181,7 @@ first_approach <- function(){
     # beta = log(mu) is a linear function of the covariates
   }
   
+  
   # Priors
   beta_0 ~ dnorm(0.0, 1.0E-4) # Prior on beta_0 is normal with low precision
   beta_1 ~ dnorm(0.0, 1.0E-4) # Prior on beta_1 is normal with low precision
@@ -247,7 +248,7 @@ data_Popes_first_approach <- list("n",
                    "x_5",
                    "x_1_new",
                    #"x_2_new",
-                   "age_at_election",
+                   #"age_at_election",
                    #"age_Francis",
                    "year_Francis",
                    "present_length",
