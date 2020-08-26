@@ -102,6 +102,11 @@ x_2 <- leaders_nopred$TypeUsPres
 x_3 <- leaders_nopred$TypeChinaEmp
 x_4 <- leaders_nopred$TypeDalaiLama
 x_5 <- leaders_nopred$TypeJapanEmp
+# add interaction b/w Birth.Year and Type
+x_6 <- leaders_nopred$Birth.Year*as.numeric(leaders_nopred$TypeUsPres) 
+x_7 <- leaders_nopred$Birth.Year*as.numeric(leaders_nopred$TypeChinaEmp)
+x_8 <- leaders_nopred$Birth.Year*as.numeric(leaders_nopred$TypeDalaiLama)
+x_9 <- leaders_nopred$Birth.Year*as.numeric(leaders_nopred$TypeJapanEmp)
 
 ```
 
@@ -126,7 +131,7 @@ first_approach <- function(){
     
     survival[i] ~ dweib(r, mu[i]) # Basic Weibull assumption
     mu[i] <- exp(beta[i])  # Defining beta as log(mu)
-    beta[i] <- beta_0 + beta_1*x_1[i] + beta_2*x_2[i] + beta_3*x_3[i] + beta_4*x_4[i] + beta_5*x_5[i]
+    beta[i] <- beta_0 + beta_1*x_1[i] + beta_2*x_2[i] + beta_3*x_3[i] + beta_4*x_4[i] + beta_5*x_5[i] + beta_6*x_6[i] + beta_7*x_7[i] + beta_8*x_8[i] + beta_9*x_9[i]
     
     # beta = log(mu) is a linear function of the covariates
   }
@@ -139,6 +144,10 @@ first_approach <- function(){
   beta_3 ~ dnorm(0.0, 1.0E-4) # Prior on beta_1 is normal with low precision
   beta_4 ~ dnorm(0.0, 1.0E-4) # Prior on beta_2 is normal with low precision
   beta_5 ~ dnorm(0.0, 1.0E-4) # Prior on beta_2 is normal with low precision
+  beta_6 ~ dnorm(0.0, 1.0E-4) # Prior on beta_2 is normal with low precision
+  beta_7 ~ dnorm(0.0, 1.0E-4) # Prior on beta_2 is normal with low precision
+  beta_8 ~ dnorm(0.0, 1.0E-4) # Prior on beta_2 is normal with low precision
+  beta_9 ~ dnorm(0.0, 1.0E-4) # Prior on beta_2 is normal with low precision
   r ~ dexp(0.001) # Prior on r
   
   # Define the alphas
@@ -196,6 +205,10 @@ data_Popes_first_approach <- list("n",
                    "x_3",
                    "x_4",
                    "x_5",
+                   "x_6",
+                   "x_7",
+                   "x_8",
+                   "x_9",
                    "x_1_new",
                    #"x_2_new",
                    #"age_at_election",
@@ -210,6 +223,10 @@ Bayesian_Popes_first_approach <- jags(data = data_Popes_first_approach,
                                               "beta_3",
                                               "beta_4",
                                               "beta_5",
+                                              "beta_6",
+                                              "beta_7",
+                                              "beta_8",
+                                              "beta_9",
                                               "alpha_0",
                                               "alpha_1",
                                               "alpha_2",
