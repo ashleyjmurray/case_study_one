@@ -21,69 +21,20 @@ T_i \sim Weibull(\alpha, \mu_i) \\
 + \beta_4\text{(Leadership_i = DalaiLama)} +\beta_5\text{(Leadership_i = JapanEmp)}
 $$
 
-According to Graham, the following is being done by the model above. So basically Stander et al is doing cox proportional, but they just didn't write out this hazard function explicity in the paper.
-$$
-h_i(t)=h_0(t)\exp(\beta_1x_{i1}+\beta_2x_{i2}+...+\beta_px_{ip}) \\
-$$
-hazard of death is a rate -- instantaneous failure rate (probability is integral from 0 to J over it dt)
-
-$$
-f(t) = \alpha\lambda t^{\alpha-1}\exp(-\lambda t^\alpha)
-$$
-run JAGS mcmc on the betas, follow Stander et al code as a guide
-
-
-
-
-# EXPERIMENTAL CODE
-```{r}
-leaders_data <- get(load("Leaders.RData"))
-```
-
-```{r}
-library(dynsurv)
-library(survival)
-library(tidyverse)
-library(lubridate)
-data(tooth)
-```
-
-
-```{r}
-library(tidyverse)
-mydata = leaders_data
-mygrid <- tooth.grid # Amy said the time variable is not relevant
-myformula <- Surv(leaders_data$Birth.Date, leaders_data$Event.Date, type = "interval2") ~ leaders_data$Birth.Date + leaders_data$Type
-```
-
 # https://amy-herring.github.io/STA440/decks/survival.html#/proportional-hazards-models
 # generate predictive samples of Obama and Naruhito, then do Pr(B0+B1 > B1+B2)
 # < 1.02 Rhat and > 200 n.eff
 # bayes plot package
 
+# Libraries
 ```{r}
-fit <- bayesCox(myformula, mydata, mygrid, 
-                 out = "leadersCox.txt", 
-                 model = "TimeIndep", 
-                 base.prior = list(type = "Gamma", shape = 0.1, rate = 0.1),    
-                 coef.prior = list(type = "Normal", mean = 0, sd = 1),  
-                 gibbs = list(iter = 100, burn = 20, thin = 1, verbose = TRUE, nReport = 5))
-plotCoef(coef(fit, level = 0.9))
-```
-```{r}
-# https://www.rdocumentation.org/packages/dynsurv/versions/0.3-3/topics/bayesCox
-mydata0 <- tooth
-mygrid0 = tooth.grid
-myformula0<- Surv(left, right, type = "interval2") ~ dmf + sex
+library(tidyverse)
+library(lubridate)
 ```
 
+# Data
 ```{r}
-fit0 <- bayesCox(myformula0, mydata0, mygrid0, out = "tiCox.txt",
-                 model = "TimeIndep",
-                 base.prior = list(type = "Gamma", shape = 0.1, rate = 0.1),
-                 coef.prior = list(type = "Normal", mean = 0, sd = 1),
-                 gibbs = list(iter = 100, burn = 20, thin = 1, verbose = TRUE, nReport = 5))
-plotCoef(coef(fit0, level = 0.9))
+leaders_data <- get(load("Leaders.RData"))
 ```
 
 # EDA
@@ -102,6 +53,7 @@ ggplot(data = leaders_data) +
   geom_point(aes(x = Birth.Date, y = Age.Event))
 
 ```
+
 # THIS IS OUR MODEL
 $$
 T_i \sim Weibull(\alpha, \mu) \\
@@ -115,16 +67,8 @@ T_i \sim Weibull(\alpha, \mu_i) \\
 \log(\mu_i) = \beta_0+\beta_1 \text{(Year of Birth_i)}+\beta_2 \text{(Leadership_i = UsPres)} + \beta_3\text{(Leadership_i = ChinaEmp)} \\
 + \beta_4\text{(Leadership_i = DalaiLama)} +\beta_5\text{(Leadership_i = JapanEmp)}
 $$
-According to Graham, the following is being done by the model above. So basically Stander et al is doing cox proportional, but they just didn't write out this hazard function explicity in the paper.
-$$
-h_i(t)=h_0(t)\exp(\beta_1x_{i1}+\beta_2x_{i2}+...+\beta_px_{ip}) \\
-$$
-hazard of death is a rate -- instantaneous failure rate (probability is integral from 0 to J over it dt)
 
-$$
-f(t) = \alpha\lambda t^{\alpha-1}\exp(-\lambda t^\alpha)
-$$
-run JAGS mcmc on the betas, follow Stander et al code as a guide
+# Data Cleaning
 
 ```{r}
 # filter out the 4 leaders we need to predict
@@ -161,6 +105,8 @@ x_5 <- leaders_nopred$TypeJapanEmp
 
 ```
 
+# First Approach Function
+
 ```{r Censor-1st-approach-1}
 first_approach <- function(){
   for(i in 1:n){
@@ -168,14 +114,16 @@ first_approach <- function(){
     # Likelihood part
     #
     censored[i] ~ dinterval(survival[i], censoring_limits[i]) 
+
     # To deal with censoring: 
-    # censored equals 1 for Benedict XVI as of 25/12/2016, 
+    # censored equals 1 for Benedict XVI as of 25/12/2016,
     # 0 for the other popes.
     # survival equals NA for Benedict XVI,
     # and the survival times of the other popes.
     # censoring_limits equals 11.7 for Benedict XVI,
     # and values (e.g. 32) greater than or equal to 
     # the survival times of the other popes.
+    
     survival[i] ~ dweib(r, mu[i]) # Basic Weibull assumption
     mu[i] <- exp(beta[i])  # Defining beta as log(mu)
     beta[i] <- beta_0 + beta_1*x_1[i] + beta_2*x_2[i] + beta_3*x_3[i] + beta_4*x_4[i] + beta_5*x_5[i]
@@ -280,8 +228,4 @@ Bayesian_Popes_first_approach <- jags(data = data_Popes_first_approach,
 
 Bayesian_Popes_first_approach
 ```
-
-
-
-
 

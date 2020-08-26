@@ -11,22 +11,22 @@ knitr::opts_chunk$set(echo = TRUE)
 #library(R2jags)
 library(dynsurv)
 library(survival)
+library(R2jags)
 library(tidyverse)
 library(lubridate)
-library(tidyverse)
 ```
 
 ```{r}
 leaders_data <- get(load("Leaders.RData"))
-mydata = leaders_data
-myformula <- Surv(leaders_data$Birth.Date, leaders_data$Event.Date, type = "interval2") ~ leaders_data$Birth.Date + leaders_data$Type
 
 leaders_data$Censored <- as.factor(leaders_data$Censored)
 leaders_data$Type <- as.factor(leaders_data$Type)
 leaders_data$Age.Event <- as.numeric(leaders_data$Age.Event)
 summary(leaders_data)
+```
 
 # boxplot of age (Age.Event) by Type
+```{r}
 ggplot(data = leaders_data) +
   geom_boxplot(aes(x = Type, y = Age.Event))
 
@@ -62,17 +62,23 @@ x_2 <- leaders_nopred$TypeUsPres
 x_3 <- leaders_nopred$TypeChinaEmp
 x_4 <- leaders_nopred$TypeDalaiLama
 x_5 <- leaders_nopred$TypeJapanEmp
+x_6 <- leaders_nopred$Birth.Year*as.numeric(leaders_nopred$TypeUsPres)
+x_7 <- leaders_nopred$Birth.Year*as.numeric(leaders_nopred$TypeChinaEmp)
+x_8 <- leaders_nopred$Birth.Year*as.numeric(leaders_nopred$TypeDalaiLama)
+x_9 <- leaders_nopred$Birth.Year*as.numeric(leaders_nopred$TypeJapanEmp)
 ```
 
 
 ```{r}
 second_approach <- function() {
-  z_censored ~ dpois(phi_censored)
-  phi_censored <- mu_censored * pow(t_censored, r)
-  mu_censored <- exp(beta_censored)
-  beta_censored <- beta_0 + beta_1*x_1_censored + beta_2*x_2_censored + beta_3*x_3_censored + beta_4*x_4_censored + beta_5*x_5_censored
+  for(i in 1:n_censored) {
+    z_censored[i] ~ dpois(phi_censored[i])
+    phi_censored[i] <- mu_censored[i] * pow(t_censored[i], r)
+    mu_censored[i] <- exp(beta_censored[i])
+    beta_censored[i] <- beta_0 + beta_1*x_1_censored[i] + beta_2*x_2_censored[i] + beta_3*x_3_censored[i] + beta_4*x_4_censored[i] + beta_5*x_5_censored[i]
+  }
   
-  for(j in 1:n_non_censored){ #total rows - 7 ** 7 are censored, rest are not censored
+  for(j in 1:n_non_censored) { #total rows - 7 ** 7 are censored, rest are not censored
     survival_non_censored[j] ~ dweib(r, mu[j])
     mu[j] <- exp(beta[j])
     beta[j] <- beta_0 + beta_1*x_1_non_censored[j] + beta_2*x_2_non_censored[j] + beta_3*x_3_non_censored[j] + beta_4*x_4_non_censored[j] + beta_5*x_5_non_censored[j]
@@ -86,26 +92,34 @@ second_approach <- function() {
   beta_5 ~ dnorm(0.0, 1.0E-4) # Prior on beta_2 is normal with low precision
   r ~ dexp(1) # Prior on r
 }
+```
 
 
-z_censored <- 0
-t_censored <- censoring_limits[1]
-x_1_censored <- x_1[1] 
-x_2_censored <- x_2[1] 
-x_3_censored <- x_3[1]
-x_4_censored <- x_4[1]
-x_5_censored <- x_5[1]
+```{r}
+censored_dex = which(censored==1) # index of ppl who are censored
+
+z_censored <- rep(0, length(censored_dex))
+t_censored <- censoring_limits[censored_dex]
+x_1_censored <- x_1[censored_dex] 
+x_2_censored <- x_2[censored_dex] 
+x_3_censored <- x_3[censored_dex]
+x_4_censored <- x_4[censored_dex]
+x_5_censored <- x_5[censored_dex]
 #
-survival_non_censored <- survival[-1] # Remove Benedict
-x_1_non_censored <- x_1[-1]
-x_2_non_censored <- x_2[-1]
-x_3_non_censored <- x_3[-1]
-x_4_non_censored <- x_4[-1]
-x_5_non_censored <- x_5[-1]
+n_censored <- length(censored_dex)
+#
+
+survival_non_censored <- survival[-censored_dex] # Remove ALL ALIVE PEOPLE
+x_1_non_censored <- x_1[-censored_dex]
+x_2_non_censored <- x_2[-censored_dex]
+x_3_non_censored <- x_3[-censored_dex]
+x_4_non_censored <- x_4[-censored_dex]
+x_5_non_censored <- x_5[-censored_dex]
 #
 n_non_censored <- length(survival_non_censored)
 #
-data_Popes_second_approach <- list("n_non_censored",
+data_Popes_second_approach <- list("n_censored",
+                                   "n_non_censored",
                                    "z_censored",
                                    "t_censored",
                                    "x_1_censored",
