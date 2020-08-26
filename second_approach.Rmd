@@ -22,14 +22,34 @@ leaders_data$Age.Event <- as.numeric(leaders_data$Age.Event)
 summary(leaders_data)
 ```
 
-# boxplot of age (Age.Event) by Type
+# Boxplot of age (Age.Event) by Type
 ```{r}
 ggplot(data = leaders_data) +
   geom_boxplot(aes(x = Type, y = Age.Event))
 
 ggplot(data = leaders_data) +
   geom_point(aes(x = Birth.Date, y = Age.Event))
+```
 
+# THIS IS OUR MODEL
+$$
+T_i \sim Weibull(\alpha, \mu) \\
+log(\mu) = \beta_0 + \beta_1x_{i1}+\beta_2x_{i2}+...+\beta_px_{ip}\\
+$$
+Log of mu is done so that the mu parameter is always positive (the support on mu in Weibull is that mu > 0)
+
+# More specificically
+## WILL ADD INTERACTION LATER
+$$
+T_i \sim Weibull(\alpha, \mu_i) \\
+\log(\mu_i) = \beta_0+\beta_1 \text{(Year of Birth_i)}+\beta_2 \text{(Leadership_i = UsPres)} + \beta_3\text{(Leadership_i = ChinaEmp)} \\
++ \beta_4\text{(Leadership_i = DalaiLama)} +\beta_5\text{(Leadership_i = JapanEmp)} \\
++ \beta_6\text{} 
+$$
+
+
+# Data Cleaning
+```{r}
 leaders_data <- leaders_data %>%
   mutate(TypeChinaEmp = as.factor(case_when(Type == "ChinaEmp" ~ 1,
                              TRUE ~ 0)),
@@ -59,7 +79,8 @@ x_2 <- leaders_nopred$TypeUsPres
 x_3 <- leaders_nopred$TypeChinaEmp
 x_4 <- leaders_nopred$TypeDalaiLama
 x_5 <- leaders_nopred$TypeJapanEmp
-x_6 <- leaders_nopred$Birth.Year*as.numeric(leaders_nopred$TypeUsPres)
+# add interaction b/w Birth.Year and Type
+x_6 <- leaders_nopred$Birth.Year*as.numeric(leaders_nopred$TypeUsPres) 
 x_7 <- leaders_nopred$Birth.Year*as.numeric(leaders_nopred$TypeChinaEmp)
 x_8 <- leaders_nopred$Birth.Year*as.numeric(leaders_nopred$TypeDalaiLama)
 x_9 <- leaders_nopred$Birth.Year*as.numeric(leaders_nopred$TypeJapanEmp)
