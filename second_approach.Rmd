@@ -8,7 +8,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r}
-library(R2jags)
+#library(R2jags)
 library(dynsurv)
 library(survival)
 library(tidyverse)
