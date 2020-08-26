@@ -208,7 +208,6 @@ first_approach <- function(){
   # t_median <- pow(log(2) * exp(-beta_med), 1 / r)
   
   # Predictive distribution of age at the new values
-  
   beta_Francis <- beta_0 + beta_1*year_Francis 
   # Values of age_Francis and year_Francis need to be provided
   mu_Francis <- exp(beta_Francis)
@@ -247,7 +246,7 @@ data_Popes_first_approach <- list("n",
                    "x_5",
                    "x_1_new",
                    #"x_2_new",
-                   "age_at_election",
+                   #"age_at_election",
                    #"age_Francis",
                    "year_Francis",
                    "present_length",
