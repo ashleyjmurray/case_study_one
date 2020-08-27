@@ -47,10 +47,10 @@ $$
 T_i \sim Weibull(\alpha, \mu_i) \\
 \log(\mu_i) = \beta_0+\beta_1 \text{(Year of Birth_i)}+\beta_2 \text{(Leadership_i = UsPres)} + \beta_3\text{(Leadership_i = ChinaEmp)} \\
 + \beta_4\text{(Leadership_i = DalaiLama)} +\beta_5\text{(Leadership_i = JapanEmp)} \\
-+ \beta_6\text{(Year of Brth_i * (Leadership_i = UsPres))} \\
-+ \beta_7\text{(Year of Brth_i * (Leadership_i = ChinaEmp))} \\
-+ \beta_8\text{(Year of Brth_i * (Leadership_i = DalaiLama))} \\
-+ \beta_9\text{(Year of Brth_i * (Leadership_i = JapanEmp))}
++ \beta_6\text{(Year of Birth_i * (Leadership_i = UsPres))} \\
++ \beta_7\text{(Year of Birth_i * (Leadership_i = ChinaEmp))} \\
++ \beta_8\text{(Year of Birth_i * (Leadership_i = DalaiLama))} \\
++ \beta_9\text{(Year of Birth_i * (Leadership_i = JapanEmp))}
 $$
 
 
