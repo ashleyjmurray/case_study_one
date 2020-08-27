@@ -9,8 +9,6 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r, message=F}
 #library(R2jags)
-library(dynsurv)
-library(survival)
 library(R2jags)
 library(tidyverse)
 library(lubridate)
@@ -56,6 +54,8 @@ $$
 
 # Data Cleaning
 ```{r}
+leaders_data$Birth.Year <- year(leaders_data$Birth.Date)
+
 leaders_data <- leaders_data %>%
   mutate(TypeChinaEmp = as.factor(case_when(Type == "ChinaEmp" ~ 1,
                              TRUE ~ 0)),
@@ -70,8 +70,6 @@ leaders_data <- leaders_data %>%
 
 leaders_nopred <- leaders_data %>%
   filter(!(Name %in% c("14th Dalai Lama (Tenzin Gyatso)", "Naruhito (Emperor Reiwa)", "Barack Obama", "Francis")))
-
-leaders_nopred$Birth.Year <- year(leaders_nopred$Birth.Date)
 
 survival_raw <- leaders_nopred$Age.Event
 n <- length(survival_raw)
@@ -109,17 +107,38 @@ second_approach <- function() {
     beta[j] <- beta_0 + beta_1*x_1_non_censored[j] + beta_2*x_2_non_censored[j] + beta_3*x_3_non_censored[j] + beta_4*x_4_non_censored[j] + beta_5*x_5_non_censored[j] + beta_6*x_6_non_censored[j] + beta_7*x_7_non_censored[j] + beta_8*x_8_non_censored[j] + beta_9*x_9_non_censored[j]
   }
   
-  beta_0 ~ dnorm(0.0, 1.0E-3) # Prior on beta_0 is normal with low precision
-  beta_1 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_2 ~ dnorm(0.0, 1.0E-3) # Prior on beta_2 is normal with low precision
-  beta_3 ~ dnorm(0.0, 1.0E-3) # Prior on beta_3 is normal with low precision
-  beta_4 ~ dnorm(0.0, 1.0E-3) # Prior on beta_4 is normal with low precision
-  beta_5 ~ dnorm(0.0, 1.0E-3) # Prior on beta_5 is normal with low precision
-  beta_6 ~ dnorm(0.0, 1.0E-3) # Prior on beta_6 is normal with low precision
-  beta_7 ~ dnorm(0.0, 1.0E-3) # Prior on beta_7 is normal with low precision
-  beta_8 ~ dnorm(0.0, 1.0E-3) # Prior on beta_8 is normal with low precision
-  beta_9 ~ dnorm(0.0, 1.0E-3) # Prior on beta_9 is normal with low precision
+  beta_0 ~ dnorm(0.0, 1.0E-2) # Prior on beta_0 is normal with low precision
+  beta_1 ~ dnorm(0.0, 1.0E-2) # Prior on beta_1 is normal with low precision
+  beta_2 ~ dnorm(0.0, 1.0E-2) # Prior on beta_2 is normal with low precision
+  beta_3 ~ dnorm(0.0, 1.0E-2) # Prior on beta_3 is normal with low precision
+  beta_4 ~ dnorm(0.0, 1.0E-2) # Prior on beta_4 is normal with low precision
+  beta_5 ~ dnorm(0.0, 1.0E-2) # Prior on beta_5 is normal with low precision
+  beta_6 ~ dnorm(0.0, 1.0E-2) # Prior on beta_6 is normal with low precision
+  beta_7 ~ dnorm(0.0, 1.0E-2) # Prior on beta_7 is normal with low precision
+  beta_8 ~ dnorm(0.0, 1.0E-2) # Prior on beta_8 is normal with low precision
+  beta_9 ~ dnorm(0.0, 1.0E-2) # Prior on beta_9 is normal with low precision
   r ~ dexp(1) # Prior on r
+  
+  # Predictive distribution of age at the new values
+  beta_Francis <- beta_0 + beta_1*year_Francis 
+  mu_Francis <- exp(beta_Francis)
+  survival_Francis ~ dweib(r, mu_Francis) %_% T(present_length, upper_length) 
+  age_Francis_predictive <- survival_Francis 
+  
+  beta_Obama <- beta_0 + beta_2*year_Obama + beta_6*year_Obama
+  mu_Obama <- exp(beta_Obama)
+  survival_Obama ~ dweib(r, mu_Obama) %_% T(present_length, upper_length) 
+  age_Obama_predictive <- survival_Obama 
+  
+  beta_Daila <- beta_0 + beta_4*year_Daila + beta_8*year_Daila
+  mu_Daila <- exp(beta_Daila)
+  survival_Daila ~ dweib(r, mu_Daila) %_% T(present_length, upper_length) 
+  age_Daila_predictive <- survival_Daila
+  
+  beta_Naruhito <- beta_0 + beta_5*year_Naruhito + beta_9*year_Naruhito
+  mu_Naruhito <- exp(beta_Naruhito)
+  survival_Naruhito ~ dweib(r, mu_Naruhito) %_% T(present_length, upper_length) 
+  age_Naruhito_predictive <- survival_Naruhito
 }
 ```
 
@@ -156,6 +175,25 @@ x_9_non_censored <- x_9[-censored_dex]
 
 n_non_censored <- length(survival_non_censored)
 
+birth_year_Francis <- leaders_data$Birth.Year[leaders_data$Name == "Francis"]
+year_Francis <- birth_year_Francis - mean(leaders_data$Birth.Year) # center on leaders or leaders_nopred?
+present_length <- leaders_data$Age.Event[leaders_data$Name =="Francis"]
+
+birth_year_Obama <- leaders_data$Birth.Year[leaders_data$Name == "Barack Obama"]
+year_Obama <- birth_year_Obama - mean(leaders_data$Birth.Year) # center on leaders or leaders_nopred?
+present_length <- leaders_data$Age.Event[leaders_data$Name =="Barack Obama"]
+
+birth_year_Daila <- leaders_data$Birth.Year[leaders_data$Name == "14th Dalai Lama (Tenzin Gyatso)"]
+year_Daila <- birth_year_Daila - mean(leaders_data$Birth.Year) # center on leaders or leaders_nopred?
+present_length <- leaders_data$Age.Event[leaders_data$Name =="14th Dalai Lama (Tenzin Gyatso)"]
+
+birth_year_Naruhito <- leaders_data$Birth.Year[leaders_data$Name == "Naruhito (Emperor Reiwa)"]
+year_Naruhito <- birth_year_Naruhito - mean(leaders_data$Birth.Year) # center on leaders or leaders_nopred?
+present_length <- leaders_data$Age.Event[leaders_data$Name =="Naruhito (Emperor Reiwa)"]
+
+
+upper_length <- 120
+
 data_Popes_second_approach <- list("n_censored",
                                    "n_non_censored",
                                    "z_censored",
@@ -178,14 +216,21 @@ data_Popes_second_approach <- list("n_censored",
                                    "x_6_non_censored",
                                    "x_7_non_censored",
                                    "x_8_non_censored",
-                                   "x_9_non_censored")
+                                   "x_9_non_censored", 
+                                   "year_Francis",
+                                   "year_Obama", 
+                                   "year_Daila",
+                                   "year_Naruhito",
+                                   "present_length", 
+                                   "upper_length")
 
 Bayesian_Popes_second_approach <- jags(data = data_Popes_second_approach,  
                                       parameters.to.save = c("beta_0",
                                                              "beta_1",
                                                              "beta_2", "beta_3", "beta_4", "beta_5",
                                                              "beta_6","beta_7", "beta_8", "beta_9",
-                                                             "r"), 
+                                                             "r", "age_Francis_predictive",
+                                                             "age_Obama_predictive","age_Daila_predictive","age_Naruhito_predictive"), 
                                       n.iter = 50000, 
                                       n.chains = 3,
                                       model.file = second_approach)
@@ -237,4 +282,6 @@ lapply(seq(1,length(res)), function(i) {
   #dev.off()
 })
 ```
+
+# btw the predictions for the four leaders are somewhat sus (like Obama isn't going to die at 60, and 60.435 shows up a lot in our results)…so maybe there's a mistake or model diagnostics will tell us more about our model's predictive ability --Cathy
 
