@@ -95,6 +95,7 @@ x_9 <- x_1*as.numeric(as.character(x_5))
 
 
 ```{r}
+set.seed(123)
 second_approach <- function() {
   for(i in 1:n_censored) {
     z_censored[i] ~ dpois(phi_censored[i])
@@ -109,16 +110,16 @@ second_approach <- function() {
     beta[j] <- beta_0 + beta_1*x_1_non_censored[j] + beta_2*x_2_non_censored[j] + beta_3*x_3_non_censored[j] + beta_4*x_4_non_censored[j] + beta_5*x_5_non_censored[j] + beta_6*x_6_non_censored[j] + beta_7*x_7_non_censored[j] + beta_8*x_8_non_censored[j] + beta_9*x_9_non_censored[j]
   }
   
-  beta_0 ~ dnorm(0.0, 1.0E-1) # Prior on beta_0 is normal with low precision
-  beta_1 ~ dnorm(0.0, 1.0E-1) # Prior on beta_1 is normal with low precision
-  beta_2 ~ dnorm(0.0, 1.0E-1) # Prior on beta_2 is normal with low precision
-  beta_3 ~ dnorm(0.0, 1.0E-1) # Prior on beta_3 is normal with low precision
-  beta_4 ~ dnorm(0.0, 1.0E-1) # Prior on beta_4 is normal with low precision
-  beta_5 ~ dnorm(0.0, 1.0E-1) # Prior on beta_5 is normal with low precision
-  beta_6 ~ dnorm(0.0, 1.0E-1) # Prior on beta_6 is normal with low precision
-  beta_7 ~ dnorm(0.0, 1.0E-1) # Prior on beta_7 is normal with low precision
-  beta_8 ~ dnorm(0.0, 1.0E-1) # Prior on beta_8 is normal with low precision
-  beta_9 ~ dnorm(0.0, 1.0E-1) # Prior on beta_9 is normal with low precision
+  beta_0 ~ dnorm(0.0, 1.0E-3) # Prior on beta_0 is normal with low precision
+  beta_1 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
+  beta_2 ~ dnorm(0.0, 1.0E-3) # Prior on beta_2 is normal with low precision
+  beta_3 ~ dnorm(0.0, 1.0E-3) # Prior on beta_3 is normal with low precision
+  beta_4 ~ dnorm(0.0, 1.0E-3) # Prior on beta_4 is normal with low precision
+  beta_5 ~ dnorm(0.0, 1.0E-3) # Prior on beta_5 is normal with low precision
+  beta_6 ~ dnorm(0.0, 1.0E-3) # Prior on beta_6 is normal with low precision
+  beta_7 ~ dnorm(0.0, 1.0E-3) # Prior on beta_7 is normal with low precision
+  beta_8 ~ dnorm(0.0, 1.0E-3) # Prior on beta_8 is normal with low precision
+  beta_9 ~ dnorm(0.0, 1.0E-3) # Prior on beta_9 is normal with low precision
   r ~ dexp(1) # Prior on r
 }
 ```
@@ -192,3 +193,49 @@ Bayesian_Popes_second_approach <- jags(data = data_Popes_second_approach,
 
 Bayesian_Popes_second_approach
 ```
+
+```{r}
+library(coda)
+#res = data.frame(Bayesian_Popes_second_approach$BUGSoutput$sims.array)
+res = data.frame(Bayesian_Popes_second_approach$BUGSoutput$sims.matrix)
+colnames(res) <- gsub("^.*\\.","", colnames(res) )
+
+#par(mfrow= c(2,2))
+lapply(seq(1,length(res)), function(i) {
+  #jpeg(paste0(colnames(res)[i], "_traceplot.jpeg"))
+  traceplot(as.mcmc(res[,i]), smooth = FALSE, type = "l",
+            xlab = "Iterations", ylab = colnames(res)[i],
+            main = paste("Traceplot of ", colnames(res)[i]))
+  #dev.off()
+})
+
+# tps <- function(var){
+#   ggplot(res, aes_(y=as.name(var), x=seq(1,nrow(res)))) + 
+#     geom_line() +
+#     labs(title=paste("Traceplot of ", as.name(var)),
+#          x ="Iterations", y = as.name(var))
+# }
+# lapply(names(res), tps)
+```
+
+```{r}
+library(ggplot2)
+res_lag1 = lapply(seq(1:length(res)), function(i) {
+  lres = lag(res[,i],1)
+  plot(y=res[,i], x= lres, 
+       xlab = paste0(colnames(res)[i], "-1"),
+       ylab = paste0(colnames(res)[i]),
+       main = paste("Lag-1 Scatter Plot of", colnames(res)[i]))
+})
+```
+
+```{r}
+#par(mfrow= c(2,2))
+lapply(seq(1,length(res)), function(i) { 
+  #jpeg(paste0(colnames(res)[i], "_acf.jpeg"))
+  acf(res[,i], xlab = "Lag", ylab = "ACF", 
+            main = paste("ACF Plot of ", colnames(res)[i]))
+  #dev.off()
+})
+```
+
