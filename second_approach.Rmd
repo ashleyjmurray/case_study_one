@@ -86,10 +86,10 @@ x_3 <- leaders_nopred$TypeChinaEmp
 x_4 <- leaders_nopred$TypeDalaiLama
 x_5 <- leaders_nopred$TypeJapanEmp
 # add interaction b/w Birth.Year and Type
-x_6 <- leaders_nopred$Birth.Year*as.numeric(leaders_nopred$TypeUsPres) 
-x_7 <- leaders_nopred$Birth.Year*as.numeric(leaders_nopred$TypeChinaEmp)
-x_8 <- leaders_nopred$Birth.Year*as.numeric(leaders_nopred$TypeDalaiLama)
-x_9 <- leaders_nopred$Birth.Year*as.numeric(leaders_nopred$TypeJapanEmp)
+x_6 <- leaders_nopred$Birth.Year*as.numeric(as.character(leaders_nopred$TypeUsPres)) 
+x_7 <- leaders_nopred$Birth.Year*as.numeric(as.character(leaders_nopred$TypeChinaEmp))
+x_8 <- leaders_nopred$Birth.Year*as.numeric(as.character(leaders_nopred$TypeDalaiLama))
+x_9 <- leaders_nopred$Birth.Year*as.numeric(as.character(leaders_nopred$TypeJapanEmp))
 ```
 
 
@@ -99,25 +99,25 @@ second_approach <- function() {
     z_censored[i] ~ dpois(phi_censored[i])
     phi_censored[i] <- mu_censored[i] * pow(t_censored[i], r)
     mu_censored[i] <- exp(beta_censored[i])
-    beta_censored[i] <- beta_0 + beta_1*x_1_censored[i] + beta_2*x_2_censored[i] + beta_3*x_3_censored[i] + beta_4*x_4_censored[i] + beta_5*x_5_censored[i] + beta_6*x_6_censored[i] + beta_7*x_7_censored[i] + beta_8*x_8_censored[i] + beta_9*x_9_censored[i]
+    beta_censored[i] <- beta_0 + beta_1*x_1_censored[i] + beta_2*x_2_censored[i] + beta_3*x_3_censored[i] + beta_4*x_4_censored[i] + beta_5*x_5_censored[i] + beta_6*x_6_censored[i] #+ beta_7*x_7_censored[i] + beta_8*x_8_censored[i] + beta_9*x_9_censored[i]
   }
   
   for(j in 1:n_non_censored) { #total rows - 7 ** 7 are censored, rest are not censored
     survival_non_censored[j] ~ dweib(r, mu[j])
     mu[j] <- exp(beta[j])
-    beta[j] <- beta_0 + beta_1*x_1_non_censored[j] + beta_2*x_2_non_censored[j] + beta_3*x_3_non_censored[j] + beta_4*x_4_non_censored[j] + beta_5*x_5_non_censored[j] + beta_6*x_6_non_censored[j] + beta_7*x_7_non_censored[j] + beta_8*x_8_non_censored[j] + beta_9*x_9_non_censored[j]
+    beta[j] <- beta_0 + beta_1*x_1_non_censored[j] + beta_2*x_2_non_censored[j] + beta_3*x_3_non_censored[j] + beta_4*x_4_non_censored[j] + beta_5*x_5_non_censored[j] + beta_6*x_6_non_censored[j] #+ beta_7*x_7_non_censored[j] + beta_8*x_8_non_censored[j] + beta_9*x_9_non_censored[j]
   }
   
-  beta_0 ~ dnorm(0.0, 1.0E-4) # Prior on beta_0 is normal with low precision
-  beta_1 ~ dnorm(0.0, 1.0E-4) # Prior on beta_1 is normal with low precision
-  beta_2 ~ dnorm(0.0, 1.0E-4) # Prior on beta_2 is normal with low precision
-  beta_3 ~ dnorm(0.0, 1.0E-4) # Prior on beta_3 is normal with low precision
-  beta_4 ~ dnorm(0.0, 1.0E-4) # Prior on beta_4 is normal with low precision
-  beta_5 ~ dnorm(0.0, 1.0E-4) # Prior on beta_5 is normal with low precision
-  beta_6 ~ dnorm(0.0, 1.0E-4) # Prior on beta_6 is normal with low precision
-  beta_7 ~ dnorm(0.0, 1.0E-4) # Prior on beta_7 is normal with low precision
-  beta_8 ~ dnorm(0.0, 1.0E-4) # Prior on beta_8 is normal with low precision
-  beta_9 ~ dnorm(0.0, 1.0E-4) # Prior on beta_9 is normal with low precision
+  beta_0 ~ dnorm(0.0, 1.0E-1) # Prior on beta_0 is normal with low precision
+  beta_1 ~ dnorm(0.0, 1.0E-1) # Prior on beta_1 is normal with low precision
+  beta_2 ~ dnorm(0.0, 1.0E-1) # Prior on beta_2 is normal with low precision
+  beta_3 ~ dnorm(0.0, 1.0E-1) # Prior on beta_3 is normal with low precision
+  beta_4 ~ dnorm(0.0, 1.0E-1) # Prior on beta_4 is normal with low precision
+  beta_5 ~ dnorm(0.0, 1.0E-1) # Prior on beta_5 is normal with low precision
+  beta_6 ~ dnorm(0.0, 1.0E-1) # Prior on beta_6 is normal with low precision
+  beta_7 ~ dnorm(0.0, 1.0E-1) # Prior on beta_7 is normal with low precision
+  beta_8 ~ dnorm(0.0, 1.0E-1) # Prior on beta_8 is normal with low precision
+  beta_9 ~ dnorm(0.0, 1.0E-1) # Prior on beta_9 is normal with low precision
   r ~ dexp(1) # Prior on r
 }
 ```
@@ -182,7 +182,7 @@ Bayesian_Popes_second_approach <- jags(data = data_Popes_second_approach,
                                       parameters.to.save = c("beta_0",
                                                              "beta_1",
                                                              "beta_2", "beta_3", "beta_4", "beta_5",
-                                                             "beta_6", "beta_7", "beta_8", "beta_9",
+                                                             "beta_6",# "beta_7", "beta_8", "beta_9",
                                                              "r"), 
                                       n.iter = 50000, 
                                       n.chains = 3,
