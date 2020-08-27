@@ -7,14 +7,13 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r}
+```{r, message=F}
 #library(R2jags)
 library(dynsurv)
 library(survival)
 library(R2jags)
 library(tidyverse)
 library(lubridate)
-set.seed(123)
 ```
 
 ```{r}
