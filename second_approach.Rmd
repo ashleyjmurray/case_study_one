@@ -7,14 +7,13 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r}
+```{r, message=F}
 #library(R2jags)
 library(dynsurv)
 library(survival)
 library(R2jags)
 library(tidyverse)
 library(lubridate)
-set.seed(123)
 ```
 
 ```{r}
@@ -95,6 +94,7 @@ x_9 <- x_1*as.numeric(as.character(x_5))
 
 
 ```{r}
+set.seed(123)
 second_approach <- function() {
   for(i in 1:n_censored) {
     z_censored[i] ~ dpois(phi_censored[i])
