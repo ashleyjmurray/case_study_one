@@ -14,6 +14,7 @@ library(survival)
 library(R2jags)
 library(tidyverse)
 library(lubridate)
+set.seed(123)
 ```
 
 ```{r}
