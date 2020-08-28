@@ -1,0 +1,54 @@
+---
+title: "Scratch Code"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+According to Graham, the following is being done by the model above. So basically Stander et al is doing cox proportional, but they just didn't write out this hazard function explicity in the paper.
+$$
+h_i(t)=h_0(t)\exp(\beta_1x_{i1}+\beta_2x_{i2}+...+\beta_px_{ip}) \\
+$$
+hazard of death is a rate -- instantaneous failure rate (probability is integral from 0 to J over it dt)
+
+$$
+f(t) = \alpha\lambda t^{\alpha-1}\exp(-\lambda t^\alpha)
+$$
+run JAGS mcmc on the betas, follow Stander et al code as a guide
+
+```{r}
+library(dynsurv)
+library(survival)
+library(tidyverse)
+data(tooth)
+mydata = leaders_data
+mygrid <- tooth.grid # Amy said the time variable is not relevant
+myformula <- Surv(leaders_data$Birth.Date, leaders_data$Event.Date, type = "interval2") ~ leaders_data$Birth.Date + leaders_data$Type
+```
+
+```{r}
+fit <- bayesCox(myformula, mydata, mygrid, 
+                 out = "leadersCox.txt", 
+                 model = "TimeIndep", 
+                 base.prior = list(type = "Gamma", shape = 0.1, rate = 0.1),    
+                 coef.prior = list(type = "Normal", mean = 0, sd = 1),  
+                 gibbs = list(iter = 100, burn = 20, thin = 1, verbose = TRUE, nReport = 5))
+plotCoef(coef(fit, level = 0.9))
+```
+```{r}
+# https://www.rdocumentation.org/packages/dynsurv/versions/0.3-3/topics/bayesCox
+mydata0 <- tooth
+mygrid0 = tooth.grid
+myformula0<- Surv(left, right, type = "interval2") ~ dmf + sex
+```
+
+```{r}
+fit0 <- bayesCox(myformula0, mydata0, mygrid0, out = "tiCox.txt",
+                 model = "TimeIndep",
+                 base.prior = list(type = "Gamma", shape = 0.1, rate = 0.1),
+                 coef.prior = list(type = "Normal", mean = 0, sd = 1),
+                 gibbs = list(iter = 100, burn = 20, thin = 1, verbose = TRUE, nReport = 5))
+plotCoef(coef(fit0, level = 0.9))
+```
