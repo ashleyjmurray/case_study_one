@@ -120,24 +120,24 @@ second_approach <- function() {
   r ~ dexp(1) # Prior on r
   
   # Predictive distribution of age at the new values
-  beta_Francis <- beta_0 + beta_1*year_Francis 
+  beta_Francis <- beta_0 + beta_1*year_Francis
   mu_Francis <- exp(beta_Francis)
-  survival_Francis ~ dweib(r, mu_Francis) %_% T(present_length_Francis, upper_length) 
-  age_Francis_predictive <- survival_Francis 
-  
+  survival_Francis ~ dweib(r, mu_Francis) %_% T(present_length_Francis, upper_length)
+  age_Francis_predictive <- survival_Francis
+
   beta_Obama <- beta_0 + beta_2*year_Obama + beta_6*year_Obama
   mu_Obama <- exp(beta_Obama)
-  survival_Obama ~ dweib(r, mu_Obama) %_% T(present_length_Obama, upper_length) 
-  age_Obama_predictive <- survival_Obama 
-  
+  survival_Obama ~ dweib(r, mu_Obama) %_% T(present_length_Obama, upper_length)
+  age_Obama_predictive <- survival_Obama
+
   beta_Dalai <- beta_0 + beta_4*year_Dalai + beta_8*year_Dalai
   mu_Dalai <- exp(beta_Dalai)
-  survival_Dalai ~ dweib(r, mu_Dalai) %_% T(present_length_Dalai, upper_length) 
+  survival_Dalai ~ dweib(r, mu_Dalai) %_% T(present_length_Dalai, upper_length)
   age_Dalai_predictive <- survival_Dalai
   
   beta_Naruhito <- beta_0 + beta_5*year_Naruhito + beta_9*year_Naruhito
   mu_Naruhito <- exp(beta_Naruhito)
-  survival_Naruhito ~ dweib(r, mu_Naruhito) %_% T(present_length_Naruhito, upper_length) 
+  survival_Naruhito ~ dweib(r, mu_Naruhito) %_% T(present_length_Naruhito, upper_length)
   age_Naruhito_predictive <- survival_Naruhito
 }
 ```
@@ -176,19 +176,19 @@ x_9_non_censored <- x_9[-censored_dex]
 n_non_censored <- length(survival_non_censored)
 
 birth_year_Francis <- leaders_data$Birth.Year[leaders_data$Name == "Francis"]
-year_Francis <- birth_year_Francis - mean(leaders_data$Birth.Year) # center on leaders or leaders_nopred?
+year_Francis <- birth_year_Francis - mean(leaders_nopred$Birth.Year) # center on leaders or leaders_nopred?
 present_length_Francis <- leaders_data$Age.Event[leaders_data$Name =="Francis"]
 
 birth_year_Obama <- leaders_data$Birth.Year[leaders_data$Name == "Barack Obama"]
-year_Obama <- birth_year_Obama - mean(leaders_data$Birth.Year) # center on leaders or leaders_nopred?
+year_Obama <- birth_year_Obama - mean(leaders_nopred$Birth.Year) # center on leaders or leaders_nopred?
 present_length_Obama <- leaders_data$Age.Event[leaders_data$Name =="Barack Obama"]
 
 birth_year_Dalai <- leaders_data$Birth.Year[leaders_data$Name == "14th Dalai Lama (Tenzin Gyatso)"]
-year_Dalai <- birth_year_Dalai - mean(leaders_data$Birth.Year) # center on leaders or leaders_nopred?
+year_Dalai <- birth_year_Dalai - mean(leaders_nopred$Birth.Year) # center on leaders or leaders_nopred?
 present_length_Dalai <- leaders_data$Age.Event[leaders_data$Name =="14th Dalai Lama (Tenzin Gyatso)"]
 
 birth_year_Naruhito <- leaders_data$Birth.Year[leaders_data$Name == "Naruhito (Emperor Reiwa)"]
-year_Naruhito <- birth_year_Naruhito - mean(leaders_data$Birth.Year) # center on leaders or leaders_nopred?
+year_Naruhito <- birth_year_Naruhito - mean(leaders_nopred$Birth.Year) # center on leaders or leaders_nopred?
 present_length_Naruhito <- leaders_data$Age.Event[leaders_data$Name =="Naruhito (Emperor Reiwa)"]
 
 
@@ -232,8 +232,15 @@ Bayesian_Popes_second_approach <- jags(data = data_Popes_second_approach,
                                                              "beta_1",
                                                              "beta_2", "beta_3", "beta_4", "beta_5",
                                                              "beta_6","beta_7", "beta_8", "beta_9",
-                                                             "r", "age_Francis_predictive",
-                                                             "age_Obama_predictive","age_Dalai_predictive","age_Naruhito_predictive"), 
+                                                             "r", 
+                                                             "age_Francis_predictive",
+                                                             "age_Obama_predictive",
+                                                             # "beta_Dalai",
+                                                             # "mu_Dalai",
+                                                             # "survival_Dalai",
+                                                             "age_Dalai_predictive",
+                                                             "age_Naruhito_predictive"
+                                                             ), 
                                       n.iter = 50000, 
                                       n.chains = 3,
                                       model.file = second_approach)
