@@ -1,0 +1,70 @@
+---
+title: "Report"
+output: html_document
+---
+
+
+Questions:
+- How are year of birth and type of leadership related to lifespan of leaders?
+- Does any relationship between year of birth and lifespan depend on the type of leadership?
+- What is the probability that the 14th Dalai Lama will have a longer lifespan than Pope Francis? 
+- What is the probability that President Obama will have a longer lifespan than Emperor Naruhito?
+
+Goals:
+- Identify an excellent statistical model for predicting lifespan of selected world leaders.
+- Provide a comprehensive interpretation of your model, explaining how year of birth and type of leadership are associated with longevity.
+- Provide point and interval predictions of lifespan of living leaders in the data.
+- Estimate and describe the posterior distribution of the probability that the 14th Dalai Lama will live longer than Pope Francis
+- Estimate and describe the posterior distribution of the probability that President Obama will live longer than Emperor Naruhito
+
+# To Do's:
+
+- Other Notes
+ - Fix Dalai Lama
+ - Cathy look at traceplots
+ - everyone verify code
+ 
+## Code 
+- Model diagnostics 
+  - posterior predictive checks (Ashley)
+  - residual plots (standardized?) (Matty)
+- Posterior Inference (answer questions)
+  - sample many tries and average to get point/ interval estimate (Alice)
+  - compare leaders (Cathy)
+  
+## Report 
+- Written Report
+  - Provide Interpretation of alphas/ betas (Alice)
+  - Describe Interaction (not significant?) (Alice)
+- Report Graphs/ Tables
+  - Lexis diagram (Ashley)
+  - Add other EDA plots? (anyone)
+  - posterior distribution plots for 4 people of interest (Cathy)
+  - tidy output table (Matty)
+  - other interesting plots? (anyone)
+  
+- Report Outline
+  - Intro (Matty)
+  - Body
+      - Data (Matty)
+      - Methods (everyone/ Zoom?)
+      - Analysis (Alice + Cathy)
+          - interpretations and diagnostics
+      - Results  (Cathy + Ashley)
+          - discuss probabilities/ etc
+  - Conclusion / Discussion (everyone/ Zoom?)
+      - above and beyond possible / further research
+  - Appendix (all contribute code, etc.)
+ 
+ 
+## End
+  - comment/ clean-up code
+  - make video (everyone/ Zoom?)
+
+- Above and beyond/ Further research
+  - somehow factor in GDP?
+  
+  
+  
+  
+  
