@@ -3,4 +3,19 @@ title: "Final Report"
 output: pdf_document
 ---
 
+# I. Introduction
+
+# II. Data
+
+# III. Methods
+
+# IV. Analysis
+
+# V. Results
+
+# VI. Conclusion and Further Discussion
+
+# VII. Appendix
+
+ 
 

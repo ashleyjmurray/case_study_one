@@ -12,6 +12,8 @@ knitr::opts_chunk$set(echo = TRUE)
 library(R2jags)
 library(tidyverse)
 library(lubridate)
+library(knitr)
+library(broom)
 ```
 
 ```{r}
@@ -42,7 +44,6 @@ $$
 Log of mu is done so that the mu parameter is always positive (the support on mu in Weibull is that mu > 0)
 
 # More specificically
-## WILL ADD INTERACTION LATER
 $$
 T_i \sim Weibull(r, \mu_i) \\
 \log(\mu_i) = \beta_0+\beta_1 \text{(Year of Birth_i)}+\beta_2 \text{(Leadership_i = UsPres)} + \beta_3\text{(Leadership_i = ChinaEmp)} \\
@@ -306,4 +307,22 @@ lapply(seq(1,length(res)), function(i) {
             main = paste("ACF Plot of ", colnames(res)[i]))
   #dev.off()
 })
+```
+
+
+```{r tidy-model-table}
+output <- data.frame(Bayesian_Popes_second_approach$BUGSoutput$summary)
+output <- output %>%
+  mutate("Variable" = Bayesian_Popes_second_approach$BUGSoutput$root.short,
+         "Mean" = output$mean,
+         "Standard Deviation" = output$sd,
+         "2.5% Quantile" = output$X2.5.,
+         "Median" = output$X50.,
+         "97.5% Quantile" = output$X97.5.
+         ) %>%
+  select("Variable", "Mean", "Standard Deviation", "2.5% Quantile", "Median", "97.5% Quantile")
+coef <- output %>%
+  slice(5:16)
+kable(coef)
+
 ```
