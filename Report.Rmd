@@ -30,7 +30,7 @@ Goals:
   - residual plots (standardized?) (Matty)
 - Posterior Inference (answer questions)
   - sample many tries and average to get point/ interval estimate (Alice)
-  - compare leaders (Cathy)
+  - compare leaders (Cathy) *done*
   
 ## Report 
 - Written Report
