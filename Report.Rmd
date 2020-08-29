@@ -20,8 +20,8 @@ Goals:
 # To Do's:
 
 - Other Notes
- - Fix Dalai Lama
- - Cathy look at traceplots
+ - Fix Dalai Lama *done*
+ - Cathy look at traceplots *done*
  - everyone verify code
  
 ## Code 

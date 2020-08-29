@@ -30,6 +30,8 @@ ggplot(data = leaders_data) +
 
 ggplot(data = leaders_data) +
   geom_point(aes(x = Birth.Date, y = Age.Event))
+
+
 ```
 
 # THIS IS OUR MODEL
@@ -125,17 +127,17 @@ second_approach <- function() {
   survival_Francis ~ dweib(r, mu_Francis) %_% T(present_length_Francis, upper_length)
   age_Francis_predictive <- survival_Francis
 
-  beta_Obama <- beta_0 + beta_2*year_Obama + beta_6*year_Obama
+  beta_Obama <- beta_0 + (beta_1+beta_6)*year_Obama + beta_2
   mu_Obama <- exp(beta_Obama)
   survival_Obama ~ dweib(r, mu_Obama) %_% T(present_length_Obama, upper_length)
   age_Obama_predictive <- survival_Obama
 
-  beta_Dalai <- beta_0 + beta_4*year_Dalai + beta_8*year_Dalai
+  beta_Dalai <- beta_0 + (beta_1+beta_8)*year_Dalai + beta_4
   mu_Dalai <- exp(beta_Dalai)
   survival_Dalai ~ dweib(r, mu_Dalai) %_% T(present_length_Dalai, upper_length)
   age_Dalai_predictive <- survival_Dalai
   
-  beta_Naruhito <- beta_0 + beta_5*year_Naruhito + beta_9*year_Naruhito
+  beta_Naruhito <- beta_0 + (beta_1+beta_9)*year_Naruhito + beta_5
   mu_Naruhito <- exp(beta_Naruhito)
   survival_Naruhito ~ dweib(r, mu_Naruhito) %_% T(present_length_Naruhito, upper_length)
   age_Naruhito_predictive <- survival_Naruhito
@@ -158,9 +160,7 @@ x_7_censored <- x_7[censored_dex]
 x_8_censored <- x_8[censored_dex]
 x_9_censored <- x_9[censored_dex]
 
-
 n_censored <- length(censored_dex)
-#
 
 survival_non_censored <- survival[-censored_dex] # Remove ALL ALIVE PEOPLE
 x_1_non_censored <- x_1[-censored_dex]
@@ -176,7 +176,6 @@ x_9_non_censored <- x_9[-censored_dex]
 n_non_censored <- length(survival_non_censored)
 
 birth_year_Francis <- leaders_data$Birth.Year[leaders_data$Name == "Francis"]
-<<<<<<< HEAD
 year_Francis <- birth_year_Francis - mean(leaders_nopred$Birth.Year)
 present_length_Francis <- leaders_data$Age.Event[leaders_data$Name =="Francis"]
 
@@ -190,21 +189,6 @@ present_length_Dalai <- leaders_data$Age.Event[leaders_data$Name =="14th Dalai L
 
 birth_year_Naruhito <- leaders_data$Birth.Year[leaders_data$Name == "Naruhito (Emperor Reiwa)"]
 year_Naruhito <- birth_year_Naruhito - mean(leaders_nopred$Birth.Year)
-=======
-year_Francis <- birth_year_Francis - mean(leaders_nopred$Birth.Year) # center on leaders or leaders_nopred?
-present_length_Francis <- leaders_data$Age.Event[leaders_data$Name =="Francis"]
-
-birth_year_Obama <- leaders_data$Birth.Year[leaders_data$Name == "Barack Obama"]
-year_Obama <- birth_year_Obama - mean(leaders_nopred$Birth.Year) # center on leaders or leaders_nopred?
-present_length_Obama <- leaders_data$Age.Event[leaders_data$Name =="Barack Obama"]
-
-birth_year_Dalai <- leaders_data$Birth.Year[leaders_data$Name == "14th Dalai Lama (Tenzin Gyatso)"]
-year_Dalai <- birth_year_Dalai - mean(leaders_nopred$Birth.Year) # center on leaders or leaders_nopred?
-present_length_Dalai <- leaders_data$Age.Event[leaders_data$Name =="14th Dalai Lama (Tenzin Gyatso)"]
-
-birth_year_Naruhito <- leaders_data$Birth.Year[leaders_data$Name == "Naruhito (Emperor Reiwa)"]
-year_Naruhito <- birth_year_Naruhito - mean(leaders_nopred$Birth.Year) # center on leaders or leaders_nopred?
->>>>>>> 1f9684ae3615c303a174532a6bffce138dfff375
 present_length_Naruhito <- leaders_data$Age.Event[leaders_data$Name =="Naruhito (Emperor Reiwa)"]
 
 upper_length <- 120
@@ -245,7 +229,6 @@ data_Popes_second_approach <- list("n_censored",
 Bayesian_Popes_second_approach <- jags(data = data_Popes_second_approach,  
                                       parameters.to.save = c("beta_0",
                                                              "beta_1",
-<<<<<<< HEAD
                                                              "beta_2", 
                                                              "beta_3", 
                                                              "beta_4", 
@@ -255,22 +238,12 @@ Bayesian_Popes_second_approach <- jags(data = data_Popes_second_approach,
                                                              "beta_8", 
                                                              "beta_9",
                                                              "r", 
-                                                             "age_Francis_predictive",                                                                   "age_Obama_predictive",
-                                                             "age_Dalai_predictive",
-                                                             "age_Naruhito_predictive"), 
-=======
-                                                             "beta_2", "beta_3", "beta_4", "beta_5",
-                                                             "beta_6","beta_7", "beta_8", "beta_9",
-                                                             "r", 
                                                              "age_Francis_predictive",
                                                              "age_Obama_predictive",
-                                                             # "beta_Dalai",
-                                                             # "mu_Dalai",
-                                                             # "survival_Dalai",
                                                              "age_Dalai_predictive",
                                                              "age_Naruhito_predictive"
                                                              ), 
->>>>>>> 1f9684ae3615c303a174532a6bffce138dfff375
+
                                       n.iter = 50000, 
                                       n.chains = 3,
                                       model.file = second_approach)
@@ -278,10 +251,22 @@ Bayesian_Popes_second_approach <- jags(data = data_Popes_second_approach,
 Bayesian_Popes_second_approach
 ```
 
+
+```{r}
+mu_Obama <- exp(-2.287464e+01 + (beta_2+beta_6)*year_Obama)
+  beta_Obama <- beta_0 + (beta_2+beta_6)*year_Obama
+  mu_Obama <- exp(beta_Obama)
+  survival_Obama ~ dweib(r, mu_Obama) %_% T(present_length_Obama, upper_length)
+  age_Obama_predictive <- survival_Obama
+```
+
 ```{r}
 library(coda)
+parameters = c("beta_0", "beta_1", "beta_2", "beta_3", "beta_4", "beta_5", 
+               "beta_6", "beta_7",  "beta_8", "beta_9", "r")
+
 #res = data.frame(Bayesian_Popes_second_approach$BUGSoutput$sims.array)
-res = data.frame(Bayesian_Popes_second_approach$BUGSoutput$sims.matrix)
+res = data.frame(Bayesian_Popes_second_approach$BUGSoutput$sims.matrix)[,parameters]
 colnames(res) <- gsub("^.*\\.","", colnames(res) )
 
 #par(mfrow= c(2,2))
