@@ -245,7 +245,7 @@ Bayesian_Popes_second_approach <- jags(data = data_Popes_second_approach,
                                                              "age_Naruhito_predictive"
                                                              ), 
 
-                                      n.iter = 500000, 
+                                      n.iter = 50000, 
                                       n.chains = 3,
                                       model.file = second_approach)
 
