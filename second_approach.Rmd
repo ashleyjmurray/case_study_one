@@ -12,6 +12,8 @@ knitr::opts_chunk$set(echo = TRUE)
 library(R2jags)
 library(tidyverse)
 library(lubridate)
+library(knitr)
+library(broom)
 ```
 
 ```{r}
@@ -42,7 +44,6 @@ $$
 Log of mu is done so that the mu parameter is always positive (the support on mu in Weibull is that mu > 0)
 
 # More specificically
-## WILL ADD INTERACTION LATER
 $$
 T_i \sim Weibull(r, \mu_i) \\
 \log(\mu_i) = \beta_0+\beta_1 \text{(Year of Birth_i)}+\beta_2 \text{(Leadership_i = UsPres)} + \beta_3\text{(Leadership_i = ChinaEmp)} \\
@@ -299,7 +300,6 @@ lapply(seq(1,length(res)), function(i) {
 })
 ```
 
-
 ```{r}
 people = c("age_Francis_predictive", "age_Obama_predictive", "age_Dalai_predictive",
 "age_Naruhito_predictive")
@@ -307,35 +307,6 @@ four_pred = data.frame(Bayesian_Popes_second_approach$BUGSoutput$sims.matrix)[,p
 
 mean(four_pred$age_Dalai_predictive>four_pred$age_Francis_predictive)
 mean(four_pred$age_Obama_predictive>four_pred$age_Naruhito_predictive)
-```
-
-```{r}
-library(ggplot2)
-
-
-# four_pred = four_pred %>%
-#   mutate(wt_color = case_when(
-#     (age_Francis_predictive <= medval) ~ "a",
-#     (age_Francis_predictive > val95) ~ "c",
-#     TRUE ~ "b"))
-
-ggplot(four_pred, aes(x=four_pred[,1])) + geom_histogram(aes(y=..density..), 
-                                                   binwidth = 0.8,
-                                                   boundary = minval) +
-  geom_vline(xintercept = minval, colour = "black")+
-  geom_vline(xintercept = medval, colour = "black") +
-  geom_vline(xintercept = val95, colour = "black")+
-  geom_hline(yintercept = 0, colour = "black") +
-  xlab("Lifespan (years)") +
-  ylab("Predictive Probability density") +
-  ggtitle("Predictive Posterior Distribution for Lifespan of Pope Francis") +
-  ylim(c(0, 0.07))+
-  annotate("text", x = minval+2.5, y = 0.06, label = paste("Current xge", minval, "years", sep = "\n"), size = 3)+
-  annotate("text", x = (medval+minval)/2, y = 0.05, label = "50%", size = 3)+
-  annotate("text", x = medval+1.5, y = 0.06, label = paste("Median", medval,"years", sep = "\n"), size = 3)+
-  annotate("text", x = (medval+val95)/2, y = 0.05, label = "45%", size = 3)+
-  annotate("text", x = val95+2.5, y = 0.06, label = paste("95% quantile", val95, "years", sep = "\n"), size = 3)+
-  annotate("text", x = val95+3, y = 0.05, label = "5%", size = 3)
 ```
 
 ```{r}
@@ -365,9 +336,56 @@ ggplot(four_pred, aes(x=four_pred[,i])) + geom_histogram(aes(y=..density..),
 }
 
 lapply(seq(1,4), ppd_plot)
-
-#ppd_plot(1)
 ```
+
+## Plots of Posterior Predicitive distribution of Lifespans 
+
+### Francis and Dalai Lama
+
+```{r}
+francis_dalai = data.frame(plifespans = c(four_pred$age_Francis_predictive, four_pred$age_Dalai_predictive), person = c(rep("Francis", nrow(four_pred)), rep("Dalai", nrow(four_pred))))
+
+mins = francis_dalai %>%
+  group_by(person) %>%
+  summarise(min_vals = round(min(plifespans), 2))
+
+meds = francis_dalai %>%
+  group_by(person) %>%
+  summarise(med_vals = round(median(plifespans), 2))
+
+val95 = francis_dalai %>%
+  group_by(person) %>%
+  summarise(vals_95 = round(quantile(plifespans, 0.95), 2))
+
+francis_txt = paste(paste("Current age:", mins$min_vals[mins$person=="Francis"], "yrs"),
+      paste("Median:", meds$med_vals[meds$person=="Francis"],"yrs"),
+      paste("95% quantile:", val95$vals_95[val95$person=="Francis"], "yrs"),
+      sep = "\n")
+
+dalai_txt = paste(paste("Current age:", mins$min_vals[mins$person=="Dalai"], "yrs"),
+      paste("Median:",  meds$med_vals[meds$person=="Dalai"],"yrs"),
+      paste("95% quantile:", val95$vals_95[val95$person=="Dalai"], "yrs"),
+      sep = "\n")
+
+plot_txt <- data.frame(
+  label = c(francis_txt, dalai_txt),
+  person = c("Francis", "Dalai")
+)
+
+ggplot(francis_dalai, aes(x=plifespans)) + 
+  geom_histogram(aes(y=..density..), binwidth = 0.8,boundary = round(min(francis_dalai$plifespans), 2)) +
+  facet_wrap(~person) +
+  geom_vline(data=mins, aes(xintercept=min_vals))+
+  geom_vline(data=meds, aes(xintercept=med_vals))+
+  geom_vline(data=val95, aes(xintercept=vals_95))+
+  geom_hline(yintercept = 0, colour = "black") +
+  xlab("Lifespan (yrs)") + ylab("Predictive Probability density") +
+  ggtitle(paste("Posterior Predicted Lifespans (Pope Francis and 14th Dalai Lama)")) +
+  ylim(c(0, 0.05)) + 
+  geom_text(data = plot_txt, mapping = aes(x = 92.8, y = 0.048, label = label), size = 2.8)
+```
+
+### Obama and Naruhito
 
 ```{r}
 obama_naru = data.frame(plifespans = c(four_pred$age_Obama_predictive, four_pred$age_Naruhito_predictive), person = c(rep("Obama", nrow(four_pred)), rep("Naruhito", nrow(four_pred))))
@@ -384,6 +402,21 @@ val95 = obama_naru %>%
   group_by(person) %>%
   summarise(vals_95 = round(quantile(plifespans, 0.95), 2))
 
+obama_txt = paste(paste("Current age:", mins$min_vals[mins$person=="Obama"], "yrs"),
+      paste("Median:", meds$med_vals[meds$person=="Obama"],"yrs"),
+      paste("95% quantile:", val95$vals_95[val95$person=="Obama"], "yrs"),
+      sep = "\n")
+
+naru_txt = paste(paste("Current age:", mins$min_vals[mins$person=="Naruhito"], "yrs"),
+      paste("Median:",  meds$med_vals[meds$person=="Naruhito"],"yrs"),
+      paste("95% quantile:", val95$vals_95[val95$person=="Naruhito"], "yrs"),
+      sep = "\n")
+
+plot_txt <- data.frame(
+  label = c(obama_txt, naru_txt),
+  person = c("Obama", "Naruhito")
+)
+
 ggplot(obama_naru, aes(x=plifespans)) + 
   geom_histogram(aes(y=..density..), binwidth = 0.8,boundary = round(min(obama_naru$plifespans), 2)) +
   facet_wrap(~person) +
@@ -391,15 +424,50 @@ ggplot(obama_naru, aes(x=plifespans)) +
   geom_vline(data=meds, aes(xintercept=med_vals))+
   geom_vline(data=val95, aes(xintercept=vals_95))+
   geom_hline(yintercept = 0, colour = "black") +
-  xlab("Lifespan (years)") +
-  ylab("Predictive Probability density") +
-  ggtitle(paste("Predictive Posterior Distribution for Lifespans of Obama and Naruhito", name)) +
-  ylim(c(0, 0.05)) #+
-  annotate("text", x = minval+0.15*(medval-minval), y = 0.06, label = paste("Current age", minval, "years", sep = "\n"), size = 3)+
-  # annotate("text", x = (medval+minval)/2, y = 0.05, label = "50%", size = 3)+
-  # annotate("text", x = medval+0.15*(val95-medval), y = 0.06, label = paste("Median", medval,"years", sep = "\n"), size = 3)+
-  # annotate("text", x = (medval+val95)/2, y = 0.05, label = "45%", size = 3)+
-  # annotate("text", x = val95+2.2, y = 0.06, label = paste("95%", "quantile", val95, "years", sep = "\n"), size = 3)+
-  # annotate("text", x = val95+3, y = 0.05, label = "5%", size = 3)
+  xlab("Lifespan (yrs)") + ylab("Predictive Probability density") +
+  ggtitle(paste("Posterior Predicted Lifespans (President Obama and Emperor Naruhito)")) +
+  ylim(c(0, 0.05)) + 
+  geom_text(data = plot_txt, mapping = aes(x = 80, y = 0.04, label = label), size = 3)
+```
 
+```{r tidy-model-table}
+output <- data.frame(Bayesian_Popes_second_approach$BUGSoutput$summary)
+output <- output %>%
+  mutate("Variable" = Bayesian_Popes_second_approach$BUGSoutput$root.short,
+         "Mean" = output$mean,
+         "Standard Deviation" = output$sd,
+         "2.5% Quantile" = output$X2.5.,
+         "Median" = output$X50.,
+         "97.5% Quantile" = output$X97.5.
+         ) %>%
+  select("Variable", "Mean", "Standard Deviation", "2.5% Quantile", "Median", "97.5% Quantile")
+coef <- output %>%
+  slice(5:16)
+kable(coef)
+
+```
+
+```{r standardized-resid}
+beta_0_est <- coef[1,2]
+beta_1_est <- coef[2,2]
+beta_2_est <- coef[3,2]
+beta_3_est <- coef[4,2]
+beta_4_est <- coef[5,2]
+beta_5_est <- coef[6,2]
+beta_6_est <- coef[7,2]
+beta_7_est <- coef[8,2]
+beta_8_est <- coef[9,2]
+beta_9_est <- coef[10,2]
+
+no_living <- leaders_data %>%
+  filter(Censored == 0)
+
+estimates <- no_living %>%
+  mutate(Birth.Year.Cent = Birth.Year - mean(leaders_nopred$Birth.Year)) %>%
+  mutate(ChinaEmp =case_when(Type == "ChinaEmp" ~ 1, TRUE ~ 0),
+         DalaiLama =case_when(Type == "DalaiLama" ~ 1, TRUE ~ 0),
+         JapanEmp =case_when(Type == "JapanEmp" ~ 1, TRUE ~ 0),
+         Pope =case_when(Type == "Pope" ~ 1, TRUE ~ 0),
+         UsPres =case_when(Type == "UsPres" ~ 1, TRUE ~ 0)) %>%
+  mutate(predicted = exp(beta_0_est + beta_1_est*(Birth.Year.Cent) + beta_2_est*(UsPres) + beta_3_est*(ChinaEmp) + beta_4_est*(DalaiLama) + beta_5_est*(JapanEmp) + beta_6_est*(UsPres)*(Birth.Year.Cent) + beta_7_est*(ChinaEmp)*(Birth.Year.Cent) + beta_8_est*(DalaiLama)*(Birth.Year.Cent) + beta_9_est*(JapanEmp)*(Birth.Year.Cent)))
 ```

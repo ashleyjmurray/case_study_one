@@ -1,5 +1,5 @@
 ---
-title: "Report"
+title: "Report Outline / To Do's"
 output: html_document
 ---
 
@@ -39,7 +39,7 @@ Goals:
 - Report Graphs/ Tables
   - Lexis diagram (Ashley)
   - Add other EDA plots? (anyone)
-  - posterior distribution plots for 4 people of interest (Cathy)
+  - posterior distribution plots for 4 people of interest (Cathy) *done*
   - tidy output table (Matty)
   - other interesting plots? (anyone)
   
