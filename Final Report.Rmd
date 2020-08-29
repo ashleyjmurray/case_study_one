@@ -11,7 +11,13 @@ output: pdf_document
 
 # IV. Analysis
 
+The combination of traceplots, lag-1 scatterplots, and acf plots suggest the chain for each parameters converges, and that 50000 iterations is sufficient. The Rhat's are all close to 1, which is another indicator of converge. All of the effective sample sizes are greater than 200, except for that of beta_0 (the intercept) and r.
+
 # V. Results
+
+The probability that the 14th Dalai Lama will have a longer lifespan than Pope Francis is 0.39. The probability that President Obama will have a longer lifespan than Emperor Naruhito is 0.51.
+
+The posterior predictive distribution of the lifespan of Pope Francis is somewhat left skewed, with the mode in the 110s. The posterior predictive distribution of the lifespan of the 14th Dalai Lama is more uniform, with mode in the 90s. The posterior predictive distributions of the lifespans of President Obama and Emperor Naruhito are both left skewed, with the modes in the 110s.
 
 # VI. Conclusion and Further Discussion
 

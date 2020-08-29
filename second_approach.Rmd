@@ -245,7 +245,7 @@ Bayesian_Popes_second_approach <- jags(data = data_Popes_second_approach,
                                                              "age_Naruhito_predictive"
                                                              ), 
 
-                                      n.iter = 50000, 
+                                      n.iter = 500000, 
                                       n.chains = 3,
                                       model.file = second_approach)
 
@@ -257,17 +257,13 @@ library(coda)
 parameters = c("beta_0", "beta_1", "beta_2", "beta_3", "beta_4", "beta_5", 
                "beta_6", "beta_7",  "beta_8", "beta_9", "r")
 
-#res = data.frame(Bayesian_Popes_second_approach$BUGSoutput$sims.array)
 res = data.frame(Bayesian_Popes_second_approach$BUGSoutput$sims.matrix)[,parameters]
 colnames(res) <- gsub("^.*\\.","", colnames(res) )
 
-#par(mfrow= c(2,2))
 lapply(seq(1,length(res)), function(i) {
-  #jpeg(paste0(colnames(res)[i], "_traceplot.jpeg"))
   traceplot(as.mcmc(res[,i]), smooth = FALSE, type = "l",
             xlab = "Iterations", ylab = colnames(res)[i],
             main = paste("Traceplot of ", colnames(res)[i]))
-  #dev.off()
 })
 
 # tps <- function(var){
@@ -291,12 +287,9 @@ res_lag1 = lapply(seq(1:length(res)), function(i) {
 ```
 
 ```{r}
-#par(mfrow= c(2,2))
 lapply(seq(1,length(res)), function(i) { 
-  #jpeg(paste0(colnames(res)[i], "_acf.jpeg"))
   acf(res[,i], xlab = "Lag", ylab = "ACF", 
             main = paste("ACF Plot of ", colnames(res)[i]))
-  #dev.off()
 })
 ```
 
@@ -305,9 +298,12 @@ people = c("age_Francis_predictive", "age_Obama_predictive", "age_Dalai_predicti
 "age_Naruhito_predictive")
 four_pred = data.frame(Bayesian_Popes_second_approach$BUGSoutput$sims.matrix)[,people]
 
-mean(four_pred$age_Dalai_predictive>four_pred$age_Francis_predictive)
-mean(four_pred$age_Obama_predictive>four_pred$age_Naruhito_predictive)
+print(paste("P(Dalai Lifespan > Francis Lifespan)=", mean(four_pred$age_Dalai_predictive>four_pred$age_Francis_predictive)))
+
+print(paste("P(Obama Lifespan > Naruhito Lifespan)=", mean(four_pred$age_Obama_predictive>four_pred$age_Naruhito_predictive)))
 ```
+
+# Posterior Predictive Plots (4 separate)
 
 ```{r}
 ppd_plot <- function(i) {
@@ -338,9 +334,9 @@ ggplot(four_pred, aes(x=four_pred[,i])) + geom_histogram(aes(y=..density..),
 lapply(seq(1,4), ppd_plot)
 ```
 
-## Plots of Posterior Predicitive distribution of Lifespans 
+## Posterior Predictive Plots (2 pairs)
 
-### Francis and Dalai Lama
+### Francis and Dalai Lama 
 
 ```{r}
 francis_dalai = data.frame(plifespans = c(four_pred$age_Francis_predictive, four_pred$age_Dalai_predictive), person = c(rep("Francis", nrow(four_pred)), rep("Dalai", nrow(four_pred))))
@@ -380,7 +376,7 @@ ggplot(francis_dalai, aes(x=plifespans)) +
   geom_vline(data=val95, aes(xintercept=vals_95))+
   geom_hline(yintercept = 0, colour = "black") +
   xlab("Lifespan (yrs)") + ylab("Predictive Probability density") +
-  ggtitle(paste("Posterior Predicted Lifespans (Pope Francis and 14th Dalai Lama)")) +
+  ggtitle(paste("Posterior Predictive Lifespans (Pope Francis and 14th Dalai Lama)")) +
   ylim(c(0, 0.05)) + 
   geom_text(data = plot_txt, mapping = aes(x = 92.8, y = 0.048, label = label), size = 2.8)
 ```
@@ -425,7 +421,7 @@ ggplot(obama_naru, aes(x=plifespans)) +
   geom_vline(data=val95, aes(xintercept=vals_95))+
   geom_hline(yintercept = 0, colour = "black") +
   xlab("Lifespan (yrs)") + ylab("Predictive Probability density") +
-  ggtitle(paste("Posterior Predicted Lifespans (President Obama and Emperor Naruhito)")) +
+  ggtitle(paste("Posterior Predictive Lifespans (President Obama and Emperor Naruhito)")) +
   ylim(c(0, 0.05)) + 
   geom_text(data = plot_txt, mapping = aes(x = 80, y = 0.04, label = label), size = 3)
 ```
