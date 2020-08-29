@@ -326,3 +326,29 @@ coef <- output %>%
 kable(coef)
 
 ```
+
+```{r standardized-resid}
+beta_0_est <- coef[1,2]
+beta_1_est <- coef[2,2]
+beta_2_est <- coef[3,2]
+beta_3_est <- coef[4,2]
+beta_4_est <- coef[5,2]
+beta_5_est <- coef[6,2]
+beta_6_est <- coef[7,2]
+beta_7_est <- coef[8,2]
+beta_8_est <- coef[9,2]
+beta_9_est <- coef[10,2]
+
+no_living <- leaders_data %>%
+  filter(Censored == 0)
+
+estimates <- no_living %>%
+  mutate(Birth.Year.Cent = Birth.Year - mean(leaders_nopred$Birth.Year)) %>%
+  mutate(ChinaEmp =case_when(Type == "ChinaEmp" ~ 1, TRUE ~ 0),
+         DalaiLama =case_when(Type == "DalaiLama" ~ 1, TRUE ~ 0),
+         JapanEmp =case_when(Type == "JapanEmp" ~ 1, TRUE ~ 0),
+         Pope =case_when(Type == "Pope" ~ 1, TRUE ~ 0),
+         UsPres =case_when(Type == "UsPres" ~ 1, TRUE ~ 0)) %>%
+  mutate(predicted = exp(beta_0_est + beta_1_est*(Birth.Year.Cent) + beta_2_est*(UsPres) + beta_3_est*(ChinaEmp) + beta_4_est*(DalaiLama) + beta_5_est*(JapanEmp) + beta_6_est*(UsPres)*(Birth.Year.Cent) + beta_7_est*(ChinaEmp)*(Birth.Year.Cent) + beta_8_est*(DalaiLama)*(Birth.Year.Cent) + beta_9_est*(JapanEmp)*(Birth.Year.Cent)))
+```
+
