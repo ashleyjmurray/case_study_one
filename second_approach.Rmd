@@ -251,15 +251,6 @@ Bayesian_Popes_second_approach <- jags(data = data_Popes_second_approach,
 Bayesian_Popes_second_approach
 ```
 
-
-```{r}
-mu_Obama <- exp(-2.287464e+01 + (beta_2+beta_6)*year_Obama)
-  beta_Obama <- beta_0 + (beta_2+beta_6)*year_Obama
-  mu_Obama <- exp(beta_Obama)
-  survival_Obama ~ dweib(r, mu_Obama) %_% T(present_length_Obama, upper_length)
-  age_Obama_predictive <- survival_Obama
-```
-
 ```{r}
 library(coda)
 parameters = c("beta_0", "beta_1", "beta_2", "beta_3", "beta_4", "beta_5", 
@@ -306,4 +297,109 @@ lapply(seq(1,length(res)), function(i) {
             main = paste("ACF Plot of ", colnames(res)[i]))
   #dev.off()
 })
+```
+
+
+```{r}
+people = c("age_Francis_predictive", "age_Obama_predictive", "age_Dalai_predictive",
+"age_Naruhito_predictive")
+four_pred = data.frame(Bayesian_Popes_second_approach$BUGSoutput$sims.matrix)[,people]
+
+mean(four_pred$age_Dalai_predictive>four_pred$age_Francis_predictive)
+mean(four_pred$age_Obama_predictive>four_pred$age_Naruhito_predictive)
+```
+
+```{r}
+library(ggplot2)
+
+
+# four_pred = four_pred %>%
+#   mutate(wt_color = case_when(
+#     (age_Francis_predictive <= medval) ~ "a",
+#     (age_Francis_predictive > val95) ~ "c",
+#     TRUE ~ "b"))
+
+ggplot(four_pred, aes(x=four_pred[,1])) + geom_histogram(aes(y=..density..), 
+                                                   binwidth = 0.8,
+                                                   boundary = minval) +
+  geom_vline(xintercept = minval, colour = "black")+
+  geom_vline(xintercept = medval, colour = "black") +
+  geom_vline(xintercept = val95, colour = "black")+
+  geom_hline(yintercept = 0, colour = "black") +
+  xlab("Lifespan (years)") +
+  ylab("Predictive Probability density") +
+  ggtitle("Predictive Posterior Distribution for Lifespan of Pope Francis") +
+  ylim(c(0, 0.07))+
+  annotate("text", x = minval+2.5, y = 0.06, label = paste("Current xge", minval, "years", sep = "\n"), size = 3)+
+  annotate("text", x = (medval+minval)/2, y = 0.05, label = "50%", size = 3)+
+  annotate("text", x = medval+1.5, y = 0.06, label = paste("Median", medval,"years", sep = "\n"), size = 3)+
+  annotate("text", x = (medval+val95)/2, y = 0.05, label = "45%", size = 3)+
+  annotate("text", x = val95+2.5, y = 0.06, label = paste("95% quantile", val95, "years", sep = "\n"), size = 3)+
+  annotate("text", x = val95+3, y = 0.05, label = "5%", size = 3)
+```
+
+```{r}
+ppd_plot <- function(i) {
+  name = gsub(".*[_]([^.]+)[_].*", "\\1", colnames(four_pred)[i])
+  minval = round(min(four_pred[,i]), 2)
+  medval = round(median(four_pred[,i]), 2)
+  val95 = round(quantile(four_pred[,i], 0.95),2)
+  maxval = round(max(four_pred[,i]), 2)
+ggplot(four_pred, aes(x=four_pred[,i])) + geom_histogram(aes(y=..density..), 
+                                                   binwidth = 0.8,
+                                                   boundary = minval) +
+  geom_vline(xintercept = minval, colour = "black")+
+  geom_vline(xintercept = medval, colour = "black") +
+  geom_vline(xintercept = val95, colour = "black")+
+  geom_hline(yintercept = 0, colour = "black") +
+  xlab("Lifespan (years)") +
+  ylab("Predictive Probability density") +
+  ggtitle(paste("Predictive Posterior Distribution for Lifespan of", name)) +
+  ylim(c(0, 0.07))+
+  annotate("text", x = minval+0.15*(medval-minval), y = 0.06, label = paste("Current age", minval, "years", sep = "\n"), size = 3)+
+  annotate("text", x = (medval+minval)/2, y = 0.05, label = "50%", size = 3)+
+  annotate("text", x = medval+0.15*(val95-medval), y = 0.06, label = paste("Median", medval,"years", sep = "\n"), size = 3)+
+  annotate("text", x = (medval+val95)/2, y = 0.05, label = "45%", size = 3)+
+  annotate("text", x = val95+2.2, y = 0.06, label = paste("95%", "quantile", val95, "years", sep = "\n"), size = 3)+
+  annotate("text", x = val95+3, y = 0.05, label = "5%", size = 3)
+}
+
+lapply(seq(1,4), ppd_plot)
+
+#ppd_plot(1)
+```
+
+```{r}
+obama_naru = data.frame(plifespans = c(four_pred$age_Obama_predictive, four_pred$age_Naruhito_predictive), person = c(rep("Obama", nrow(four_pred)), rep("Naruhito", nrow(four_pred))))
+
+mins = obama_naru %>%
+  group_by(person) %>%
+  summarise(min_vals = round(min(plifespans), 2))
+
+meds = obama_naru %>%
+  group_by(person) %>%
+  summarise(med_vals = round(median(plifespans), 2))
+
+val95 = obama_naru %>%
+  group_by(person) %>%
+  summarise(vals_95 = round(quantile(plifespans, 0.95), 2))
+
+ggplot(obama_naru, aes(x=plifespans)) + 
+  geom_histogram(aes(y=..density..), binwidth = 0.8,boundary = round(min(obama_naru$plifespans), 2)) +
+  facet_wrap(~person) +
+  geom_vline(data=mins, aes(xintercept=min_vals))+
+  geom_vline(data=meds, aes(xintercept=med_vals))+
+  geom_vline(data=val95, aes(xintercept=vals_95))+
+  geom_hline(yintercept = 0, colour = "black") +
+  xlab("Lifespan (years)") +
+  ylab("Predictive Probability density") +
+  ggtitle(paste("Predictive Posterior Distribution for Lifespans of Obama and Naruhito", name)) +
+  ylim(c(0, 0.05)) #+
+  annotate("text", x = minval+0.15*(medval-minval), y = 0.06, label = paste("Current age", minval, "years", sep = "\n"), size = 3)+
+  # annotate("text", x = (medval+minval)/2, y = 0.05, label = "50%", size = 3)+
+  # annotate("text", x = medval+0.15*(val95-medval), y = 0.06, label = paste("Median", medval,"years", sep = "\n"), size = 3)+
+  # annotate("text", x = (medval+val95)/2, y = 0.05, label = "45%", size = 3)+
+  # annotate("text", x = val95+2.2, y = 0.06, label = paste("95%", "quantile", val95, "years", sep = "\n"), size = 3)+
+  # annotate("text", x = val95+3, y = 0.05, label = "5%", size = 3)
+
 ```
