@@ -44,7 +44,7 @@ Log of mu is done so that the mu parameter is always positive (the support on mu
 # More specificically
 ## WILL ADD INTERACTION LATER
 $$
-T_i \sim Weibull(\alpha, \mu_i) \\
+T_i \sim Weibull(r, \mu_i) \\
 \log(\mu_i) = \beta_0+\beta_1 \text{(Year of Birth_i)}+\beta_2 \text{(Leadership_i = UsPres)} + \beta_3\text{(Leadership_i = ChinaEmp)} \\
 + \beta_4\text{(Leadership_i = DalaiLama)} +\beta_5\text{(Leadership_i = JapanEmp)} \\
 + \beta_6\text{(Year of Birth_i * (Leadership_i = UsPres))} \\
