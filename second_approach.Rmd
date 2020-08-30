@@ -18,10 +18,13 @@ library(broom)
 
 ```{r}
 leaders_data <- get(load("Leaders.RData"))
+leaders_data$Censored[leaders$Name == "Jianwen Emperor"] <- "0" #typo for Jianwen Emperor
 
 leaders_data$Censored <- as.factor(leaders_data$Censored)
 leaders_data$Type <- as.factor(leaders_data$Type)
 leaders_data$Age.Event <- as.numeric(leaders_data$Age.Event)
+
+
 summary(leaders_data)
 ```
 
@@ -178,6 +181,36 @@ second_approach <- function() {
   mu_Naruhito <- exp(beta_Naruhito)
   survival_Naruhito ~ dweib(r, mu_Naruhito) %_% T(present_length_Naruhito, upper_length)
   age_Naruhito_predictive <- survival_Naruhito
+  
+  beta_Benedict <- beta_0 + beta_1*year_Benedict
+  mu_Benedict <- exp(beta_Benedict)
+  survival_Benedict ~ dweib(r, mu_Benedict) %_% T(present_length_Benedict, upper_length)
+  age_Benedict_predictive <- survival_Benedict
+  
+  beta_Carter <- beta_0 + (beta_1+beta_6)*year_Carter + beta_2
+  mu_Carter <- exp(beta_Carter)
+  survival_Carter ~ dweib(r, mu_Carter) %_% T(present_length_Carter, upper_length)
+  age_Carter_predictive <- survival_Cater
+  
+  beta_Clinton <- beta_0 + (beta_1+beta_6)*year_Clinton + beta_2
+  mu_Clinton <- exp(beta_Clinton)
+  survival_Clinton ~ dweib(r, mu_Clinton) %_% T(present_length_Clinton, upper_length)
+  age_Clinton_predictive <- survival_Clinton
+  
+  beta_Bush <- beta_0 + (beta_1+beta_6)*year_Bush + beta_2
+  mu_Bush <- exp(beta_Bush)
+  survival_Bush ~ dweib(r, mu_Bush) %_% T(present_length_Bush, upper_length)
+  age_Bush_predictive <- survival_Bush
+  
+  beta_Trump <- beta_0 + (beta_1+beta_6)*year_Trump + beta_2
+  mu_Trump <- exp(beta_Trump)
+  survival_Trump ~ dweib(r, mu_Trumo) %_% T(present_length_Trump, upper_length)
+  age_Trump_predictive <- survival_Trump
+  
+  beta_Akihito <- beta_0 + (beta_1+beta_9)*year_Akihito + beta_5
+  mu_Akihito <- exp(beta_Akihito)
+  survival_Akihito ~ dweib(r, mu_Akihito) %_% T(present_length_Akihito, upper_length)
+  age_Akihito_predictive <- survival_Akihito
 }
 ```
 
