@@ -485,7 +485,7 @@ min.age = min(leaders_nopred$Age.Event)
 
 install.packages("TruncatedDistributions", repos="http://R-Forge.R-project.org")
 library(TruncatedDistributions)
-Ts = rtweibull(166, r, (1/exp(logmus))^(1/r), min.age, 120) 
+Ts = rtweibull(166, r, (1/exp(logmus))^(1/r))
 # dweibull takes a diff parameterization of Weibull
 # please check the parameterization see ?dweibull
 ```
