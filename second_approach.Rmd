@@ -485,9 +485,11 @@ ggplot(obama_naru, aes(x=plifespans)) +
 ```
 
 ```{r tidy-model-table}
-vars = data.frame(Bayesian_Popes_second_approach$BUGSoutput$root.short)
-output <- head(data.frame(Bayesian_Popes_second_approach$BUGSoutput$summary), 16)
-output <- output %>%
+vars = c("beta_0", "beta_1", "beta_2", "beta_3", "beta_4", "beta_5", "beta_6", 
+                    "beta_7", "beta_8", "beta_9", "r")
+output <- data.frame(Bayesian_Popes_second_approach$BUGSoutput$summary)
+output <- output[row.names(output) %in% vars, ]
+coef <- output %>%
   mutate("Variable" = head(vars,16),
          "Mean" = output$mean,
          "Standard Deviation" = output$sd,
@@ -496,8 +498,6 @@ output <- output %>%
          "97.5% Quantile" = output$X97.5.
          ) %>%
   select("Variable", "Mean", "Standard Deviation", "2.5% Quantile", "Median", "97.5% Quantile")
-coef <- output %>%
-  slice(5:16)
 kable(coef)
 ```
 
