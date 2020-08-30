@@ -242,7 +242,8 @@ Bayesian_Popes_second_approach <- jags(data = data_Popes_second_approach,
                                                              "age_Francis_predictive",
                                                              "age_Obama_predictive",
                                                              "age_Dalai_predictive",
-                                                             "age_Naruhito_predictive"
+                                                             "age_Naruhito_predictive",
+                                                             "survival_non_censored"
                                                              ), 
 
                                       n.iter = 50000, 
@@ -260,19 +261,19 @@ parameters = c("beta_0", "beta_1", "beta_2", "beta_3", "beta_4", "beta_5",
 res = data.frame(Bayesian_Popes_second_approach$BUGSoutput$sims.matrix)[,parameters]
 colnames(res) <- gsub("^.*\\.","", colnames(res) )
 
-lapply(seq(1,length(res)), function(i) {
-  traceplot(as.mcmc(res[,i]), smooth = FALSE, type = "l",
-            xlab = "Iterations", ylab = colnames(res)[i],
-            main = paste("Traceplot of ", colnames(res)[i]))
-})
+# lapply(seq(1,length(res)), function(i) {
+#   traceplot(as.mcmc(res[,i]), smooth = FALSE, type = "l",
+#             xlab = "Iterations", ylab = colnames(res)[i],
+#             main = paste("Traceplot of ", colnames(res)[i]))
+# })
 
-# tps <- function(var){
-#   ggplot(res, aes_(y=as.name(var), x=seq(1,nrow(res)))) + 
-#     geom_line() +
-#     labs(title=paste("Traceplot of ", as.name(var)),
-#          x ="Iterations", y = as.name(var))
-# }
-# lapply(names(res), tps)
+tps <- function(var){
+  ggplot(res, aes_(y=as.name(var), x=seq(1,nrow(res)))) +
+    geom_line() +
+    labs(title=paste("Traceplot of ", as.name(var)),
+         x ="Iterations", y = as.name(var))
+}
+lapply(names(res), tps)
 ```
 
 ```{r}
@@ -440,7 +441,6 @@ output <- output %>%
 coef <- output %>%
   slice(5:16)
 kable(coef)
-
 ```
 
 ```{r standardized-resid}
@@ -465,5 +465,23 @@ estimates <- no_living %>%
          JapanEmp =case_when(Type == "JapanEmp" ~ 1, TRUE ~ 0),
          Pope =case_when(Type == "Pope" ~ 1, TRUE ~ 0),
          UsPres =case_when(Type == "UsPres" ~ 1, TRUE ~ 0)) %>%
+  mutate(BYUsPres = Birth.Year.Cent*UsPres) %>%
+  mutate(BYChinaEmp = Birth.Year.Cent*ChinaEmp) %>%
+  mutate(BYDalaiLama = Birth.Year.Cent*DalaiLama) %>%
+  mutate(BYJapanEmp = Birth.Year.Cent*JapanEmp) %>%
+  mutate(intercept = 1) %>%
   mutate(predicted = exp(beta_0_est + beta_1_est*(Birth.Year.Cent) + beta_2_est*(UsPres) + beta_3_est*(ChinaEmp) + beta_4_est*(DalaiLama) + beta_5_est*(JapanEmp) + beta_6_est*(UsPres)*(Birth.Year.Cent) + beta_7_est*(ChinaEmp)*(Birth.Year.Cent) + beta_8_est*(DalaiLama)*(Birth.Year.Cent) + beta_9_est*(JapanEmp)*(Birth.Year.Cent)))
+
+
+# check using matrices -- Ts in the 200s
+data.mat = as.matrix(estimates[,c("intercept", "Birth.Year.Cent", "UsPres", "ChinaEmp", "DalaiLama", "JapanEmp","BYUsPres", "BYChinaEmp", "BYDalaiLama", "BYJapanEmp")], nrow = nrow(estimates), byrow = TRUE)
+
+r = Bayesian_Popes_second_approach$BUGSoutput$summary[,1][16]
+betas = Bayesian_Popes_second_approach$BUGSoutput$summary[,1][5:14]
+beta.mat = as.matrix(betas, nrow = p, byrow = TRUE)
+logmus = data.mat %*% beta.mat
+
+Ts = rweibull(166, r, (1/exp(logmus))^(1/r)) 
+# dweibull takes a diff parameterization of Weibull
+# please check the parameterization see ?dweibull
 ```
