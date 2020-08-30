@@ -521,9 +521,13 @@ print(mean(non_censored_prediction$Age.Event <0))
 ## Lexis Diagram
 ```{r}
 #lg <- lexis_grid(1960, 2000, 30, 80, delta=5) 
-initial_pope <- read.csv("")
-leaders_data$Initial.Age <- year(leaders_data$Event.Date) - leaders_data$Birth.Year
+#leaders_data$Initial.Age <- year(leaders_data$Event.Date) - leaders_data$Birth.Year
+#subset <- filter(leaders_data, Censored == 0)
+#subset <- subset[0:5,]
+#ggplot() + geom_polygon(data = subset, mapping = aes(x = Birth.Year, y = Age.Event, group = Name)) + geom_point(data = subset, aes(x = Birth.Year, y = Birth.Year + Age.Event)) + geom_polygon(data = subset, mapping = aes(x = Birth.Year, y = ))
+```
+
+```{r}
 subset <- filter(leaders_data, Censored == 0)
-subset <- subset[0:5,]
-ggplot() + geom_polygon(data = subset, mapping = aes(x = Birth.Year, y = Age.Event, group = Name)) + geom_point(data = subset, aes(x = Birth.Year, y = Birth.Year + Age.Event)) + geom_polygon(data = subset, mapping = aes(x = Birth.Year, y = ))
+ggplot(data = subset, aes(x = Birth.Year, Age.Event)) + geom_point(color="pink") + ggtitle("Distribution of Leaders' Ages") + labs(x = "Birth Year", y = "Age")
 ```
