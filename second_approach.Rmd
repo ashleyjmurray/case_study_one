@@ -428,9 +428,10 @@ ggplot(obama_naru, aes(x=plifespans)) +
 ```
 
 ```{r tidy-model-table}
-output <- data.frame(Bayesian_Popes_second_approach$BUGSoutput$summary)
+vars = data.frame(Bayesian_Popes_second_approach$BUGSoutput$root.short)
+output <- head(data.frame(Bayesian_Popes_second_approach$BUGSoutput$summary), 16)
 output <- output %>%
-  mutate("Variable" = Bayesian_Popes_second_approach$BUGSoutput$root.short,
+  mutate("Variable" = head(vars,16),
          "Mean" = output$mean,
          "Standard Deviation" = output$sd,
          "2.5% Quantile" = output$X2.5.,
