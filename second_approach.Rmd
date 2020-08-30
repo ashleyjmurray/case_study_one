@@ -96,7 +96,7 @@ x_9 <- x_1*as.numeric(as.character(x_5))
 
 ```{r}
 set.seed(123)
-second_approach <- function() {
+build_model <- function() {
   for(i in 1:n_censored) {
     z_censored[i] ~ dpois(phi_censored[i])
     phi_censored[i] <- mu_censored[i] * pow(t_censored[i], r)
@@ -230,9 +230,8 @@ present_length_Naruhito <- leaders_data$Age.Event[leaders_data$Name =="Naruhito 
 
 upper_length <- 100
 
-# REMEBER TO RENAME FUNCTION data_Popes_second_approach
 
-data_Popes_second_approach <- list("n_censored",
+data_build_model <- list("n_censored",
                                    "n_non_censored",
                                    "z_censored",
                                    "t_censored",
@@ -265,7 +264,7 @@ data_Popes_second_approach <- list("n_censored",
                                    "present_length_Naruhito",
                                    "upper_length")
 
-Bayesian_Popes_second_approach <- jags(data = data_Popes_second_approach,  
+model_output <- jags(data = data_build_model,  
                                       parameters.to.save = c("beta_0",
                                                              "beta_1",
                                                              "beta_2", 
@@ -305,9 +304,9 @@ Bayesian_Popes_second_approach <- jags(data = data_Popes_second_approach,
 
                                       n.iter = 50000, 
                                       n.chains = 3,
-                                      model.file = second_approach)
+                                      model.file = build_model)
 
-Bayesian_Popes_second_approach
+model_output
 ```
 
 ```{r}
@@ -315,7 +314,7 @@ library(coda)
 parameters = c("beta_0", "beta_1", "beta_2", "beta_3", "beta_4", "beta_5", 
                "beta_6", "beta_7",  "beta_8", "beta_9", "r")
 
-res = data.frame(Bayesian_Popes_second_approach$BUGSoutput$sims.matrix)[,parameters]
+res = data.frame(model_output$BUGSoutput$sims.matrix)[,parameters]
 colnames(res) <- gsub("^.*\\.","", colnames(res) )
 
 # lapply(seq(1,length(res)), function(i) {
@@ -354,7 +353,7 @@ lapply(seq(1,length(res)), function(i) {
 ```{r}
 people = c("age_Francis_predictive", "age_Obama_predictive", "age_Dalai_predictive",
 "age_Naruhito_predictive")
-four_pred = data.frame(Bayesian_Popes_second_approach$BUGSoutput$sims.matrix)[,people]
+four_pred = data.frame(model_output$BUGSoutput$sims.matrix)[,people]
 
 print(paste("P(Dalai Lifespan > Francis Lifespan)=", mean(four_pred$age_Dalai_predictive>four_pred$age_Francis_predictive)))
 
@@ -487,7 +486,7 @@ ggplot(obama_naru, aes(x=plifespans)) +
 ```{r tidy-model-table}
 vars = c("beta_0", "beta_1", "beta_2", "beta_3", "beta_4", "beta_5", "beta_6", 
                     "beta_7", "beta_8", "beta_9", "r")
-output <- data.frame(Bayesian_Popes_second_approach$BUGSoutput$summary)
+output <- data.frame(model_output$BUGSoutput$summary)
 output <- output[row.names(output) %in% vars, ]
 coef <- output %>%
   mutate("Variable" = head(vars,16),
@@ -534,7 +533,7 @@ estimates <- no_living %>%
 # check using matrices -- Ts in the 200s
 data.mat = as.matrix(estimates[,c("intercept", "Birth.Year.Cent", "UsPres", "ChinaEmp", "DalaiLama", "JapanEmp","BYUsPres", "BYChinaEmp", "BYDalaiLama", "BYJapanEmp")], nrow = nrow(estimates), byrow = TRUE)
 
-pred_res = data.frame(t(Bayesian_Popes_second_approach$BUGSoutput$summary))
+pred_res = data.frame(t(model_output$BUGSoutput$summary))
 r = pred_res$r[1]
 betas = pred_res[,c("beta_0", "beta_1", "beta_2",  "beta_3", "beta_4", "beta_5",
                      "beta_6", "beta_7", "beta_8","beta_9")][1,]
