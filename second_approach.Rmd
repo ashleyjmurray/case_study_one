@@ -485,3 +485,29 @@ Ts = rweibull(166, r, (1/exp(logmus))^(1/r))
 # dweibull takes a diff parameterization of Weibull
 # please check the parameterization see ?dweibull
 ```
+
+## Posterior Predictive Checks
+
+```{r}
+non_censored_prediction <- filter(leaders_data, Censored == 0)
+K <- 10
+ysims <- matrix(nrow = nrow(res), ncol = K)
+for(k in 1:K){
+  for(i in 1:nrow(non_censored_prediction)){
+    w <- sample(nrow(res), 1)
+    samp <- res[w,]
+    val <- non_censored_prediction[i, ]
+    beta_temp <- samp$beta_0 + samp$beta_1*val$Birth.Year + samp$beta_2*as.integer(val$TypeUsPres) + samp$beta_3*as.integer(val$TypeChinaEmp) + samp$beta_4*as.integer(val$TypeDalaiLama) + samp$beta_5*as.integer(val$TypeJapanEmp) + samp$beta_6*val$Birth.Year*as.integer(val$TypeUsPres) + samp$beta_7*val$Birth.Year*as.integer(val$TypeChinaEmp) + samp$beta_8*val$Birth.Year*as.integer(val$TypeDalaiLama) + samp$beta_9*val$Birth.Year*as.integer(val$TypeJapanEmp)
+    mu <- exp(beta_temp)
+    ysims[i, k] <- mu
+  }
+}
+```
+
+```{r}
+r <- sample(nrow(non_censored_prediction), 1)
+hist(ysims[r,])
+abline(v=non_censored_prediction$Age.Event[r], col = "red")
+print(mean(ysims<0))
+print(mean(non_censored_prediction$Age.Event <0))
+```
