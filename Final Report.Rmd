@@ -11,9 +11,12 @@ output: pdf_document
 
 # IV. Analysis
 
+
+
 The combination of traceplots, lag-1 scatterplots, and acf plots suggest the chain for each parameters converges, and that 50000 iterations is sufficient. The Rhat's are all close to 1, which is another indicator of converge. All of the effective sample sizes are greater than 200, except for that of beta_0 (the intercept) and r.
 
 # V. Results
+Our model predicts that the 85-year-old 14th Dalai Lama is expected to live 111 years (95% credible interval: 86 - 119 years), the 84-year-old Pope Francis is expected to live 105 years (95% credible interval: 86 - 119 years), the 60-year-old Janpanese Emperior Naruhito is expected to live 99 years (95% credible interval: 66 - 119 years) and the 60-year-old former President Obama is expected to live 99 years (95% credible interval: 65 - 119 years). *THE UPPER BOUND IS TOO HIGH*
 
 The probability that the 14th Dalai Lama will have a longer lifespan than Pope Francis is 0.39. The probability that President Obama will have a longer lifespan than Emperor Naruhito is 0.51.
 

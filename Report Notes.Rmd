@@ -29,7 +29,7 @@ Goals:
   - posterior predictive checks (Ashley)
   - residual plots (standardized?) (Matty)
 - Posterior Inference (answer questions)
-  - sample many tries and average to get point/ interval estimate (Alice)
+  - sample many tries and average to get point/ interval estimate (Alice) - alr in the Bayesian_Popes_second_approach output
   - compare leaders (Cathy) *done*
   
 ## Report 

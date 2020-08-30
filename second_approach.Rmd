@@ -36,14 +36,14 @@ ggplot(data = leaders_data) +
 
 ```
 
-# THIS IS OUR MODEL
+# Our Model
 $$
 T_i \sim Weibull(\alpha, \mu) \\
 log(\mu) = \beta_0 + \beta_1x_{i1}+\beta_2x_{i2}+...+\beta_px_{ip}\\
 $$
 Log of mu is done so that the mu parameter is always positive (the support on mu in Weibull is that mu > 0)
 
-# More specificically
+### More specificically,
 $$
 T_i \sim Weibull(r, \mu_i) \\
 \log(\mu_i) = \beta_0+\beta_1 \text{(Year of Birth_i)}+\beta_2 \text{(Leadership_i = UsPres)} + \beta_3\text{(Leadership_i = ChinaEmp)} \\
@@ -80,7 +80,7 @@ n <- length(survival_raw)
 censored <- leaders_nopred$Censored
 survival <- ifelse(censored == 0, survival_raw, NA)
 
-censoring_limits <- ifelse(censored == 0, 120, survival_raw)
+censoring_limits <- ifelse(censored == 0, 100, survival_raw)
 x_1 <- leaders_nopred$Birth.Year - mean(leaders_nopred$Birth.Year)
 x_2 <- leaders_nopred$TypeUsPres
 x_3 <- leaders_nopred$TypeChinaEmp
@@ -192,7 +192,9 @@ birth_year_Naruhito <- leaders_data$Birth.Year[leaders_data$Name == "Naruhito (E
 year_Naruhito <- birth_year_Naruhito - mean(leaders_nopred$Birth.Year)
 present_length_Naruhito <- leaders_data$Age.Event[leaders_data$Name =="Naruhito (Emperor Reiwa)"]
 
-upper_length <- 120
+upper_length <- 100
+
+# REMEBER TO RENAME FUNCTION data_Popes_second_approach
 
 data_Popes_second_approach <- list("n_censored",
                                    "n_non_censored",
