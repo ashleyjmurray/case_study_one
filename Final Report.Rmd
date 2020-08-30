@@ -18,16 +18,21 @@ The data used in this analysis contains entries for 177 different world leaders.
 
 # IV. Analysis
 
-
-
+*should we move the below to diagnostic analysis at the end of "Results"?*
 The combination of traceplots, lag-1 scatterplots, and acf plots suggest the chain for each parameters converges, and that 50000 iterations is sufficient. The Rhat's are all close to 1, which is another indicator of converge. All of the effective sample sizes are greater than 200, except for that of beta_0 (the intercept) and r.
 
 # V. Results
-Our model predicts that the 85-year-old 14th Dalai Lama is expected to live 111 years (95% credible interval: 86 - 119 years), the 84-year-old Pope Francis is expected to live 105 years (95% credible interval: 86 - 119 years), the 60-year-old Janpanese Emperior Naruhito is expected to live 99 years (95% credible interval: 66 - 119 years) and the 60-year-old former President Obama is expected to live 99 years (95% credible interval: 65 - 119 years). *THE UPPER BOUND IS TOO HIGH*
+*insert model output summary here*
 
-The probability that the 14th Dalai Lama will have a longer lifespan than Pope Francis is 0.39. The probability that President Obama will have a longer lifespan than Emperor Naruhito is 0.51.
+Our model predicts that the 85-year-old 14th Dalai Lama is expected to live 92.4 years (95% credible interval: 85.4 - 99.6 years), the 84-year-old Pope Francis is expected to live 92.4 years (95% credible interval: 84.2 - 99.4 years), the 60-year-old Janpanese Emperior Naruhito is expected to live 85.3 years (95% credible interval: 66.4 - 99.5 years) and the 60-year-old former President Barack Obama is expected to live 84.8 years (95% credible interval: 61.5 - 99.4 years). 
 
-The posterior predictive distribution of the lifespan of Pope Francis is somewhat left skewed, with the mode in the 110s. The posterior predictive distribution of the lifespan of the 14th Dalai Lama is more uniform, with mode in the 90s. The posterior predictive distributions of the lifespans of President Obama and Emperor Naruhito are both left skewed, with the modes in the 110s.
+*insert Predictive Posterior Distribution for Lifespan graphs here*
+
+The posterior predictive distribution of the lifespan of the 14th Dalai Lama is more uniform, with mode in the 90s. The posterior predictive distribution of the lifespan of Pope Francis is somewhat left skewed, with the mode in the early 90s. The posterior predictive distributions of the lifespans of President Obama and Emperor Naruhito are both left skewed, with the modes in the late 90s.
+
+The probability that the 14th Dalai Lama will have a longer lifespan than Pope Francis is 0.495. The probability that President Obama will have a longer lifespan than Emperor Naruhito is 0.483.
+
+
 
 # VI. Conclusion and Further Discussion
 

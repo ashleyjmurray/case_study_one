@@ -122,6 +122,29 @@ second_approach <- function() {
   beta_9 ~ dnorm(0.0, 1.0E-3) # Prior on beta_9 is normal with low precision
   r ~ dexp(1) # Prior on r
   
+  # define alphas
+  alpha_0 <- - beta_0 / r
+  alpha_1 <- - beta_1 / r
+  alpha_2 <- - beta_2 / r
+  alpha_3 <- - beta_3 / r
+  alpha_4 <- - beta_4 / r
+  alpha_5 <- - beta_5 / r  
+  alpha_6 <- - beta_6 / r
+  alpha_7 <- - beta_7 / r
+  alpha_8 <- - beta_8 / r
+  alpha_9 <- - beta_9 / r
+  
+  # Percentage increases
+  percentage_increase_year <- 100*(exp(alpha_1) - 1)
+  percentage_increase_UsPres <- 100*(exp(alpha_2) - 1)
+  percentage_increase_ChinaEmp <- 100*(exp(alpha_3) - 1)
+  percentage_increase_DalaiLama <- 100*(exp(alpha_4) - 1)
+  percentage_increase_JapanEmp <- 100*(exp(alpha_5) - 1)
+  percentage_increase_BYUsPres <- 100*(exp(alpha_6) - 1)
+  percentage_increase_BYChinaEmp <- 100*(exp(alpha_7) - 1)
+  percentage_increase_BYDalaiLama <- 100*(exp(alpha_8) - 1)
+  percentage_increase_BYJapanEmp <- 100*(exp(alpha_9) - 1)
+  
   # Predictive distribution of age at the new values
   beta_Francis <- beta_0 + beta_1*year_Francis
   mu_Francis <- exp(beta_Francis)
@@ -241,6 +264,7 @@ Bayesian_Popes_second_approach <- jags(data = data_Popes_second_approach,
                                                              "beta_8", 
                                                              "beta_9",
                                                              "r", 
+                                                             
                                                              "age_Francis_predictive",
                                                              "age_Obama_predictive",
                                                              "age_Dalai_predictive",
