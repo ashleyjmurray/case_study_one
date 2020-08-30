@@ -15,7 +15,12 @@ The rest of the paper is structured as follows. First, we will describe the data
 The data used in this analysis contains entries for 177 different world leaders. The types of world leaders present in the data include Popes, US Presidents, Dalai Lamas, Chinese Emperors, and Japanese Emperors. Each leader's birth date type of leader is recorded. For some of these groups, we have data dating all the way back to the 14th century. Additionally, leaders who have passed away also have their death date and age of death recorded. For leaders that are still living, these columns instead contain the date the dataset was created (July 31, 2020) and their current age on that date. In order to further clarify who is dead or alive, there is a column titled "Censored," which takes a value of 0 if the person is still dead and a value of 1 if that person is still alive. Related to this, there is another column called "Fail," which takes on a value of 1 if the person is dead and a value of 0 if the person is alive. In total, there are 11 living leaders in our dataset, 4 of whose age of death we are trying to predict. 
 
 # III. Methods
-We model the lifespan $T_i$ of an individual i after the Weibull distribution specified below. The first parameter $r$ is a positive scale parameter and the second parameter $\mu$ is a linear function of the covariates (birth year and types of leadership as well as their interactions). 
+
+## III a. Motivating the Model
+
+We use survival analysis as a way to model $T_i$, the lifespan of a given leader i depending on their year of birth and type of leadership. Survival analysis is useful in that it allows the consideration of "censored" data. This means that we do not always observe the outcome for each data point, for example, we do not know the death date of leaders that are still alive. Thus, we do not know their lifespan, we just know that their survival time $T_i$ will be greater than their current age. 
+
+We model the lifespan $T_i$ of an individual i after the Weibull distribution specified below. We choose to use the Weibull distribution because it is often utilized in survival analysis and allows the user to specify a flexible shape parameter for the distribution. The first parameter $r$, also known as the shape parameter, is a positive scalar, and the second parameter $\mu$, the scale parameter, is a linear function of the covariates (birth year and types of leadership as well as their interactions). 
 $$ T_i \sim Weibull(\alpha, \mu) $$
 $$\log(\mu_i) = \beta_0+\beta_1 \text{(Year of Birth_i)}+\beta_2 \text{(Leadership_i = UsPres)} + \beta_3\text{(Leadership_i = ChinaEmp)} $$
 $$+ \beta_4\text{(Leadership_i = DalaiLama)} +\beta_5\text{(Leadership_i = JapanEmp)} \\$$
@@ -27,11 +32,20 @@ $$+ \beta_9 \text{(Year of Birth_i * (Leadership_i = JapanEmp))}$$
 
 where $\text{Leadership_i = Popes}$ is the baseline for comparison. 
 
-As Stander et al (2018) pointed out, following this Weibull distribution, log(T_i) is euqal in distribution to $1/r (\beta_0 + \beta_1x_{i1}+\beta_2x_{i2}+...+\beta_9x_{i1}x_{i5}) + 1/rlog(\epsilon)$ where $\epsilon \sim exp(1)$. $\alpha_j = -\beta_j/r$, $j = 1,2,...,9$. The interpretation of coefficients depends on the interaction terms (i.e. both year of birth and the type of leadership). 
+## III b. Addressing Censored Data
 
-For example, if a Pope is born one year later, he is expected to live longer by a multiplicative factor of $exp(\alpha_1)$, or his lifespan is expected to increase by a percentage of $100*exp(\alpha_1-1)$. If a U.S. President is born one year later, he is expected to live longer by a multiplicative factor of $exp(\alpha_1 + \alpha_6)$; for a U.S. President and a Chinese Emperor were born in the same year $y$, the Chinese emperor is expected to live longer by a multiplicative factor of $exp(\alpha_3 - \alpha_2 + (\alpha_7-\alpha_6)*y)$ and so on. 
+To handle censored observations, we specify their contribution to the likelihood function using the "zeroes trick." Since the sampling distribution of the censored observations is not known to be a standard distribution, we use the Poisson "zeroes trick" where the likelihood of a Poisson(phi) observation equal to zero is exp(-phi), and when observation[i] has a likelihood of L[i], then phi[i] is assigned to -log(L[i]) if our observed data is a set of 0's. This is necessary because we don't know the lifespan of currently living people, so we need a way to model their expected survival times. This method is also generally more computationally efficient (Stander et al, 2018).
+
+## III c. Prior Choice
+
+We assume that our priors are independent because intuitively a given observation could not be two types of leaders. Additionally, we do not have sufficiently strong prior knowledge about the relationship between birth year and type of leadership to specify an informative prior. We will use an uninformative prior 
+
 
 # IV. Analysis
+
+As Stander et al (2018) pointed out, following this Weibull distribution, $log(T_i)$ is equal in distribution to $\frac{1}{r} (\beta_0 + \beta_1x_{i1}+\beta_2x_{i2}+...+\beta_9x_{i1}x_{i5}) + \frac{1}{r}\log(\epsilon)$ where $\epsilon \sim exp(1)$. $\alpha_j = -\beta_j/r$, $j = 1,2,...,9$. The interpretation of coefficients depends on the interaction terms (i.e. both year of birth and the type of leadership). 
+
+For example, if a Pope is born one year later, he is expected to live longer by a multiplicative factor of $exp(\alpha_1)$, or his lifespan is expected to increase by a percentage of $100*exp(\alpha_1-1)$. If a U.S. President is born one year later, he is expected to live longer by a multiplicative factor of $exp(\alpha_1 + \alpha_6)$; for a U.S. President and a Chinese Emperor were born in the same year $y$, the Chinese emperor is expected to live longer by a multiplicative factor of $exp(\alpha_3 - \alpha_2 + (\alpha_7-\alpha_6)*y)$ and so on. 
 
 *should we move the below to diagnostic analysis at the end of "Results"?*
 The combination of traceplots, lag-1 scatterplots, and acf plots suggest the chain for each parameters converges, and that 50000 iterations is sufficient. The Rhat's are all close to 1, which is another indicator of converge. All of the effective sample sizes are greater than 200, except for that of beta_0 (the intercept) and r.
@@ -52,7 +66,11 @@ The probability that the 14th Dalai Lama will have a longer lifespan than Pope F
 
 # VI. Conclusion and Further Discussion
 
-# VII. Appendix
+# VII. References
+
+*cite Stander et al* 
+
+# VIII. Appendix
 
  
 
