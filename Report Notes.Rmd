@@ -27,7 +27,7 @@ Goals:
 ## Code 
 - Model diagnostics 
   - posterior predictive checks (Ashley)
-  - residual plots (standardized?) (Matty)
+  - residual plots (standardized?) (Matty) *done*
 - Posterior Inference (answer questions)
   - sample many tries and average to get point/ interval estimate (Alice) - alr in the Bayesian_Popes_second_approach output
   - compare leaders (Cathy) *done*
@@ -38,7 +38,7 @@ Goals:
   - Describe Interaction (not significant?) (Alice)
 - Report Graphs/ Tables
   - Lexis diagram (Ashley)
-  - Add other EDA plots? (anyone)
+  - Add other EDA plots? (anyone) - histograms of Age.Event and predictions
   - posterior distribution plots for 4 people of interest (Cathy) *done*
   - tidy output table (Matty) *done*
   - other interesting plots? (anyone)

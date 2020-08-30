@@ -122,6 +122,19 @@ second_approach <- function() {
   beta_9 ~ dnorm(0.0, 1.0E-3) # Prior on beta_9 is normal with low precision
   r ~ dexp(1) # Prior on r
   
+  # sensitivity analysis priors
+  # beta_0 ~ dnorm(0.5, 1.0E-2) # Prior on beta_0 is normal with low precision
+  # beta_1 ~ dnorm(0.5, 1.0E-2) # Prior on beta_1 is normal with low precision
+  # beta_2 ~ dnorm(0.5, 1.0E-2) # Prior on beta_2 is normal with low precision
+  # beta_3 ~ dnorm(0.5, 1.0E-2) # Prior on beta_3 is normal with low precision
+  # beta_4 ~ dnorm(0.5, 1.0E-2) # Prior on beta_4 is normal with low precision
+  # beta_5 ~ dnorm(0.5, 1.0E-2) # Prior on beta_5 is normal with low precision
+  # beta_6 ~ dnorm(0.5, 1.0E-2) # Prior on beta_6 is normal with low precision
+  # beta_7 ~ dnorm(0.5, 1.0E-2) # Prior on beta_7 is normal with low precision
+  # beta_8 ~ dnorm(0.5, 1.0E-2) # Prior on beta_8 is normal with low precision
+  # beta_9 ~ dnorm(0.5, 1.0E-2) # Prior on beta_9 is normal with low precision
+  # r ~ dexp(1) # Prior on r
+  
   # define alphas
   alpha_0 <- - beta_0 / r
   alpha_1 <- - beta_1 / r
@@ -286,8 +299,8 @@ Bayesian_Popes_second_approach <- jags(data = data_Popes_second_approach,
                                                              "age_Francis_predictive",
                                                              "age_Obama_predictive",
                                                              "age_Dalai_predictive",
-                                                             "age_Naruhito_predictive",
-                                                             "survival_non_censored"
+                                                             "age_Naruhito_predictive"#,
+                                                             #"survival_non_censored"
                                                              ), 
 
                                       n.iter = 50000, 
@@ -521,15 +534,16 @@ estimates <- no_living %>%
 # check using matrices -- Ts in the 200s
 data.mat = as.matrix(estimates[,c("intercept", "Birth.Year.Cent", "UsPres", "ChinaEmp", "DalaiLama", "JapanEmp","BYUsPres", "BYChinaEmp", "BYDalaiLama", "BYJapanEmp")], nrow = nrow(estimates), byrow = TRUE)
 
-r = Bayesian_Popes_second_approach$BUGSoutput$summary[,1][16]
-betas = Bayesian_Popes_second_approach$BUGSoutput$summary[,1][5:14]
+pred_res = data.frame(t(Bayesian_Popes_second_approach$BUGSoutput$summary))
+r = pred_res$r[1]
+betas = pred_res[,c("beta_0", "beta_1", "beta_2",  "beta_3", "beta_4", "beta_5",
+                     "beta_6", "beta_7", "beta_8","beta_9")][1,]
 beta.mat = as.matrix(betas, nrow = p, byrow = TRUE)
-logmus = data.mat %*% beta.mat
+logmus = data.mat %*% t(beta.mat)
 
-min.age = min(leaders_nopred$Age.Event)
-
-install.packages("TruncatedDistributions", repos="http://R-Forge.R-project.org")
+# install.packages("TruncatedDistributions", repos="http://R-Forge.R-project.org")
 library(TruncatedDistributions)
+
 set.seed(123)
 Ts = rtweibull(166, r, (1/exp(logmus))^(1/r), 0, 100) 
 
@@ -543,7 +557,6 @@ sd = sqrt((1/166)*(sum((diff)^2)) * (1+ (1/166) + (diff)^2/sum((diff)^2)))
 ggplot(data = estimates, aes(x = Ts, y = resid/sd)) + geom_point()
 ggplot(data = estimates, aes(x = Birth.Year, y = resid/sd)) + geom_point()
 ```
-```
 
 ## Posterior Predictive Checks
 
@@ -551,6 +564,7 @@ ggplot(data = estimates, aes(x = Birth.Year, y = resid/sd)) + geom_point()
 non_censored_prediction <- filter(leaders_data, Censored == 0)
 K <- 10
 ysims <- matrix(nrow = nrow(res), ncol = K)
+
 for(k in 1:K){
   for(i in 1:nrow(non_censored_prediction)){
     w <- sample(nrow(res), 1)
@@ -558,7 +572,7 @@ for(k in 1:K){
     val <- non_censored_prediction[i, ]
     beta_temp <- samp$beta_0 + samp$beta_1*val$Birth.Year + samp$beta_2*as.integer(val$TypeUsPres) + samp$beta_3*as.integer(val$TypeChinaEmp) + samp$beta_4*as.integer(val$TypeDalaiLama) + samp$beta_5*as.integer(val$TypeJapanEmp) + samp$beta_6*val$Birth.Year*as.integer(val$TypeUsPres) + samp$beta_7*val$Birth.Year*as.integer(val$TypeChinaEmp) + samp$beta_8*val$Birth.Year*as.integer(val$TypeDalaiLama) + samp$beta_9*val$Birth.Year*as.integer(val$TypeJapanEmp)
     mu <- exp(beta_temp)
-    t <- dweibull(samp$r, mu)
+    t <- rtweibull(1, samp$r, (1/mu)^(1/samp$r), 0, 100)
     ysims[i, k] <- t
   }
 }
@@ -566,7 +580,7 @@ for(k in 1:K){
 
 ```{r}
 r <- sample(nrow(non_censored_prediction), 1)
-hist(ysims[r,])
+hist(ysims[,1])
 abline(v=non_censored_prediction$Age.Event[r], col = "red")
 print(mean(ysims<0))
 print(mean(non_censored_prediction$Age.Event <0))

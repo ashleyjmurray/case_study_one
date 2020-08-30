@@ -16,24 +16,18 @@ The data used in this analysis contains entries for 177 different world leaders.
 
 # III. Methods
 We model the lifespan $T_i$ of an individual i after the Weibull distribution specified below. The first parameter $r$ is a positive scale parameter and the second parameter $\mu$ is a linear function of the covariates (birth year and types of leadership as well as their interactions). 
-*Question: what about error term?*
-$$
-T_i \sim Weibull(\alpha, \mu) \\
-log(\mu_i) = \beta_0 + \beta_1x_{i1}+\beta_2x_{i2}+...+\beta_px_{ip}\\
-$$
+$$ T_i \sim Weibull(\alpha, \mu) $$
+$$\log(\mu_i) = \beta_0+\beta_1 \text{(Year of Birth_i)}+\beta_2 \text{(Leadership_i = UsPres)} + \beta_3\text{(Leadership_i = ChinaEmp)} $$
+$$+ \beta_4\text{(Leadership_i = DalaiLama)} +\beta_5\text{(Leadership_i = JapanEmp)} \\$$
+$$+ \beta_6\text{(Year of Birth_i * (Leadership_i = UsPres))} \\$$
+$$+ \beta_7\text{(Year of Birth_i * (Leadership_i = ChinaEmp))} \\$$
+$$+ \beta_8\text{(Year of Birth_i * (Leadership_i = DalaiLama))} \\$$
+$$+ \beta_9 \text{(Year of Birth_i * (Leadership_i = JapanEmp))}$$
 
-More specificically,
-$$
-\log(\mu_i) = \beta_0+\beta_1 \text{(Year of Birth_i)}+\beta_2 \text{(Leadership_i = UsPres)} + \beta_3\text{(Leadership_i = ChinaEmp)} \\
-+ \beta_4\text{(Leadership_i = DalaiLama)} +\beta_5\text{(Leadership_i = JapanEmp)} \\
-+ \beta_6\text{(Year of Birth_i * (Leadership_i = UsPres))} \\
-+ \beta_7\text{(Year of Birth_i * (Leadership_i = ChinaEmp))} \\
-+ \beta_8\text{(Year of Birth_i * (Leadership_i = DalaiLama))} \\
-+ \beta_9\text{(Year of Birth_i * (Leadership_i = JapanEmp))}
-$$
+
 where $\text{Leadership_i = Popes}$ is the baseline for comparison. 
 
-As Stander et al (2018) pointed out, following this Weibull distribution, log(T_i) is euqal in distribution to $1/r (\beta_0 + \beta_1x_{i1}+\beta_2x_{i2}+...+\beta_9x_{i1}x_{i5}) + 1/rlog(\epsilon)$ where $\epsilon$ ~ exp(1). $\alpha_j = -\beta_j/r$, $j = 1,2,...,9$. The interpretation of coefficients depends on the interaction terms (i.e. both year of birth and the type of leadership). 
+As Stander et al (2018) pointed out, following this Weibull distribution, log(T_i) is euqal in distribution to $1/r (\beta_0 + \beta_1x_{i1}+\beta_2x_{i2}+...+\beta_9x_{i1}x_{i5}) + 1/rlog(\epsilon)$ where $\epsilon \sim exp(1)$. $\alpha_j = -\beta_j/r$, $j = 1,2,...,9$. The interpretation of coefficients depends on the interaction terms (i.e. both year of birth and the type of leadership). 
 
 For example, if a Pope is born one year later, he is expected to live longer by a multiplicative factor of $exp(\alpha_1)$, or his lifespan is expected to increase by a percentage of $100*exp(\alpha_1-1)$. If a U.S. President is born one year later, he is expected to live longer by a multiplicative factor of $exp(\alpha_1 + \alpha_6)$; for a U.S. President and a Chinese Emperor were born in the same year $y$, the Chinese emperor is expected to live longer by a multiplicative factor of $exp(\alpha_3 - \alpha_2 + (\alpha_7-\alpha_6)*y)$ and so on. 
 
