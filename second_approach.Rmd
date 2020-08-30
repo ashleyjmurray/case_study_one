@@ -534,11 +534,15 @@ set.seed(123)
 Ts = rtweibull(166, r, (1/exp(logmus))^(1/r), 0, 100) 
 
 resid = estimates$Age.Event - Ts
-resid
+resid * estimates$predicted
 
-ggplot(data = estimates, aes(x = Ts, y = resid)) + geom_point()
-ggplot(data = estimates, aes(x = Age.Event, y = resid)) + geom_point() please 
+meanTs = mean(Ts)
+diff = Ts - meanTs
+sd = sqrt((1/166)*(sum((diff)^2)) * (1+ (1/166) + (diff)^2/sum((diff)^2)))
 
+ggplot(data = estimates, aes(x = Ts, y = resid/sd)) + geom_point()
+ggplot(data = estimates, aes(x = Birth.Year, y = resid/sd)) + geom_point()
+```
 ```
 
 ## Posterior Predictive Checks
