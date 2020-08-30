@@ -486,9 +486,15 @@ min.age = min(leaders_nopred$Age.Event)
 
 install.packages("TruncatedDistributions", repos="http://R-Forge.R-project.org")
 library(TruncatedDistributions)
-Ts = rtweibull(166, r, (1/exp(logmus))^(1/r), min.age, 120) 
-# dweibull takes a diff parameterization of Weibull
-# please check the parameterization see ?dweibull
+set.seed(123)
+Ts = rtweibull(166, r, (1/exp(logmus))^(1/r), 0, 100) 
+
+resid = estimates$Age.Event - Ts
+resid
+
+ggplot(data = estimates, aes(x = Ts, y = resid)) + geom_point()
+ggplot(data = estimates, aes(x = Age.Event, y = resid)) + geom_point() please 
+
 ```
 
 ## Posterior Predictive Checks
