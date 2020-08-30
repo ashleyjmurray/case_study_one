@@ -563,7 +563,7 @@ ggplot(data = estimates, aes(x = Birth.Year, y = resid/sd)) + geom_point()
 ```{r}
 non_censored_prediction <- filter(leaders_data, Censored == 0)
 K <- 10
-ysims <- matrix(nrow = nrow(res), ncol = K)
+ysims <- matrix(nrow = 166, ncol = K)
 
 for(k in 1:K){
   for(i in 1:nrow(non_censored_prediction)){
@@ -572,7 +572,7 @@ for(k in 1:K){
     val <- non_censored_prediction[i, ]
     beta_temp <- samp$beta_0 + samp$beta_1*val$Birth.Year + samp$beta_2*as.integer(val$TypeUsPres) + samp$beta_3*as.integer(val$TypeChinaEmp) + samp$beta_4*as.integer(val$TypeDalaiLama) + samp$beta_5*as.integer(val$TypeJapanEmp) + samp$beta_6*val$Birth.Year*as.integer(val$TypeUsPres) + samp$beta_7*val$Birth.Year*as.integer(val$TypeChinaEmp) + samp$beta_8*val$Birth.Year*as.integer(val$TypeDalaiLama) + samp$beta_9*val$Birth.Year*as.integer(val$TypeJapanEmp)
     mu <- exp(beta_temp)
-    t <- rtweibull(1, samp$r, (1/mu)^(1/samp$r), 100, 200)
+    t <- rtweibull(1, samp$r, (1/mu)^(1/samp$r), 0, 100)
     ysims[i, k] <- t
   }
 }
