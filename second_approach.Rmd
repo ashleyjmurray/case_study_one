@@ -428,9 +428,10 @@ ggplot(obama_naru, aes(x=plifespans)) +
 ```
 
 ```{r tidy-model-table}
-output <- data.frame(Bayesian_Popes_second_approach$BUGSoutput$summary)
+vars = data.frame(Bayesian_Popes_second_approach$BUGSoutput$root.short)
+output <- head(data.frame(Bayesian_Popes_second_approach$BUGSoutput$summary), 16)
 output <- output %>%
-  mutate("Variable" = Bayesian_Popes_second_approach$BUGSoutput$root.short,
+  mutate("Variable" = head(vars,16),
          "Mean" = output$mean,
          "Standard Deviation" = output$sd,
          "2.5% Quantile" = output$X2.5.,
@@ -485,9 +486,15 @@ min.age = min(leaders_nopred$Age.Event)
 
 install.packages("TruncatedDistributions", repos="http://R-Forge.R-project.org")
 library(TruncatedDistributions)
-Ts = rtweibull(166, r, (1/exp(logmus))^(1/r))
-# dweibull takes a diff parameterization of Weibull
-# please check the parameterization see ?dweibull
+
+set.seed(123)
+Ts = rtweibull(166, r, (1/exp(logmus))^(1/r), 0, 100) 
+
+resid = estimates$Age.Event - Ts
+resid
+
+ggplot(data = estimates, aes(x = Ts, y = resid)) + geom_point()
+ggplot(data = estimates, aes(x = Age.Event, y = resid)) + geom_point() please 
 ```
 
 ## Posterior Predictive Checks
@@ -503,7 +510,8 @@ for(k in 1:K){
     val <- non_censored_prediction[i, ]
     beta_temp <- samp$beta_0 + samp$beta_1*val$Birth.Year + samp$beta_2*as.integer(val$TypeUsPres) + samp$beta_3*as.integer(val$TypeChinaEmp) + samp$beta_4*as.integer(val$TypeDalaiLama) + samp$beta_5*as.integer(val$TypeJapanEmp) + samp$beta_6*val$Birth.Year*as.integer(val$TypeUsPres) + samp$beta_7*val$Birth.Year*as.integer(val$TypeChinaEmp) + samp$beta_8*val$Birth.Year*as.integer(val$TypeDalaiLama) + samp$beta_9*val$Birth.Year*as.integer(val$TypeJapanEmp)
     mu <- exp(beta_temp)
-    ysims[i, k] <- mu
+    t <- dweibull(samp$r, mu)
+    ysims[i, k] <- t
   }
 }
 ```
@@ -514,4 +522,18 @@ hist(ysims[r,])
 abline(v=non_censored_prediction$Age.Event[r], col = "red")
 print(mean(ysims<0))
 print(mean(non_censored_prediction$Age.Event <0))
+```
+
+## Lexis Diagram
+```{r}
+#lg <- lexis_grid(1960, 2000, 30, 80, delta=5) 
+#leaders_data$Initial.Age <- year(leaders_data$Event.Date) - leaders_data$Birth.Year
+#subset <- filter(leaders_data, Censored == 0)
+#subset <- subset[0:5,]
+#ggplot() + geom_polygon(data = subset, mapping = aes(x = Birth.Year, y = Age.Event, group = Name)) + geom_point(data = subset, aes(x = Birth.Year, y = Birth.Year + Age.Event)) + geom_polygon(data = subset, mapping = aes(x = Birth.Year, y = ))
+```
+
+```{r}
+subset <- filter(leaders_data, Censored == 0)
+ggplot(data = subset, aes(x = Birth.Year, Age.Event)) + geom_point(color="pink") + ggtitle("Distribution of Leaders' Ages") + labs(x = "Birth Year", y = "Age")
 ```
