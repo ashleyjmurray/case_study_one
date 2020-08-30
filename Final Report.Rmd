@@ -15,16 +15,40 @@ The rest of the paper is structured as follows. First, we will describe the data
 The data used in this analysis contains entries for 177 different world leaders. The types of world leaders present in the data include Popes, US Presidents, Dalai Lamas, Chinese Emperors, and Japanese Emperors. Each leader's birth date type of leader is recorded. For some of these groups, we have data dating all the way back to the 14th century. Additionally, leaders who have passed away also have their death date and age of death recorded. For leaders that are still living, these columns instead contain the date the dataset was created (July 31, 2020) and their current age on that date. In order to further clarify who is dead or alive, there is a column titled "Censored," which takes a value of 0 if the person is still dead and a value of 1 if that person is still alive. Related to this, there is another column called "Fail," which takes on a value of 1 if the person is dead and a value of 0 if the person is alive. In total, there are 11 living leaders in our dataset, 4 of whose age of death we are trying to predict. 
 
 # III. Methods
+We model the lifespan $T_i$ of an individual i after the Weibull distribution specified below. The first parameter $r$ is a positive scale parameter and the second parameter $\mu$ is a linear function of the covariates (birth year and types of leadership as well as their interactions). 
+$$ T_i \sim Weibull(\alpha, \mu) $$
+$$\log(\mu_i) = \beta_0+\beta_1 \text{(Year of Birth_i)}+\beta_2 \text{(Leadership_i = UsPres)} + \beta_3\text{(Leadership_i = ChinaEmp)} $$
+$$+ \beta_4\text{(Leadership_i = DalaiLama)} +\beta_5\text{(Leadership_i = JapanEmp)} \\$$
+$$+ \beta_6\text{(Year of Birth_i * (Leadership_i = UsPres))} \\$$
+$$+ \beta_7\text{(Year of Birth_i * (Leadership_i = ChinaEmp))} \\$$
+$$+ \beta_8\text{(Year of Birth_i * (Leadership_i = DalaiLama))} \\$$
+$$+ \beta_9 \text{(Year of Birth_i * (Leadership_i = JapanEmp))}$$
+
+
+where $\text{Leadership_i = Popes}$ is the baseline for comparison. 
+
+As Stander et al (2018) pointed out, following this Weibull distribution, log(T_i) is euqal in distribution to $1/r (\beta_0 + \beta_1x_{i1}+\beta_2x_{i2}+...+\beta_9x_{i1}x_{i5}) + 1/rlog(\epsilon)$ where $\epsilon \sim exp(1)$. $\alpha_j = -\beta_j/r$, $j = 1,2,...,9$. The interpretation of coefficients depends on the interaction terms (i.e. both year of birth and the type of leadership). 
+
+For example, if a Pope is born one year later, he is expected to live longer by a multiplicative factor of $exp(\alpha_1)$, or his lifespan is expected to increase by a percentage of $100*exp(\alpha_1-1)$. If a U.S. President is born one year later, he is expected to live longer by a multiplicative factor of $exp(\alpha_1 + \alpha_6)$; for a U.S. President and a Chinese Emperor were born in the same year $y$, the Chinese emperor is expected to live longer by a multiplicative factor of $exp(\alpha_3 - \alpha_2 + (\alpha_7-\alpha_6)*y)$ and so on. 
 
 # IV. Analysis
 
+*should we move the below to diagnostic analysis at the end of "Results"?*
 The combination of traceplots, lag-1 scatterplots, and acf plots suggest the chain for each parameters converges, and that 50000 iterations is sufficient. The Rhat's are all close to 1, which is another indicator of converge. All of the effective sample sizes are greater than 200, except for that of beta_0 (the intercept) and r.
 
 # V. Results
+*insert model output summary here*
 
-The probability that the 14th Dalai Lama will have a longer lifespan than Pope Francis is 0.39. The probability that President Obama will have a longer lifespan than Emperor Naruhito is 0.51.
 
-The posterior predictive distribution of the lifespan of Pope Francis is somewhat left skewed, with the mode in the 110s. The posterior predictive distribution of the lifespan of the 14th Dalai Lama is more uniform, with mode in the 90s. The posterior predictive distributions of the lifespans of President Obama and Emperor Naruhito are both left skewed, with the modes in the 110s.
+Our model predicts that the 85-year-old 14th Dalai Lama is expected to live 92.4 years (95% credible interval: 85.4 - 99.6 years), the 84-year-old Pope Francis is expected to live 92.4 years (95% credible interval: 84.2 - 99.4 years), the 60-year-old Janpanese Emperior Naruhito is expected to live 85.3 years (95% credible interval: 66.4 - 99.5 years) and the 60-year-old former President Barack Obama is expected to live 84.8 years (95% credible interval: 61.5 - 99.4 years). 
+
+*insert Predictive Posterior Distribution for Lifespan graphs here*
+
+The posterior predictive distribution of the lifespan of the 14th Dalai Lama is more uniform, with mode in the 90s. The posterior predictive distribution of the lifespan of Pope Francis is somewhat left skewed, with the mode in the early 90s. The posterior predictive distributions of the lifespans of President Obama and Emperor Naruhito are both left skewed, with the modes in the late 90s.
+
+The probability that the 14th Dalai Lama will have a longer lifespan than Pope Francis is 0.495. The probability that President Obama will have a longer lifespan than Emperor Naruhito is 0.483.
+
+
 
 # VI. Conclusion and Further Discussion
 
