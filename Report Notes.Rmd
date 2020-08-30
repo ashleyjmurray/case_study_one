@@ -40,13 +40,13 @@ Goals:
   - Lexis diagram (Ashley)
   - Add other EDA plots? (anyone)
   - posterior distribution plots for 4 people of interest (Cathy) *done*
-  - tidy output table (Matty)
+  - tidy output table (Matty) *done*
   - other interesting plots? (anyone)
   
 - Report Outline
-  - Intro (Matty)
+  - Intro (Matty) *done*
   - Body
-      - Data (Matty)
+      - Data (Matty) *done* 
       - Methods (everyone/ Zoom?)
       - Analysis (Alice + Cathy)
           - interpretations and diagnostics

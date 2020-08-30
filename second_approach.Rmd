@@ -481,7 +481,11 @@ betas = Bayesian_Popes_second_approach$BUGSoutput$summary[,1][5:14]
 beta.mat = as.matrix(betas, nrow = p, byrow = TRUE)
 logmus = data.mat %*% beta.mat
 
-Ts = rweibull(166, r, (1/exp(logmus))^(1/r)) 
+min.age = min(leaders_nopred$Age.Event)
+
+install.packages("TruncatedDistributions", repos="http://R-Forge.R-project.org")
+library(TruncatedDistributions)
+Ts = rtweibull(166, r, (1/exp(logmus))^(1/r), min.age, 120) 
 # dweibull takes a diff parameterization of Weibull
 # please check the parameterization see ?dweibull
 ```
