@@ -484,6 +484,8 @@ ggplot(obama_naru, aes(x=plifespans)) +
 ```
 
 ```{r tidy-model-table}
+
+# select betas and r from output and put into a tidy table
 vars = c("beta_0", "beta_1", "beta_2", "beta_3", "beta_4", "beta_5", "beta_6", 
                     "beta_7", "beta_8", "beta_9", "r")
 output <- data.frame(model_output$BUGSoutput$summary)
@@ -501,6 +503,9 @@ kable(coef)
 ```
 
 ```{r standardized-resid}
+# calculate and create graphs for standardized residuals
+
+#select estimated mean betas
 beta_0_est <- coef[1,2]
 beta_1_est <- coef[2,2]
 beta_2_est <- coef[3,2]
@@ -512,9 +517,11 @@ beta_7_est <- coef[8,2]
 beta_8_est <- coef[9,2]
 beta_9_est <- coef[10,2]
 
+# select only non-living leaders to calculate residuals for
 no_living <- leaders_data %>%
   filter(Censored == 0)
 
+# mutate data to calculate mus
 estimates <- no_living %>%
   mutate(Birth.Year.Cent = Birth.Year - mean(leaders_nopred$Birth.Year)) %>%
   mutate(ChinaEmp =case_when(Type == "ChinaEmp" ~ 1, TRUE ~ 0),
@@ -529,8 +536,6 @@ estimates <- no_living %>%
   mutate(intercept = 1) %>%
   mutate(predicted = exp(beta_0_est + beta_1_est*(Birth.Year.Cent) + beta_2_est*(UsPres) + beta_3_est*(ChinaEmp) + beta_4_est*(DalaiLama) + beta_5_est*(JapanEmp) + beta_6_est*(UsPres)*(Birth.Year.Cent) + beta_7_est*(ChinaEmp)*(Birth.Year.Cent) + beta_8_est*(DalaiLama)*(Birth.Year.Cent) + beta_9_est*(JapanEmp)*(Birth.Year.Cent)))
 
-
-# check using matrices -- Ts in the 200s
 data.mat = as.matrix(estimates[,c("intercept", "Birth.Year.Cent", "UsPres", "ChinaEmp", "DalaiLama", "JapanEmp","BYUsPres", "BYChinaEmp", "BYDalaiLama", "BYJapanEmp")], nrow = nrow(estimates), byrow = TRUE)
 
 pred_res = data.frame(t(model_output$BUGSoutput$summary))
@@ -540,21 +545,26 @@ betas = pred_res[,c("beta_0", "beta_1", "beta_2",  "beta_3", "beta_4", "beta_5",
 beta.mat = as.matrix(betas, nrow = p, byrow = TRUE)
 logmus = data.mat %*% t(beta.mat)
 
-# install.packages("TruncatedDistributions", repos="http://R-Forge.R-project.org")
+# install.packages("TruncatedDistributions", repos="http://R-Forge.R-project.org") 
 library(TruncatedDistributions)
 
+# draw predicted values based on mus calculated above
 set.seed(123)
 Ts = rtweibull(166, r, (1/exp(logmus))^(1/r), 0, 100) 
 
+#calculate residuals
 resid = estimates$Age.Event - Ts
-resid * estimates$predicted
 
+#calculate standard deviations
 meanTs = mean(Ts)
 diff = Ts - meanTs
 sd = sqrt((1/166)*(sum((diff)^2)) * (1+ (1/166) + (diff)^2/sum((diff)^2)))
 
-ggplot(data = estimates, aes(x = Ts, y = resid/sd)) + geom_point()
-ggplot(data = estimates, aes(x = Birth.Year, y = resid/sd)) + geom_point()
+# make plots
+ggplot(data = estimates, aes(x = Ts, y = resid/sd)) + geom_point() + 
+  labs(x = "Predicted Lifespan", y = "Standardized Residual")
+ggplot(data = estimates, aes(x = Birth.Year, y = resid/sd)) + geom_point() +
+  labs(x = "Birth Year", y = "Standardized Residual")
 ```
 
 ## Posterior Predictive Checks

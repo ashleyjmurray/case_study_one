@@ -75,7 +75,11 @@ Goals:
 - Ashley: try to fix posterior predictive checks LOL, need to explain the plots outputted
 - Cathy: fix posterior predictive plots
 - Alice: add point estimate for all living people, add comparison to our prediction and the world live data
-- Matty: fix the model table output, fix the residuals again, see what's happening with the residuals. add explanation of the residual plots in the final report
+- Matty: 
+    - fix the model table output *done*
+    - fix the residuals again *done*
+    - see what's happening with the residuals
+    - add explanation of the residual plots in the final report
 - Change function names
 - Comment on code
 - Check reproducibility
