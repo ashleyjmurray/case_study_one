@@ -645,6 +645,6 @@ This model could be improved by including more predictors; for example, health w
 
 # VII. References
 
-*cite Stander et al* 
+Stander, J., Valle, L. D., &amp; Cortina-Borja, M. (2018). A Bayesian Survival Analysis of a Historical Dataset: How Long Do Popes Live? The American Statistician, 72(4), 368-375.
 
 # VIII. Appendix
