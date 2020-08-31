@@ -44,7 +44,7 @@ We assume that our priors are independent because intuitively a given observatio
 
 For our prior for r, we chose a prior of $exp(1)$, as we believe the hazard of death increases with time. 
 
-```{r, message=F}
+```{r, message=F, include=F}
 #library(R2jags)
 library(R2jags)
 library(tidyverse)
@@ -53,7 +53,7 @@ library(knitr)
 library(broom)
 ```
 
-```{r}
+```{r, include=F}
 leaders_data <- get(load("Leaders.RData"))
 leaders_data$Censored[leaders$Name == "Jianwen Emperor"] <- "0" #typo for Jianwen Emperor
 
@@ -66,7 +66,7 @@ summary(leaders_data)
 ```
 
 # Boxplot of age (Age.Event) by Type
-```{r}
+```{r, echo=F}
 ggplot(data = leaders_data) +
   geom_boxplot(aes(x = Type, y = Age.Event))
 
@@ -75,7 +75,7 @@ ggplot(data = leaders_data) +
 ```
 
 # Data Cleaning
-```{r}
+```{r, include=F}
 # 10 censored data
 leaders_data$Name[leaders_data$Censored == "1"]
   
@@ -117,7 +117,7 @@ x_9 <- x_1*as.numeric(as.character(x_5))
 ```
 
 
-```{r}
+```{r, include=F}
 set.seed(123)
 build_model <- function() {
   for(i in 1:n_censored) {
@@ -205,7 +205,7 @@ build_model <- function() {
 ```
 
 
-```{r}
+```{r, include=F}
 censored_dex = which(censored==1) # index of ppl who are censored
 
 z_censored <- rep(0, length(censored_dex))
@@ -332,7 +332,7 @@ model_output <- jags(data = data_build_model,
 model_output
 ```
 
-```{r}
+```{r, include=F}
 library(coda)
 parameters = c("beta_0", "beta_1", "beta_2", "beta_3", "beta_4", "beta_5", 
                "beta_6", "beta_7",  "beta_8", "beta_9", "r")
@@ -355,7 +355,7 @@ tps <- function(var){
 lapply(names(res), tps)
 ```
 
-```{r}
+```{r, include=F}
 library(ggplot2)
 res_lag1 = lapply(seq(1:length(res)), function(i) {
   lres = lag(res[,i],1)
@@ -366,7 +366,7 @@ res_lag1 = lapply(seq(1:length(res)), function(i) {
 })
 ```
 
-```{r}
+```{r, include=F}
 lapply(seq(1,length(res)), function(i) { 
   acf(res[,i], xlab = "Lag", ylab = "ACF", 
             main = paste("ACF Plot of ", colnames(res)[i]))
@@ -393,7 +393,11 @@ Our model predicts that the 85-year-old 14th Dalai Lama is expected to live 92.4
 
 ### Francis and Dalai Lama 
 
-```{r}
+```{r francis-dalai-plot, fig.height=2, fig.width=5, echo = FALSE}
+people = c("age_Francis_predictive", "age_Obama_predictive", "age_Dalai_predictive",
+"age_Naruhito_predictive")
+four_pred = data.frame(model_output$BUGSoutput$sims.matrix)[,people]
+
 francis_dalai = data.frame(plifespans = c(four_pred$age_Francis_predictive, four_pred$age_Dalai_predictive), person = c(rep("Francis", nrow(four_pred)), rep("Dalai", nrow(four_pred))))
 
 mins = francis_dalai %>%
@@ -431,17 +435,15 @@ ggplot(francis_dalai, aes(x=plifespans)) +
   geom_vline(data=val95, aes(xintercept=vals_95), color = "red")+
   geom_hline(yintercept = 0, colour = "black") +
   xlab("Lifespan (yrs)") + ylab("Predictive Probability density") + 
+  labs(caption = paste("Fig. 3a The posterior predictive probability density function of the lifespan for hypothetical leaders with the same attributes as Pope Francis (right) and the 14th Dalai Lama (left). The black vertical line marks current age, the blue marks posterior median, and", "the red marks the posterior 95% quantile.", sep = "\n")) +
+  theme(plot.caption = element_text(hjust = 0))+
   ylim(c(0, 0.1)) + 
   geom_text(data = plot_txt, mapping = aes(x = 88.5, y = 0.09, label = label), size = 2)
 ```
 
 ### Obama and Naruhito
 
-```{r}
-people = c("age_Francis_predictive", "age_Obama_predictive", "age_Dalai_predictive",
-"age_Naruhito_predictive")
-four_pred = data.frame(model_output$BUGSoutput$sims.matrix)[,people]
-
+```{r obama-naru-plot, fig.height=2, fig.width=5, echo = FALSE}
 obama_naru = data.frame(plifespans = c(four_pred$age_Obama_predictive, four_pred$age_Naruhito_predictive), person = c(rep("Obama", nrow(four_pred)), rep("Naruhito", nrow(four_pred))))
 
 mins = obama_naru %>%
@@ -479,13 +481,16 @@ ggplot(obama_naru, aes(x=plifespans)) +
   geom_vline(data=val95, aes(xintercept=vals_95), color = "red")+
   geom_hline(yintercept = 0, colour = "black") +
   xlab("Lifespan (yrs)") + ylab("Predictive Probability density") +
+    labs(caption = paste("Fig. 3a The posterior predictive probability density function of the lifespan for hypothetical leaders with the same attributes as President Obama (right) and Emperor Naruhito (left). The black vertical line marks current age, the blue marks posterior median, and", "the red marks the posterior 95% quantile.", sep = "\n")) +
+  theme(plot.caption = element_text(hjust = 0))+
+
   ylim(c(0, 0.06)) +
   geom_text(data = plot_txt, mapping = aes(x = 72, y = 0.05, label = label), size = 3)
 ```
 
-The posterior predictive distribution of the lifespan of the 14th Dalai Lama is more uniform, with mode in the 90s. The posterior predictive distribution of the lifespan of Pope Francis is somewhat left skewed, with the mode in the early 90s. The posterior predictive distributions of the lifespans of President Obama and Emperor Naruhito are both left skewed, with the modes in the late 90s.
+The histogram of the posterior predictive distributions of the lifespans of a leaders with the same attributes as Pope Francis and the 14th Dalai Lama are more uniform. The posterior predictive distributions of the lifespans of President Obama and Emperor Naruhito are both left skewed, with the modes in the late 90s.
 
-```{r}
+```{r posterior-prob-comparison, include=F}
 pprob1 = mean(four_pred$age_Dalai_predictive>four_pred$age_Francis_predictive)
 pprob2 =  mean(four_pred$age_Obama_predictive>four_pred$age_Naruhito_predictive)
 ```
@@ -493,7 +498,7 @@ pprob2 =  mean(four_pred$age_Obama_predictive>four_pred$age_Naruhito_predictive)
 The probability that the 14th Dalai Lama will have a longer lifespan than Pope Francis is `r pprob1`. The probability that President Obama will have a longer lifespan than Emperor Naruhito is `r pprob2`.
 
 
-```{r tidy-model-table}
+```{r tidy-model-table, echo = F}
 
 # select betas and r from output and put into a tidy table
 vars = c("beta_0", "beta_1", "beta_2", "beta_3", "beta_4", "beta_5", "beta_6", 
@@ -512,7 +517,7 @@ coef <- output %>%
 kable(coef)
 ```
 
-```{r standardized-resid}
+```{r standardized-resid, echo=F}
 # calculate and create graphs for standardized residuals
 
 #select estimated mean betas
@@ -579,7 +584,7 @@ ggplot(data = estimates, aes(x = Birth.Year, y = resid/sd)) + geom_point() +
 
 ## Posterior Predictive Checks
 
-```{r}
+```{r, include=F}
 # non_censored_prediction <- filter(leaders_data, Censored == 0)
 # K <- 10
 # ysims <- matrix(nrow = 166, ncol = K)
@@ -597,7 +602,7 @@ ggplot(data = estimates, aes(x = Birth.Year, y = resid/sd)) + geom_point() +
 #}
 ```
 
-```{r}
+```{r, echo = FALSE}
 # r <- sample(nrow(non_censored_prediction), 1)
 # hist(ysims[,1])
 # abline(v=non_censored_prediction$Age.Event[r], col = "red")
@@ -614,7 +619,7 @@ ggplot(data = estimates, aes(x = Birth.Year, y = resid/sd)) + geom_point() +
 #ggplot() + geom_polygon(data = subset, mapping = aes(x = Birth.Year, y = Age.Event, group = Name)) + geom_point(data = subset, aes(x = Birth.Year, y = Birth.Year + Age.Event)) + geom_polygon(data = subset, mapping = aes(x = Birth.Year, y = ))
 ```
 
-```{r}
+```{r, echo=F}
 subset <- filter(leaders_data, Censored == 0)
 ggplot(data = subset, aes(x = Birth.Year, Age.Event)) + geom_point(color="pink") + ggtitle("Distribution of Leaders' Ages") + labs(x = "Birth Year", y = "Age")
 ```
