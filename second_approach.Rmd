@@ -18,7 +18,9 @@ The rest of the paper is structured as follows. First, we will describe the data
 
 # II. Data
 
-The data used in this analysis contains entries for 177 different world leaders. The types of world leaders present in the data include Popes, US Presidents, Dalai Lamas, Chinese Emperors, and Japanese Emperors. Each leader's birth date type of leader is recorded. For some of these groups, we have data dating all the way back to the 14th century. Additionally, leaders who have passed away also have their death date and age of death recorded. For leaders that are still living, these columns instead contain the date the dataset was created (July 31, 2020) and their current age on that date. In order to further clarify who is dead or alive, there is a column titled "Censored," which takes a value of 0 if the person is still dead and a value of 1 if that person is still alive. Related to this, there is another column called "Fail," which takes on a value of 1 if the person is dead and a value of 0 if the person is alive. In total, there are 11 living leaders in our dataset, 4 of whose age of death we are trying to predict. 
+# II a. Description of the Data
+
+The data used in this analysis contains entries for 177 different world leaders. The types of world leaders present in the data include Popes, US Presidents, Dalai Lamas, Chinese Emperors, and Japanese Emperors. Each leader's birth date type of leader is recorded. For some of these groups, we have data dating all the way back to the 14th century. Additionally, leaders who have passed away also have their death date and age of death recorded. For leaders that are still living, these columns instead contain the date the dataset was created (July 31, 2020) and their current age on that date. In order to further clarify who is dead or alive, there is a column titled "Censored," which takes a value of 0 if the person is still dead and a value of 1 if that person is still alive. Related to this, there is another column called "Fail," which takes on a value of 1 if the person is dead and a value of 0 if the person is alive. In total, there are 10 living leaders in our dataset, 4 of whose age of death we are trying to predict. 
 
 ```{r, message=F, include=F}
 library(R2jags)
@@ -42,9 +44,9 @@ leaders_data$Age.Event <- as.numeric(leaders_data$Age.Event)
 summary(leaders_data)
 ```
 
-# Exploratory Data Analysis
-```{r, fig.height=2, fig.width=5,echo=F}
+# II b. Exploratory Data Analysis
 
+```{r, fig.height=2, fig.width=5,echo=F}
 # create EDA plots
 ggplot(data = leaders_data) +
   geom_point(aes(x = Birth.Date, y = Age.Event))
@@ -84,8 +86,6 @@ We assume that our priors are independent because intuitively a given observatio
 
 For our prior for r, we chose a prior of $exp(1)$, as we believe the hazard of death increases with time. 
 
-
-# Data Cleaning
 ```{r, include=F}
 # 10 censored data
 leaders_data$Name[leaders_data$Censored == "1"]
@@ -392,15 +392,11 @@ As Stander et al (2018) pointed out, following this Weibull distribution, $log(T
 For example, if a Pope is born one year later, he is expected to live longer by a multiplicative factor of $exp(\alpha_1)$, or his lifespan is expected to increase by a percentage of $100*exp(\alpha_1-1)$. If a U.S. President is born one year later, he is expected to live longer by a multiplicative factor of $exp(\alpha_1 + \alpha_6)$; for a U.S. President and a Chinese Emperor were born in the same year $y$, the Chinese emperor is expected to live longer by a multiplicative factor of $exp(\alpha_3 - \alpha_2 + (\alpha_7-\alpha_6)*y)$ and so on. 
 
 # V. Results
-*insert model output summary here*
-
+```{r, echo = F}
+model_output
+```
 
 Our model predicts that the 85-year-old 14th Dalai Lama is expected to live 92.4 years (95% credible interval: 85.4 - 99.6 years), the 84-year-old Pope Francis is expected to live 92.4 years (95% credible interval: 84.2 - 99.4 years), the 60-year-old Janpanese Emperior Naruhito is expected to live 85.3 years (95% credible interval: 66.4 - 99.5 years) and the 60-year-old former President Barack Obama is expected to live 84.8 years (95% credible interval: 61.5 - 99.4 years). 
-
-
-## Posterior Predictive Plots
-
-### Francis and Dalai Lama 
 
 ```{r francis-dalai-plot, message = F, fig.height=5, fig.width=10, echo = FALSE}
 people = c("age_Francis_predictive", "age_Obama_predictive", "age_Dalai_predictive",
@@ -449,8 +445,6 @@ ggplot(francis_dalai, aes(x=plifespans)) +
   ylim(c(0, 0.1)) + 
   geom_text(data = plot_txt, mapping = aes(x = 88.5, y = 0.09, label = label), size = 3)
 ```
-
-### Obama and Naruhito
 
 ```{r obama-naru-plot, message = F, fig.height=5, fig.width=10, echo = FALSE}
 obama_naru = data.frame(plifespans = c(four_pred$age_Obama_predictive, four_pred$age_Naruhito_predictive), person = c(rep("Obama", nrow(four_pred)), rep("Naruhito", nrow(four_pred))))
@@ -505,7 +499,6 @@ pprob2 =  mean(four_pred$age_Obama_predictive>four_pred$age_Naruhito_predictive)
 ```
 
 The probability that the 14th Dalai Lama will have a longer lifespan than Pope Francis is `r round(pprob1,4)`. The probability that President Obama will have a longer lifespan than Emperor Naruhito is `r round(pprob2,4)`.
-
 
 ```{r tidy-model-table, echo = F}
 # select betas and r from output and put into a tidy table
@@ -627,6 +620,7 @@ abline(v=non_censored_prediction$Age.Event[r], col = "red")
 print(mean(d<0))
 print(mean(non_censored_prediction$Age.Event <0))
 ```
+
 For the posterior predictive checks, it appears that our model returns values that are more concentrated around the upper truncation limit, which is why the dataframe's Inf values are encoded as 100 (the upper truncation limit defined in our function). This follows what the standardized residuals found, where most of the values from the model are left-skewed. 
 
 
