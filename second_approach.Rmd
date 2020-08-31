@@ -419,7 +419,7 @@ coef <- output %>%
 kable(coef)
 ```
 
-While we may expect leaders who were born earlier to live a shorter life, $\hat{\beta_1}$ which correpsond to the leaders' year of birth appears to be insignificant parameter it is very close to 0 (-0.0016) and is statistically insignificant (95% credible interval includes 0). $\hat{\beta_6}$ to $\hat{\beta_9}$ which correspond to the interaction effects are very weak and mostly insignificant as well. Types of leadership ($\hat{\beta_2}$ to $\hat{\beta_5}$) do seem to be significant. As explained in Section IV, the model is easier to understand if we interprate the output in terms of $\alpha_j$, defined as $\alpha_j = -\beta_j/r$, $j = 1,2,...,9$. Some examples of the interpretation are provided below.
+While we may expect leaders who were born earlier to live a shorter life, $\hat{\beta_1}$ which correpsond to the leaders' year of birth appears to be an insignificant parameter as it is very close to 0 (-0.0016) although statistically significant. $\hat{\beta_6}$ to $\hat{\beta_9}$ which correspond to the interaction effects are very weak and mostly insignificant as well. Types of leadership ($\hat{\beta_2}$ to $\hat{\beta_5}$) do seem to be significant. As explained in Section IV, the model is easier to understand if we interprate the output in terms of $\alpha_j$, defined as $\alpha_j = -\beta_j/r$, $j = 1,2,...,9$. Some examples of the interpretation are provided below.
 
 ```{r tidy-model-table-alpha, echo = F}
 vars1 = c("alpha_0", "alpha_1", "alpha_2", "alpha_3", "alpha_4", "alpha_5", "alpha_6", 
