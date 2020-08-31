@@ -83,7 +83,7 @@ Goals:
 - Change function names *done*
 - Comment on code
 - Check reproducibility
-- Add EDA to the data portion in the Final Report
+- Add EDA to the data portion in the Final Report *done*
   
   
   
