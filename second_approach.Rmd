@@ -640,42 +640,40 @@ The standardized residuals when plotted against Birth Year show random scatterin
 ## Posterior Predictive Checks
 
 ```{r, include=F}
- non_censored_prediction <- filter(leaders_data, Censored == 0)
- K <- 10
- ysims <- matrix(nrow = nrow(non_censored_prediction), ncol = K)
+ non_censored_prediction <- filter(leaders_data, Censored == 0) #get all of the leaders that are non-censored, as these are the only people that you are able to do posterior predictive checks on, intuitively
+ K <- 10 # set the total number of iterations
+ ysims <- matrix(nrow = nrow(non_censored_prediction), ncol = K) #create a matrix of the resulting simulations
  
- for(k in 1:K){
-   for(i in 1:nrow(non_censored_prediction)){
-     w <- sample(nrow(res), 1)
-     samp <- res[w,]
-     val <- non_censored_prediction[i, ]
-     beta_temp <- samp$beta_0 + samp$beta_1*val$Birth.Year + samp$beta_2*as.integer(val$TypeUsPres) + samp$beta_3*as.integer(val$TypeChinaEmp) + samp$beta_4*as.integer(val$TypeDalaiLama) + samp$beta_5*as.integer(val$TypeJapanEmp) + samp$beta_6*val$Birth.Year*as.integer(val$TypeUsPres) + samp$beta_7*val$Birth.Year*as.integer(val$TypeChinaEmp) + samp$beta_8*val$Birth.Year*as.integer(val$TypeDalaiLama) + samp$beta_9*val$Birth.Year*as.integer(val$TypeJapanEmp)
-     mu <- exp(beta_temp)
-     t <- rtweibull(1, samp$r, (1/mu)^(1/samp$r), 50, 100)
-     ysims[i, k] <- t
+ for(k in 1:K){ #for each iteration
+   for(i in 1:nrow(non_censored_prediction)){ #for each row of the non-censored data
+     w <- sample(nrow(res), 1) #sample from the model's simulations
+     samp <- res[w,] #get the resulting values from the model's random sample
+     val <- non_censored_prediction[i, ] #get the resulting values from the specific row
+     beta_temp <- samp$beta_0 + samp$beta_1*val$Birth.Year + samp$beta_2*as.integer(val$TypeUsPres) + samp$beta_3*as.integer(val$TypeChinaEmp) + samp$beta_4*as.integer(val$TypeDalaiLama) + samp$beta_5*as.integer(val$TypeJapanEmp) + samp$beta_6*val$Birth.Year*as.integer(val$TypeUsPres) + samp$beta_7*val$Birth.Year*as.integer(val$TypeChinaEmp) + samp$beta_8*val$Birth.Year*as.integer(val$TypeDalaiLama) + samp$beta_9*val$Birth.Year*as.integer(val$TypeJapanEmp) #calculate the beta values as defined by our model
+     mu <- exp(beta_temp) #calculate mu from the betas
+     t <- rtweibull(1, samp$r, (1/mu)^(1/samp$r), 50, 100) #put the mu and the sample's r value into the weibull equation
+     ysims[i, k] <- t #put the resulting value into the ysims matrix
    }
 }
 ```
 
 ```{r}
-d <- data.frame(ysims)
-d[sapply(d, is.infinite)] <- 100
+d <- data.frame(ysims) #create a dataframe from the ysims matrix
+d[sapply(d, is.infinite)] <- 100 #set all of the Inf values to the upper truncation value as defined in the previous weibull distribution
 ```
 
 
 ```{r, echo=F}
 subset <- filter(leaders_data, Censored == 0)
 ggplot(data = subset, aes(x = Birth.Year, Age.Event)) + geom_point(color="pink") + ggtitle("Distribution of Leaders' Ages") + labs(x = "Birth Year", y = "Age")
-
-
 ```
 
 ```{r, echo = FALSE}
-r <- sample(nrow(non_censored_prediction), 2)
-hist(d[,1])
-abline(v=non_censored_prediction$Age.Event[r], col = "red")
-print(mean(d<0))
-print(mean(non_censored_prediction$Age.Event <0))
+r <- sample(nrow(non_censored_prediction), 2) #sample from the non_censored data
+hist(d[,1]) #create a histogram for the first column of the dataframe
+abline(v=non_censored_prediction$Age.Event[r], col = "red")  #get the ages defined in the data
+print(mean(d<0)) #resulting mean of the simulation dataframe
+print(mean(non_censored_prediction$Age.Event <0)) #resulting mean of the actual non-censored data
 ```
 
 For the posterior predictive checks, it appears that our model returns values that are more concentrated around the upper truncation limit, which is why the dataframe's Inf values are encoded as 100 (the upper truncation limit defined in our function). This follows what the standardized residuals found, where most of the values from the model are left-skewed. 
