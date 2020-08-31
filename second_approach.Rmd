@@ -24,6 +24,7 @@ The rest of the paper is structured as follows. First, we will describe the data
 The data used in this analysis contains entries for 177 different world leaders. The types of world leaders present in the data include Popes, US Presidents, Dalai Lamas, Chinese Emperors, and Japanese Emperors. Each leader's birth date type of leader is recorded. For some of these groups, we have data dating all the way back to the 14th century. Additionally, leaders who have passed away also have their death date and age of death recorded. For leaders that are still living, these columns instead contain the date the dataset was created (July 31, 2020) and their current age on that date. In order to further clarify who is dead or alive, there is a column titled "Censored," which takes a value of 0 if the person is still dead and a value of 1 if that person is still alive. Related to this, there is another column called "Fail," which takes on a value of 1 if the person is dead and a value of 0 if the person is alive. In total, there are 10 living leaders in our dataset, 4 of whose age of death we are trying to predict. 
 
 ```{r, message=F, include=F}
+# import libraries
 library(R2jags)
 library(tidyverse)
 library(ggplot2)
@@ -31,16 +32,17 @@ library(lubridate)
 library(TruncatedDistributions)
 library(knitr)
 library(broom)
+library(coda)
 ```
 
 ```{r, include=F}
+# clean data and make sure columns have the right type
 leaders_data <- get(load("Leaders.RData"))
 leaders_data$Censored[leaders$Name == "Jianwen Emperor"] <- "0" #typo for Jianwen Emperor
 
 leaders_data$Censored <- as.factor(leaders_data$Censored)
 leaders_data$Type <- as.factor(leaders_data$Type)
 leaders_data$Age.Event <- as.numeric(leaders_data$Age.Event)
-
 
 summary(leaders_data)
 ```
@@ -100,9 +102,10 @@ For our prior for r, we chose a prior of $exp(1)$, as we believe the hazard of d
 # 10 censored data
 leaders_data$Name[leaders_data$Censored == "1"]
   
-
+# create birth year
 leaders_data$Birth.Year <- year(leaders_data$Birth.Date)
 
+# create interactions
 leaders_data <- leaders_data %>%
   mutate(TypeChinaEmp = as.factor(case_when(Type == "ChinaEmp" ~ 1,
                              TRUE ~ 0)),
@@ -115,9 +118,11 @@ leaders_data <- leaders_data %>%
          TypeUsPres = as.factor(case_when(Type == "UsPres" ~ 1,
                                 TRUE ~ 0)))
 
+# get rid of those we are trying to predict
 leaders_nopred <- leaders_data %>%
   filter(!(Name %in% c("14th Dalai Lama (Tenzin Gyatso)", "Naruhito (Emperor Reiwa)", "Barack Obama", "Francis")))
 
+# set the survival and censored vectors
 survival_raw <- leaders_nopred$Age.Event
 n <- length(survival_raw)
 
@@ -130,6 +135,7 @@ x_2 <- leaders_nopred$TypeUsPres
 x_3 <- leaders_nopred$TypeChinaEmp
 x_4 <- leaders_nopred$TypeDalaiLama
 x_5 <- leaders_nopred$TypeJapanEmp
+
 # add interaction b/w Birth.Year and Type
 x_6 <- x_1*as.numeric(as.character(x_2))
 x_7 <- x_1*as.numeric(as.character(x_3))
@@ -139,6 +145,7 @@ x_9 <- x_1*as.numeric(as.character(x_5))
 
 
 ```{r, include=F}
+# mcmc sampler function
 set.seed(123)
 build_model <- function() {
   for(i in 1:n_censored) {
@@ -229,6 +236,7 @@ build_model <- function() {
 ```{r, include = FALSE}
 censored_dex = which(censored==1) # index of ppl who are censored
 
+# set numeric vectors for censored ppl
 z_censored <- rep(0, length(censored_dex))
 t_censored <- censoring_limits[censored_dex]
 x_1_censored <- x_1[censored_dex] 
@@ -243,6 +251,7 @@ x_9_censored <- x_9[censored_dex]
 
 n_censored <- length(censored_dex)
 
+# set numeric vectors for non censored ppl
 survival_non_censored <- survival[-censored_dex] # Remove ALL ALIVE PEOPLE
 x_1_non_censored <- x_1[-censored_dex]
 x_2_non_censored <- x_2[-censored_dex]
@@ -256,6 +265,7 @@ x_9_non_censored <- x_9[-censored_dex]
 
 n_non_censored <- length(survival_non_censored)
 
+# find attributes for the four leaders
 birth_year_Francis <- leaders_data$Birth.Year[leaders_data$Name == "Francis"]
 year_Francis <- birth_year_Francis - mean(leaders_nopred$Birth.Year)
 present_length_Francis <- leaders_data$Age.Event[leaders_data$Name =="Francis"]
@@ -274,7 +284,7 @@ present_length_Naruhito <- leaders_data$Age.Event[leaders_data$Name =="Naruhito 
 
 upper_length <- 100
 
-
+# build model inputs and run model
 data_build_model <- list("n_censored",
                                    "n_non_censored",
                                    "z_censored",
@@ -352,18 +362,12 @@ model_output
 
 
 ```{r, include = FALSE}
-library(coda)
+# run traceplots
 parameters = c("beta_0", "beta_1", "beta_2", "beta_3", "beta_4", "beta_5", 
                "beta_6", "beta_7",  "beta_8", "beta_9", "r")
 
 res = data.frame(model_output$BUGSoutput$sims.matrix)[,parameters]
 colnames(res) <- gsub("^.*\\.","", colnames(res) )
-
-# lapply(seq(1,length(res)), function(i) {
-#   traceplot(as.mcmc(res[,i]), smooth = FALSE, type = "l",
-#             xlab = "Iterations", ylab = colnames(res)[i],
-#             main = paste("Traceplot of ", colnames(res)[i]))
-# })
 
 tps <- function(var){
   ggplot(res, aes_(y=as.name(var), x=seq(1,nrow(res)))) +
@@ -375,6 +379,7 @@ lapply(names(res), tps)
 ```
 
 ```{r, include = FALSE}
+# run lag-1 scatterplots
 library(ggplot2)
 res_lag1 = lapply(seq(1:length(res)), function(i) {
   lres = lag(res[,i],1)
@@ -386,6 +391,7 @@ res_lag1 = lapply(seq(1:length(res)), function(i) {
 ```
 
 ```{r, include = FALSE}
+# run acf plots
 lapply(seq(1,length(res)), function(i) { 
   acf(res[,i], xlab = "Lag", ylab = "ACF", 
             main = paste("ACF Plot of ", colnames(res)[i]))
@@ -404,6 +410,7 @@ For example, while keeping all others constant, if a Pope is born one year later
 # V. Results
 
 ```{r tidy-model-table-beta, echo = F}
+# output beta results
 vars = c("beta_0", "beta_1", "beta_2", "beta_3", "beta_4", "beta_5", "beta_6", 
                     "beta_7", "beta_8", "beta_9", "r")
 output <- data.frame(model_output$BUGSoutput$summary)
@@ -448,6 +455,7 @@ kable(coef1)
 Our model predicts that the 85-year-old 14th Dalai Lama is expected to live 92.4 years (95% credible interval: 85.4 - 99.6 years), the 84-year-old Pope Francis is expected to live 92.4 years (95% credible interval: 84.2 - 99.4 years), the 60-year-old Janpanese Emperior Naruhito is expected to live 85.3 years (95% credible interval: 66.4 - 99.5 years) and the 60-year-old former President Barack Obama is expected to live 84.8 years (95% credible interval: 61.5 - 99.4 years). 
 
 ```{r francis-dalai-plot, message = F, fig.height=5, fig.width=10, echo = FALSE}
+# plot francis and dalai lama histograms
 people = c("age_Francis_predictive", "age_Obama_predictive", "age_Dalai_predictive",
 "age_Naruhito_predictive")
 four_pred = data.frame(model_output$BUGSoutput$sims.matrix)[,people]
@@ -496,6 +504,7 @@ ggplot(francis_dalai, aes(x=plifespans)) +
 ```
 
 ```{r obama-naru-plot, message = F, fig.height=5, fig.width=10, echo = FALSE}
+# plot obama and naruhito histograms
 obama_naru = data.frame(plifespans = c(four_pred$age_Obama_predictive, four_pred$age_Naruhito_predictive), person = c(rep("Obama", nrow(four_pred)), rep("Naruhito", nrow(four_pred))))
 
 mins = obama_naru %>%
@@ -543,6 +552,7 @@ ggplot(obama_naru, aes(x=plifespans)) +
 The histogram of the posterior predictive distributions of the lifespans for a leader with the same birth year and leadership type as Pope Francis and that of a leader with the same above attributes as the 14th Dalai Lama are more uniform. The histogram for a leader with the same birth year and leadership type as President Obama and that of a leader with the same above attributes as Emperor Naruhito are both left skewed, with the modes in the late 90s.
 
 ```{r posterior-prob-comparison, include=F}
+# comparison values
 pprob1 = mean(four_pred$age_Dalai_predictive>four_pred$age_Francis_predictive)
 pprob2 =  mean(four_pred$age_Obama_predictive>four_pred$age_Naruhito_predictive)
 ```
@@ -610,9 +620,6 @@ betas = pred_res[,c("beta_0", "beta_1", "beta_2",  "beta_3", "beta_4", "beta_5",
                      "beta_6", "beta_7", "beta_8","beta_9")][1,]
 beta.mat = as.matrix(betas, nrow = p, byrow = TRUE)
 logmus = data.mat %*% t(beta.mat)
-
-# install.packages("TruncatedDistributions", repos="http://R-Forge.R-project.org") 
-library(TruncatedDistributions)
 
 # draw predicted values based on mus calculated above
 set.seed(123)
