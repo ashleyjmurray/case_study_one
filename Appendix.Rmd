@@ -595,12 +595,9 @@ d <- data.frame(ysims)
 d[sapply(d, is.infinite)] <- 100
 ```
 
-
 ```{r, echo=F}
 subset <- filter(leaders_data, Censored == 0)
 ggplot(data = subset, aes(x = Birth.Year, Age.Event)) + geom_point(color="pink") + ggtitle("Distribution of Leaders' Ages") + labs(x = "Birth Year", y = "Age")
-
-
 ```
 
 ```{r, echo = FALSE}
