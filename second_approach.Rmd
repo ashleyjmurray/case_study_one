@@ -628,13 +628,8 @@ d[sapply(d, is.infinite)] <- 100
  print(mean(d<0))
  print(mean(non_censored_prediction$Age.Event <0))
 ```
+
 For the posterior predictive checks, it appears that our model returns values that are more concentrated around the upper truncation limit, which is why the dataframe's Inf values are encoded as 100 (the upper truncation limit defined in our function). This follows what the standardized residuals found, where most of the values from the model are left-skewed. 
-
-
-```{r, echo=F}
-#subset <- filter(leaders_data, Censored == 0)
-#ggplot(data = subset, aes(x = Birth.Year, Age.Event)) + geom_point(color="pink") + ggtitle("Distribution of #Leaders' Ages") + labs(x = "Birth Year", y = "Age")
-```
 
 # VI. Conclusion and Further Discussion
 
