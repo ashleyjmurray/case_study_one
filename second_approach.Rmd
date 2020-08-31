@@ -85,11 +85,6 @@ where Leadership_i = Popes is the baseline for comparison.
 
 ## III b. Addressing Censored Data
 
-To handle censored observations, we specify their contribution to the likelihood function using the "zeroes trick." Since the sampling distribution of the censored observations is not known to be a standard distribution, we use the Poisson "zeroes trick" where the likelihood of a $Poisson(\phi)$ observation equal to zero is $exp(-\phi)$, and when observation $i$ has a likelihood of $L_i$, then $\phi_i$ is assigned to $-log(L_i)$ if our observed data is a set of 0's. This is necessary because we don't know the lifespan of currently living people, so we need a way to model their expected survival times. This method is also generally more computationally efficient (Stander et al, 2018).
-
-==
-### I THINK THIS IS HOW THE ZERO'S TRICK WORKS:  http://www.ejwagenmakers.com/BayesCourse/BugsBookZerosTrick.pdf - Alice
-
 To handle censored observations, we specify their contribution to the likelihood function using the "zeros trick." Since the sampling distribution of the censored observations is not known to be a standard distribution, we use the Poisson "zeros trick" where a set of 0's are created with the likelihood of observing an 0 following a $Poisson(\phi_i)$ distribution. The likelihood $L_i$ is $Pr(z_i = 0) = exp(-\phi)$. In other words, $\phi_i$ equals $-log(L_i)$. This mechanism is necessary because we don't know the lifespan of currently living people, so we need a way to model their expected survival times. This method is also generally more computationally efficient (Stander et al, 2018).
 
 ## III c. Prior Choice
