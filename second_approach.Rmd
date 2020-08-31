@@ -20,13 +20,50 @@ The rest of the paper is structured as follows. First, we will describe the data
 
 The data used in this analysis contains entries for 177 different world leaders. The types of world leaders present in the data include Popes, US Presidents, Dalai Lamas, Chinese Emperors, and Japanese Emperors. Each leader's birth date and type of leader is recorded. For some of these groups, we have data dating all the way back to the 14th century. Additionally, leaders who have passed away also have their death date and age of death recorded. For leaders that are still living, these columns instead contain the date the dataset was created (July 31, 2020) and their current age on that date. In order to further clarify who is dead or alive, there is a column titled "Censored," which takes a value of 0 if the person is still dead and a value of 1 if that person is still alive. Related to this, there is another column called "Fail," which takes on a value of 1 if the person is dead and a value of 0 if the person is alive. In total, there are 10 living leaders in our dataset, 4 of whose age of death we are trying to predict. 
 
+```{r, message=F, include=F}
+#library(R2jags)
+library(R2jags)
+library(tidyverse)
+library(lubridate)
+library(knitr)
+library(broom)
+```
+
+```{r, include=F}
+leaders_data <- get(load("Leaders.RData"))
+leaders_data$Censored[leaders$Name == "Jianwen Emperor"] <- "0" #typo for Jianwen Emperor
+
+leaders_data$Censored <- as.factor(leaders_data$Censored)
+leaders_data$Type <- as.factor(leaders_data$Type)
+leaders_data$Age.Event <- as.numeric(leaders_data$Age.Event)
+
+
+summary(leaders_data)
+```
+
+# Exploratory Data Analysis
+```{r, fig.height=2, fig.width=5,echo=F}
+
+# create EDA plots
+ggplot(data = leaders_data) +
+  geom_point(aes(x = Birth.Date, y = Age.Event))
+
+ggplot(data = leaders_data) +
+  geom_boxplot(aes(x = Type, y = Age.Event))
+
+ggplot(data = leaders_data) +
+  geom_histogram(aes(x = Age.Event), binwidth = 5)
+```
+
+As seen from the above plots, there seems to be no discernible relationship between Birth Date and Lifespan. Additionally, the distribution of Popes and US Presidents is centered higher, which makes intuitive sense given that these leaders are elected later in life, while Dalai Lamas and Emperors can be elected at much younger ages. Lastly, the distribution of lifespans is unimodal and slightly left skewed. However, this skewing does not seem extreme so there is no need for a transformation. 
+
 # III. Methods
 
 ## III a. Motivating the Model
 
 We use survival analysis as a way to model $T_i$, the lifespan of a given leader i depending on their year of birth and type of leadership. Survival analysis is useful in that it allows the consideration of "censored" data. This means that we do not always observe the outcome for each data point. For example, we do not know the death date of leaders that are still alive. Thus, we do not know their lifespan, we just know that their survival time $T_i$ will be greater than their current age. 
 
-We model the lifespan $T_i$ of an individual i after the Weibull distribution specified below. We choose to use the Weibull distribution because it is often utilized in survival analysis and allows the user to specify a flexible shape parameter for the distribution. The first parameter $r$, also known as the shape parameter, is a positive scalar, and the second parameter $\mu$, the scale parameter, is a linear function of the covariates (in this case, birth year and types of leadership as well as their interactions). 
+We model the lifespan $T_i$ of an individual i after the Weibull distribution specified below. We choose to use the Weibull distribution because it is often utilized in survival analysis and allows the user to specify a flexible shape parameter for the distribution. The first parameter $r$, also known as the shape parameter, is a positive scalar, and the second parameter $\mu$, the scale parameter, is a linear function of the covariates (in this case, birth year centered at mean 1677 and types of leadership as well as their interactions). 
 
 $$ T_i \sim Weibull(\alpha, \mu) $$
 $$\log(\mu_i) = \beta_0+\beta_1 (Year \ of \ Birth_i)+\beta_2 (Leadership_i = UsPres) + \beta_3 (Leadership_i = ChinaEmp) $$
@@ -52,38 +89,8 @@ We assume that our priors are independent because intuitively a given observatio
 
 For our prior for r, we chose a prior of $exp(1)$, as we believe the hazard of death increases with time. 
 
-```{r, message=F}
-#library(R2jags)
-library(R2jags)
-library(tidyverse)
-library(lubridate)
-library(knitr)
-library(broom)
-```
 
-```{r}
-leaders_data <- get(load("Leaders.RData"))
-leaders_data$Censored[leaders$Name == "Jianwen Emperor"] <- "0" #typo for Jianwen Emperor
-
-leaders_data$Censored <- as.factor(leaders_data$Censored)
-leaders_data$Type <- as.factor(leaders_data$Type)
-leaders_data$Age.Event <- as.numeric(leaders_data$Age.Event)
-
-
-summary(leaders_data)
-```
-
-# Boxplot of age (Age.Event) by Type
-```{r}
-ggplot(data = leaders_data) +
-  geom_boxplot(aes(x = Type, y = Age.Event))
-
-ggplot(data = leaders_data) +
-  geom_point(aes(x = Birth.Date, y = Age.Event))
-```
-
-# Data Cleaning
-```{r}
+```{r, include=F}
 # 10 censored data
 leaders_data$Name[leaders_data$Censored == "1"]
   
@@ -125,7 +132,7 @@ x_9 <- x_1*as.numeric(as.character(x_5))
 ```
 
 
-```{r}
+```{r, include=F}
 set.seed(123)
 build_model <- function() {
   for(i in 1:n_censored) {
@@ -213,7 +220,7 @@ build_model <- function() {
 ```
 
 
-```{r}
+```{r, include=F}
 censored_dex = which(censored==1) # index of ppl who are censored
 
 z_censored <- rep(0, length(censored_dex))
@@ -336,11 +343,10 @@ model_output <- jags(data = data_build_model,
                                       n.iter = 50000, 
                                       n.chains = 3,
                                       model.file = build_model)
-
 model_output
 ```
 
-```{r}
+```{r, include=FALSE}
 library(coda)
 parameters = c("beta_0", "beta_1", "beta_2", "beta_3", "beta_4", "beta_5", 
                "beta_6", "beta_7",  "beta_8", "beta_9", "r")
@@ -363,7 +369,7 @@ tps <- function(var){
 lapply(names(res), tps)
 ```
 
-```{r}
+```{r, include=F}
 library(ggplot2)
 res_lag1 = lapply(seq(1:length(res)), function(i) {
   lres = lag(res[,i],1)
@@ -374,7 +380,7 @@ res_lag1 = lapply(seq(1:length(res)), function(i) {
 })
 ```
 
-```{r}
+```{r, include=F}
 lapply(seq(1,length(res)), function(i) { 
   acf(res[,i], xlab = "Lag", ylab = "ACF", 
             main = paste("ACF Plot of ", colnames(res)[i]))
@@ -388,10 +394,51 @@ The combination of traceplots, lag-1 scatterplots, and acf plots suggest the cha
 
 As Stander et al (2018) pointed out, following this Weibull distribution, $log(T_i)$ is equal in distribution to $\frac{1}{r} (\beta_0 + \beta_1x_{i1}+\beta_2x_{i2}+...+\beta_9x_{i1}x_{i5}) + \frac{1}{r}\log(\epsilon)$ where $\epsilon \sim exp(1)$. $\alpha_j = -\beta_j/r$, $j = 1,2,...,9$. The interpretation of coefficients depends on the interaction terms (i.e. both year of birth and the type of leadership). 
 
-For example, if a Pope is born one year later, he is expected to live longer by a multiplicative factor of $exp(\alpha_1)$, or his lifespan is expected to increase by a percentage of $100*exp(\alpha_1-1)$. If a U.S. President is born one year later, he is expected to live longer by a multiplicative factor of $exp(\alpha_1 + \alpha_6)$; for a U.S. President and a Chinese Emperor were born in the same year $y$, the Chinese emperor is expected to live longer by a multiplicative factor of $exp(\alpha_3 - \alpha_2 + (\alpha_7-\alpha_6)*y)$ and so on. 
+For example, while keeping all others constant, if a Pope is born one year later, he is expected to live longer by a multiplicative factor of $exp(\alpha_1)$, or his lifespan is expected to increase by a percentage of $100*exp(\alpha_1-1)$. If a U.S. President is born one year later, he is expected to live longer by a multiplicative factor of $exp(\alpha_1 + \alpha_6)$. If a U.S. President and a Chinese Emperor are born in the same year $y$, the Chinese emperor is expected to live longer by a multiplicative factor of $exp(\alpha_3 - \alpha_2 + (\alpha_7-\alpha_6)*y)$ and so on. 
 
 # V. Results
-*insert model output summary here*
+
+```{r tidy-model-table-beta, echo = F}
+vars = c("beta_0", "beta_1", "beta_2", "beta_3", "beta_4", "beta_5", "beta_6", 
+                    "beta_7", "beta_8", "beta_9", "r")
+output <- data.frame(model_output$BUGSoutput$summary)
+output <- output[row.names(output) %in% vars, ]
+coef <- output %>%
+  mutate("Variable" = vars,
+         "Mean" = output$mean,
+         "Standard Deviation" = output$sd,
+         "2.5% Quantile" = output$X2.5.,
+         "Median" = output$X50.,
+         "97.5% Quantile" = output$X97.5.
+         ) %>%
+  select("Variable", "Mean", "Standard Deviation", "2.5% Quantile", "Median", "97.5% Quantile")
+kable(coef)
+```
+
+While we may expect leaders who were born earlier to live a shorter life, $\hat{\beta_1}$ which correpsond to the leaders' year of birth appears to be insignificant parameter it is very close to 0 (-0.0016) and is statistically insignificant (95% credible interval includes 0). $\hat{\beta_6}$ to $\hat{\beta_9}$ which correspond to the interaction effects are very weak and mostly insginificant as well. Types of leadership ($\hat{\beta_2}$ to $\hat{\beta_5}$) do seem to be significant. As explained in Section IV, the model is easier to understand if we interprate the output in terms of $\alpha_j$, defined as $\alpha_j = -\beta_j/r$, $j = 1,2,...,9$. Some examples of the interpretation are provided below.
+
+```{r tidy-model-table-alpha, echo = F}
+vars1 = c("alpha_0", "alpha_1", "alpha_2", "alpha_3", "alpha_4", "alpha_5", "alpha_6", 
+         "alpha_7", "alpha_8", "alpha_9", 
+         "percentage_increase_year", "percentage_increase_UsPres", 
+         "percentage_increase_ChinaEmp", "percentage_increase_DalaiLama",
+         "percentage_increase_BYUsPres", "percentage_increase_BYChinaEmp",
+         "percentage_increase_BYDalaiLama", "percentage_increase_BYJapanEmp"
+         )
+output1 <- output[row.names(output) %in% vars1, ]
+coef1 <- output1 %>%
+  mutate("Variable" = vars1,
+         "Mean" = output1$mean,
+         "Standard Deviation" = output1$sd,
+         "2.5% Quantile" = output1$X2.5.,
+         "Median" = output1$X50.,
+         "97.5% Quantile" = output1$X97.5.
+         ) %>%
+  select("Variable", "Mean", "Standard Deviation", "2.5% Quantile", "Median", "97.5% Quantile")
+kable(coef1)
+```
+
+- $\alpha_0$: 
 
 
 Our model predicts that the 85-year-old 14th Dalai Lama is expected to live 92.4 years (95% credible interval: 85.4 - 99.6 years), the 84-year-old Pope Francis is expected to live 92.4 years (95% credible interval: 84.2 - 99.4 years), the 60-year-old Janpanese Emperior Naruhito is expected to live 85.3 years (95% credible interval: 66.4 - 99.5 years) and the 60-year-old former President Barack Obama is expected to live 84.8 years (95% credible interval: 61.5 - 99.4 years). 
@@ -401,7 +448,11 @@ Our model predicts that the 85-year-old 14th Dalai Lama is expected to live 92.4
 
 ### Francis and Dalai Lama 
 
-```{r}
+```{r francis-dalai-plot, fig.height=2, fig.width=5, echo = FALSE}
+people = c("age_Francis_predictive", "age_Obama_predictive", "age_Dalai_predictive",
+"age_Naruhito_predictive")
+four_pred = data.frame(model_output$BUGSoutput$sims.matrix)[,people]
+
 francis_dalai = data.frame(plifespans = c(four_pred$age_Francis_predictive, four_pred$age_Dalai_predictive), person = c(rep("Francis", nrow(four_pred)), rep("Dalai", nrow(four_pred))))
 
 mins = francis_dalai %>%
@@ -439,17 +490,15 @@ ggplot(francis_dalai, aes(x=plifespans)) +
   geom_vline(data=val95, aes(xintercept=vals_95), color = "red")+
   geom_hline(yintercept = 0, colour = "black") +
   xlab("Lifespan (yrs)") + ylab("Predictive Probability density") + 
+  labs(caption = paste("Fig. 3a The posterior predictive probability density function of the lifespan for hypothetical leaders with the same attributes as Pope Francis (right) and the 14th Dalai Lama (left). The black vertical line marks current age, the blue marks posterior median, and", "the red marks the posterior 95% quantile.", sep = "\n")) +
+  theme(plot.caption = element_text(hjust = 0))+
   ylim(c(0, 0.1)) + 
   geom_text(data = plot_txt, mapping = aes(x = 88.5, y = 0.09, label = label), size = 2)
 ```
 
 ### Obama and Naruhito
 
-```{r}
-people = c("age_Francis_predictive", "age_Obama_predictive", "age_Dalai_predictive",
-"age_Naruhito_predictive")
-four_pred = data.frame(model_output$BUGSoutput$sims.matrix)[,people]
-
+```{r obama-naru-plot, fig.height=2, fig.width=5, echo = FALSE}
 obama_naru = data.frame(plifespans = c(four_pred$age_Obama_predictive, four_pred$age_Naruhito_predictive), person = c(rep("Obama", nrow(four_pred)), rep("Naruhito", nrow(four_pred))))
 
 mins = obama_naru %>%
@@ -487,13 +536,16 @@ ggplot(obama_naru, aes(x=plifespans)) +
   geom_vline(data=val95, aes(xintercept=vals_95), color = "red")+
   geom_hline(yintercept = 0, colour = "black") +
   xlab("Lifespan (yrs)") + ylab("Predictive Probability density") +
+    labs(caption = paste("Fig. 3a The posterior predictive probability density function of the lifespan for hypothetical leaders with the same attributes as President Obama (right) and Emperor Naruhito (left). The black vertical line marks current age, the blue marks posterior median, and", "the red marks the posterior 95% quantile.", sep = "\n")) +
+  theme(plot.caption = element_text(hjust = 0))+
+
   ylim(c(0, 0.06)) +
   geom_text(data = plot_txt, mapping = aes(x = 72, y = 0.05, label = label), size = 3)
 ```
 
-The posterior predictive distribution of the lifespan of the 14th Dalai Lama is more uniform, with mode in the 90s. The posterior predictive distribution of the lifespan of Pope Francis is somewhat left skewed, with the mode in the early 90s. The posterior predictive distributions of the lifespans of President Obama and Emperor Naruhito are both left skewed, with the modes in the late 90s.
+The histogram of the posterior predictive distributions of the lifespans of a leaders with the same attributes as Pope Francis and the 14th Dalai Lama are more uniform. The posterior predictive distributions of the lifespans of President Obama and Emperor Naruhito are both left skewed, with the modes in the late 90s.
 
-```{r}
+```{r posterior-prob-comparison, include=F}
 pprob1 = mean(four_pred$age_Dalai_predictive>four_pred$age_Francis_predictive)
 pprob2 =  mean(four_pred$age_Obama_predictive>four_pred$age_Naruhito_predictive)
 ```
@@ -501,26 +553,7 @@ pprob2 =  mean(four_pred$age_Obama_predictive>four_pred$age_Naruhito_predictive)
 The probability that the 14th Dalai Lama will have a longer lifespan than Pope Francis is `r pprob1`. The probability that President Obama will have a longer lifespan than Emperor Naruhito is `r pprob2`.
 
 
-```{r tidy-model-table}
-
-# select betas and r from output and put into a tidy table
-vars = c("beta_0", "beta_1", "beta_2", "beta_3", "beta_4", "beta_5", "beta_6", 
-                    "beta_7", "beta_8", "beta_9", "r")
-output <- data.frame(model_output$BUGSoutput$summary)
-output <- output[row.names(output) %in% vars, ]
-coef <- output %>%
-  mutate("Variable" = head(vars,16),
-         "Mean" = output$mean,
-         "Standard Deviation" = output$sd,
-         "2.5% Quantile" = output$X2.5.,
-         "Median" = output$X50.,
-         "97.5% Quantile" = output$X97.5.
-         ) %>%
-  select("Variable", "Mean", "Standard Deviation", "2.5% Quantile", "Median", "97.5% Quantile")
-kable(coef)
-```
-
-```{r standardized-resid}
+```{r standardized-resid, fig.height=2, fig.width=5, echo=F}
 # calculate and create graphs for standardized residuals
 
 #select estimated mean betas
@@ -568,7 +601,7 @@ library(TruncatedDistributions)
 
 # draw predicted values based on mus calculated above
 set.seed(123)
-Ts = rtweibull(166, r, (1/exp(logmus))^(1/r), 0, 100) 
+Ts = rtweibull(167, r, (1/exp(logmus))^(1/r), 0, 100) 
 
 #calculate residuals
 resid = estimates$Age.Event - Ts
@@ -576,7 +609,7 @@ resid = estimates$Age.Event - Ts
 #calculate standard deviations
 meanTs = mean(Ts)
 diff = Ts - meanTs
-sd = sqrt((1/166)*(sum((diff)^2)) * (1+ (1/166) + (diff)^2/sum((diff)^2)))
+sd = sqrt((1/167)*(sum((diff)^2)) * (1+ (1/167) + (diff)^2/sum((diff)^2)))
 
 # make plots
 ggplot(data = estimates, aes(x = Ts, y = resid/sd)) + geom_point() + 
@@ -585,9 +618,13 @@ ggplot(data = estimates, aes(x = Birth.Year, y = resid/sd)) + geom_point() +
   labs(x = "Birth Year", y = "Standardized Residual")
 ```
 
+The standardized residual plot for predicted lifespan shows patterning. It appears that our model tends to overpredict lifespan compared to what was actually observed in many cases. This might be due to the fact that we only have two predictors, Birth Year and Type of Leader. Therefore, we are missing information that might help predict whether or not a leader will die earlier, for example if they have some underlying health condition, etc. 
+
+The standardized residuals when plotted against Birth Year show random scattering, however, and this means that our model is not over or underpredicting lifespan according to the year a leader was born.
+
 ## Posterior Predictive Checks
 
-```{r}
+```{r, include=F}
 # non_censored_prediction <- filter(leaders_data, Censored == 0)
 # K <- 10
 # ysims <- matrix(nrow = 166, ncol = K)
@@ -605,7 +642,7 @@ ggplot(data = estimates, aes(x = Birth.Year, y = resid/sd)) + geom_point() +
 #}
 ```
 
-```{r}
+```{r, echo = FALSE}
 # r <- sample(nrow(non_censored_prediction), 1)
 # hist(ysims[,1])
 # abline(v=non_censored_prediction$Age.Event[r], col = "red")
@@ -622,7 +659,7 @@ ggplot(data = estimates, aes(x = Birth.Year, y = resid/sd)) + geom_point() +
 #ggplot() + geom_polygon(data = subset, mapping = aes(x = Birth.Year, y = Age.Event, group = Name)) + geom_point(data = subset, aes(x = Birth.Year, y = Birth.Year + Age.Event)) + geom_polygon(data = subset, mapping = aes(x = Birth.Year, y = ))
 ```
 
-```{r}
+```{r, echo=F}
 subset <- filter(leaders_data, Censored == 0)
 ggplot(data = subset, aes(x = Birth.Year, Age.Event)) + geom_point(color="pink") + ggtitle("Distribution of Leaders' Ages") + labs(x = "Birth Year", y = "Age")
 
@@ -642,4 +679,6 @@ This model could be improved by including more predictors; for example, health w
 Stander, J., Dalla Valle, L., and Cortina-Borja, M. (2018). A Bayesian Survival Analysis of a Historical Dataset: How Long Do Popes Live? The American Statistician 72(4):368-375.
 
 # VIII. Appendix
+
+
 
