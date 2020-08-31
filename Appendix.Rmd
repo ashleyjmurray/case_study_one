@@ -371,7 +371,7 @@ vars1 = c("alpha_0", "alpha_1", "alpha_2", "alpha_3", "alpha_4", "alpha_5", "alp
          "alpha_7", "alpha_8", "alpha_9", 
          "percentage_increase_year", "percentage_increase_UsPres", 
          "percentage_increase_ChinaEmp", "percentage_increase_DalaiLama",
-         "percentage_increase_JapanEmp"
+         "percentage_increase_JapanEmp",
          "percentage_increase_BYUsPres", "percentage_increase_BYChinaEmp",
          "percentage_increase_BYDalaiLama", "percentage_increase_BYJapanEmp"
          )
