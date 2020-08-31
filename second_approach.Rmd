@@ -35,8 +35,6 @@ ggplot(data = leaders_data) +
 
 ggplot(data = leaders_data) +
   geom_point(aes(x = Birth.Date, y = Age.Event))
-
-
 ```
 
 # Our Model
@@ -60,6 +58,10 @@ $$
 
 # Data Cleaning
 ```{r}
+# 10 censored data
+leaders_data$Name[leaders_data$Censored == "1"]
+  
+
 leaders_data$Birth.Year <- year(leaders_data$Birth.Date)
 
 leaders_data <- leaders_data %>%
@@ -107,7 +109,7 @@ build_model <- function() {
     beta_censored[i] <- beta_0 + beta_1*x_1_censored[i] + beta_2*x_2_censored[i] + beta_3*x_3_censored[i] + beta_4*x_4_censored[i] + beta_5*x_5_censored[i] + beta_6*x_6_censored[i] + beta_7*x_7_censored[i] + beta_8*x_8_censored[i] + beta_9*x_9_censored[i]
   }
   
-  for(j in 1:n_non_censored) { #total rows - 7 ** 7 are censored, rest are not censored
+  for(j in 1:n_non_censored) { #total rows - 6 ** 6 are censored in leaders_nopred
     survival_non_censored[j] ~ dweib(r, mu[j])
     mu[j] <- exp(beta[j])
     beta[j] <- beta_0 + beta_1*x_1_non_censored[j] + beta_2*x_2_non_censored[j] + beta_3*x_3_non_censored[j] + beta_4*x_4_non_censored[j] + beta_5*x_5_non_censored[j] + beta_6*x_6_non_censored[j] + beta_7*x_7_non_censored[j] + beta_8*x_8_non_censored[j] + beta_9*x_9_non_censored[j]
@@ -138,7 +140,7 @@ build_model <- function() {
   # beta_9 ~ dnorm(0.5, 1.0E-2) # Prior on beta_9 is normal with low precision
   # r ~ dexp(1) # Prior on r
   
-  # define alphas
+  # Define alphas
   alpha_0 <- - beta_0 / r
   alpha_1 <- - beta_1 / r
   alpha_2 <- - beta_2 / r
@@ -181,36 +183,6 @@ build_model <- function() {
   mu_Naruhito <- exp(beta_Naruhito)
   survival_Naruhito ~ dweib(r, mu_Naruhito) %_% T(present_length_Naruhito, upper_length)
   age_Naruhito_predictive <- survival_Naruhito
-  
-  beta_Benedict <- beta_0 + beta_1*year_Benedict
-  mu_Benedict <- exp(beta_Benedict)
-  survival_Benedict ~ dweib(r, mu_Benedict) %_% T(present_length_Benedict, upper_length)
-  age_Benedict_predictive <- survival_Benedict
-  
-  beta_Carter <- beta_0 + (beta_1+beta_6)*year_Carter + beta_2
-  mu_Carter <- exp(beta_Carter)
-  survival_Carter ~ dweib(r, mu_Carter) %_% T(present_length_Carter, upper_length)
-  age_Carter_predictive <- survival_Cater
-  
-  beta_Clinton <- beta_0 + (beta_1+beta_6)*year_Clinton + beta_2
-  mu_Clinton <- exp(beta_Clinton)
-  survival_Clinton ~ dweib(r, mu_Clinton) %_% T(present_length_Clinton, upper_length)
-  age_Clinton_predictive <- survival_Clinton
-  
-  beta_Bush <- beta_0 + (beta_1+beta_6)*year_Bush + beta_2
-  mu_Bush <- exp(beta_Bush)
-  survival_Bush ~ dweib(r, mu_Bush) %_% T(present_length_Bush, upper_length)
-  age_Bush_predictive <- survival_Bush
-  
-  beta_Trump <- beta_0 + (beta_1+beta_6)*year_Trump + beta_2
-  mu_Trump <- exp(beta_Trump)
-  survival_Trump ~ dweib(r, mu_Trumo) %_% T(present_length_Trump, upper_length)
-  age_Trump_predictive <- survival_Trump
-  
-  beta_Akihito <- beta_0 + (beta_1+beta_9)*year_Akihito + beta_5
-  mu_Akihito <- exp(beta_Akihito)
-  survival_Akihito ~ dweib(r, mu_Akihito) %_% T(present_length_Akihito, upper_length)
-  age_Akihito_predictive <- survival_Akihito
 }
 ```
 
@@ -325,9 +297,9 @@ model_output <- jags(data = data_build_model,
                                                              "percentage_increase_DalaiLama",
                                                              "percentage_increase_JapanEmp", 
                                                              "percentage_increase_BYUsPres",
-                                                             "percentage_increase_BYChinaEmp",
-                                                             "percentage_increase_BYDalaiLama",
-                                                             "percentage_increase_BYJapanEmp",
+                                                            "percentage_increase_BYChinaEmp",
+                                                          "percentage_increase_BYDalaiLama",
+                                                            "percentage_increase_BYJapanEmp",
                                                              "age_Francis_predictive",
                                                              "age_Obama_predictive",
                                                              "age_Dalai_predictive",
