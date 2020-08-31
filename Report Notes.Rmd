@@ -80,7 +80,7 @@ Goals:
     - fix the residuals again *done*
     - see what's happening with the residuals
     - add explanation of the residual plots in the final report
-- Change function names
+- Change function names *done*
 - Comment on code
 - Check reproducibility
 - Add EDA to the data portion in the Final Report

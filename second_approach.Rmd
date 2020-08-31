@@ -583,7 +583,7 @@ library(TruncatedDistributions)
 
 # draw predicted values based on mus calculated above
 set.seed(123)
-Ts = rtweibull(166, r, (1/exp(logmus))^(1/r), 0, 100) 
+Ts = rtweibull(167, r, (1/exp(logmus))^(1/r), 0, 100) 
 
 #calculate residuals
 resid = estimates$Age.Event - Ts
@@ -591,7 +591,7 @@ resid = estimates$Age.Event - Ts
 #calculate standard deviations
 meanTs = mean(Ts)
 diff = Ts - meanTs
-sd = sqrt((1/166)*(sum((diff)^2)) * (1+ (1/166) + (diff)^2/sum((diff)^2)))
+sd = sqrt((1/167)*(sum((diff)^2)) * (1+ (1/167) + (diff)^2/sum((diff)^2)))
 
 # make plots
 ggplot(data = estimates, aes(x = Ts, y = resid/sd)) + geom_point() + 
@@ -605,7 +605,7 @@ ggplot(data = estimates, aes(x = Birth.Year, y = resid/sd)) + geom_point() +
 ```{r}
 non_censored_prediction <- filter(leaders_data, Censored == 0)
 K <- 10
-ysims <- matrix(nrow = 166, ncol = K)
+ysims <- matrix(nrow = 167, ncol = K)
 
 for(k in 1:K){
   for(i in 1:nrow(non_censored_prediction)){
