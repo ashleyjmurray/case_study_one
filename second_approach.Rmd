@@ -574,7 +574,7 @@ kable(coef)
 ```
 
 
-```{r standardized-resid, fig.height=2, fig.width=5, echo=F}
+```{r standardized-resid, include = F}
 # calculate and create graphs for standardized residuals
 
 #select estimated mean betas
@@ -629,9 +629,15 @@ meanTs = mean(Ts)
 diff = Ts - meanTs
 sd = sqrt((1/167)*(sum((diff)^2)) * (1+ (1/167) + (diff)^2/sum((diff)^2)))
 
-# make plots
+```
+
+```{r resid-v-predictor, fig.height=2, fig.width=5,}
 ggplot(data = estimates, aes(x = Ts, y = resid/sd)) + geom_point() + 
   labs(x = "Predicted Lifespan", y = "Standardized Residual")
+```
+
+
+```{r resid-v-year, fig.height=2, fig.width=5,}
 ggplot(data = estimates, aes(x = Birth.Year, y = resid/sd)) + geom_point() +
   labs(x = "Birth Year", y = "Standardized Residual")
 ```
