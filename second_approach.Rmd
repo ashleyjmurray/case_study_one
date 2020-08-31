@@ -438,9 +438,8 @@ ggplot(francis_dalai, aes(x=plifespans)) +
   geom_vline(data=val95, aes(xintercept=vals_95), color = "red")+
   geom_hline(yintercept = 0, colour = "black") +
   xlab("Lifespan (yrs)") + ylab("Predictive Probability density") + 
-  labs(caption = "The posterior predictive probability density function of the lifespan for hypothetical leaders with the same attributes as Pope Francis (left) and the 14th Dalai Lama (right). The black vertical line marks current age, the blue marks posterior median, and the red marks the posterior 95% quantile.") +
   ylim(c(0, 0.1)) + 
-  geom_text(data = plot_txt, mapping = aes(x = 88.5, y = 0.09, label = label), size = 2.8)
+  geom_text(data = plot_txt, mapping = aes(x = 88.5, y = 0.09, label = label), size = 2)
 ```
 
 ### Obama and Naruhito
@@ -483,8 +482,6 @@ ggplot(obama_naru, aes(x=plifespans)) +
   geom_vline(data=val95, aes(xintercept=vals_95), color = "red")+
   geom_hline(yintercept = 0, colour = "black") +
   xlab("Lifespan (yrs)") + ylab("Predictive Probability density") +
-  labs(caption = paste("Fig. 3 The posterior predictive probability density function of the lifespan for hypothetical leaders with the same attributes", "as Emperor Naruhito (left) and Obama (right). The black vertical line marks current age, the blue marks posterior", "median, and the red marks the posterior 95% quantile.", sep = "\n")) +
-  theme(plot.caption = element_text(hjust = 0))+
   ylim(c(0, 0.06)) +
   geom_text(data = plot_txt, mapping = aes(x = 72, y = 0.05, label = label), size = 3)
 ```
