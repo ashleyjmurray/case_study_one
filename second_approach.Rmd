@@ -584,7 +584,6 @@ ggplot(data = estimates, aes(x = Birth.Year, y = resid/sd)) + geom_point() +
 
 ## Posterior Predictive Checks
 
-<<<<<<< HEAD
 ```{r, include=F}
 # non_censored_prediction <- filter(leaders_data, Censored == 0)
 # K <- 10
@@ -601,24 +600,6 @@ ggplot(data = estimates, aes(x = Birth.Year, y = resid/sd)) + geom_point() +
 #     ysims[i, k] <- t
 #   }
 #}
-=======
-```{r}
-non_censored_prediction <- filter(leaders_data, Censored == 0)
-K <- 10
-ysims <- matrix(nrow = 167, ncol = K)
-
-for(k in 1:K){
-  for(i in 1:nrow(non_censored_prediction)){
-    w <- sample(nrow(res), 1)
-    samp <- res[w,]
-    val <- non_censored_prediction[i, ]
-    beta_temp <- samp$beta_0 + samp$beta_1*val$Birth.Year + samp$beta_2*as.integer(val$TypeUsPres) + samp$beta_3*as.integer(val$TypeChinaEmp) + samp$beta_4*as.integer(val$TypeDalaiLama) + samp$beta_5*as.integer(val$TypeJapanEmp) + samp$beta_6*val$Birth.Year*as.integer(val$TypeUsPres) + samp$beta_7*val$Birth.Year*as.integer(val$TypeChinaEmp) + samp$beta_8*val$Birth.Year*as.integer(val$TypeDalaiLama) + samp$beta_9*val$Birth.Year*as.integer(val$TypeJapanEmp)
-    mu <- exp(beta_temp)
-    t <- rtweibull(1, samp$r, (1/mu)^(1/samp$r), 50, 100)
-    ysims[i, k] <- t
-  }
-}
->>>>>>> 0bfaadf87c4e5861b714c7d24473ad2e5142f756
 ```
 
 ```{r, echo = FALSE}
