@@ -430,7 +430,8 @@ vars1 = c("alpha_0", "alpha_1", "alpha_2", "alpha_3", "alpha_4", "alpha_5", "alp
          "percentage_increase_BYUsPres", "percentage_increase_BYChinaEmp",
          "percentage_increase_BYDalaiLama", "percentage_increase_BYJapanEmp"
          )
-output1 <- output[row.names(output) %in% vars1, ]
+output1 <- data.frame(model_output$BUGSoutput$summary)
+output1 <- output[row.names(output1) %in% vars1, ]
 coef1 <- output1 %>%
   mutate("Variable" = vars1,
          "Mean" = output1$mean,
