@@ -1,6 +1,10 @@
+<<<<<<< HEAD
 \PassOptionsToPackage{unicode=true}{hyperref} % options for packages loaded elsewhere
 \PassOptionsToPackage{hyphens}{url}
 %
+=======
+<<<<<<< HEAD
+>>>>>>> ff2267c030cf7f5179303b8ed9d679345292487f
 \documentclass[]{article}
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -9,15 +13,25 @@
 \ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
   \usepackage[T1]{fontenc}
   \usepackage[utf8]{inputenc}
+<<<<<<< HEAD
   \usepackage{textcomp} % provides euro and other symbols
 \else % if luatex or xelatex
   \usepackage{unicode-math}
+=======
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+>>>>>>> ff2267c030cf7f5179303b8ed9d679345292487f
   \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
 \fi
 % use upquote if available, for straight quotes in verbatim environments
 \IfFileExists{upquote.sty}{\usepackage{upquote}}{}
 % use microtype if available
 \IfFileExists{microtype.sty}{%
+<<<<<<< HEAD
 \usepackage[]{microtype}
 \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
 }{}
@@ -29,11 +43,67 @@
 }
 \usepackage{hyperref}
 \hypersetup{
+=======
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\hypersetup{unicode=true,
+>>>>>>> ff2267c030cf7f5179303b8ed9d679345292487f
             pdftitle={Final Report},
             pdfborder={0 0 0},
             breaklinks=true}
 \urlstyle{same}  % don't use monospace font for urls
+<<<<<<< HEAD
 \usepackage[margin=1in]{geometry}
+=======
+=======
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  pdftitle={Final Report},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage[margin=1in]{geometry}
+>>>>>>> f3f68c29bd121ea31a42eb9f939b261bd39569de
+>>>>>>> ff2267c030cf7f5179303b8ed9d679345292487f
 \usepackage{graphicx,grffile}
 \makeatletter
 \def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
@@ -43,6 +113,16 @@
 % margins by default, and it is still possible to overwrite the defaults
 % using explicit options in \includegraphics[width, height, ...]{}
 \setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+>>>>>>> ff2267c030cf7f5179303b8ed9d679345292487f
 \setlength{\emergencystretch}{3em}  % prevent overfull lines
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
@@ -57,15 +137,55 @@
 \renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
 \fi
 
+<<<<<<< HEAD
 % set default figure placement to htbp
 \makeatletter
 \def\fps@figure{htbp}
 \makeatother
 
+=======
+%%% Use protect on footnotes to avoid problems with footnotes in titles
+\let\rmarkdownfootnote\footnote%
+\def\footnote{\protect\rmarkdownfootnote}
+
+%%% Change title format to be more compact
+\usepackage{titling}
+
+% Create subtitle command for use in maketitle
+\providecommand{\subtitle}[1]{
+  \posttitle{
+    \begin{center}\large#1\end{center}
+    }
+}
+
+\setlength{\droptitle}{-2em}
+
+  \title{Final Report}
+    \pretitle{\vspace{\droptitle}\centering\huge}
+  \posttitle{\par}
+    \author{}
+    \preauthor{}\postauthor{}
+    \date{}
+    \predate{}\postdate{}
+  
+=======
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+>>>>>>> ff2267c030cf7f5179303b8ed9d679345292487f
 
 \title{Final Report}
 \author{}
 \date{\vspace{-2.5em}}
+<<<<<<< HEAD
+=======
+>>>>>>> f3f68c29bd121ea31a42eb9f939b261bd39569de
+>>>>>>> ff2267c030cf7f5179303b8ed9d679345292487f
 
 \begin{document}
 \maketitle
@@ -121,22 +241,55 @@ We model the lifespan \(T_i\) of an individual i after the Weibull
 distribution specified below. The first parameter \(r\) is a positive
 scale parameter and the second parameter \(\mu\) is a linear function of
 the covariates (birth year and types of leadership as well as their
+<<<<<<< HEAD
 interactions).
 
 \[
 T_i \sim Weibull(r, \mu_i) \\
+=======
+<<<<<<< HEAD
+interactions). \emph{Question: what about error term?} \[
+T_i \sim Weibull(\alpha, \mu) \\
+log(\mu_i) = \beta_0 + \beta_1x_{i1}+\beta_2x_{i2}+...+\beta_px_{ip}\\
+\]
+
+More specificically, \[
+>>>>>>> ff2267c030cf7f5179303b8ed9d679345292487f
 \log(\mu_i) = \beta_0+\beta_1 \text{(Year of Birth_i)}+\beta_2 \text{(Leadership_i = UsPres)} + \beta_3\text{(Leadership_i = ChinaEmp)} \\
 + \beta_4\text{(Leadership_i = DalaiLama)} +\beta_5\text{(Leadership_i = JapanEmp)} \\
 + \beta_6\text{(Year of Birth_i * (Leadership_i = UsPres))} \\
 + \beta_7\text{(Year of Birth_i * (Leadership_i = ChinaEmp))} \\
 + \beta_8\text{(Year of Birth_i * (Leadership_i = DalaiLama))} \\
 + \beta_9\text{(Year of Birth_i * (Leadership_i = JapanEmp))}
+<<<<<<< HEAD
 \] where Leadership\_i = Popes is the baseline for comparison.
+=======
+\] where \(\text{Leadership_i = Popes}\) is the baseline for comparison.
+=======
+interactions). \[ T_i \sim Weibull(\alpha, \mu) \]
+\[\log(\mu_i) = \beta_0+\beta_1 \text{(Year of Birth_i)}+\beta_2 \text{(Leadership_i = UsPres)} + \beta_3\text{(Leadership_i = ChinaEmp)} \]
+\[+ \beta_4\text{(Leadership_i = DalaiLama)} +\beta_5\text{(Leadership_i = JapanEmp)} \\\]
+\[+ \beta_6\text{(Year of Birth_i * (Leadership_i = UsPres))} \\\]
+\[+ \beta_7\text{(Year of Birth_i * (Leadership_i = ChinaEmp))} \\\]
+\[+ \beta_8\text{(Year of Birth_i * (Leadership_i = DalaiLama))} \\\]
+\[+ \beta_9 \text{(Year of Birth_i * (Leadership_i = JapanEmp))}\]
+
+where \(\text{Leadership_i = Popes}\) is the baseline for comparison.
+>>>>>>> f3f68c29bd121ea31a42eb9f939b261bd39569de
+>>>>>>> ff2267c030cf7f5179303b8ed9d679345292487f
 
 As Stander et al (2018) pointed out, following this Weibull
 distribution, log(T\_i) is euqal in distribution to
 \(1/r (\beta_0 + \beta_1x_{i1}+\beta_2x_{i2}+...+\beta_9x_{i1}x_{i5}) + 1/rlog(\epsilon)\)
+<<<<<<< HEAD
 where \(\epsilon \sim exp(1)\). \(\alpha_j = -\beta_j/r\),
+=======
+<<<<<<< HEAD
+where \(\epsilon\) \textasciitilde{} exp(1). \(\alpha_j = -\beta_j/r\),
+=======
+where \(\epsilon \sim exp(1)\). \(\alpha_j = -\beta_j/r\),
+>>>>>>> f3f68c29bd121ea31a42eb9f939b261bd39569de
+>>>>>>> ff2267c030cf7f5179303b8ed9d679345292487f
 \(j = 1,2,...,9\). The interpretation of coefficients depends on the
 interaction terms (i.e.~both year of birth and the type of leadership).
 
@@ -173,7 +326,10 @@ Naruhito is expected to live 85.3 years (95\% credible interval: 66.4 -
 expected to live 84.8 years (95\% credible interval: 61.5 - 99.4 years).
 
 \emph{insert Predictive Posterior Distribution for Lifespan graphs here}
+<<<<<<< HEAD
 \includegraphics{/Users/cathylee/Documents/Course Folders/Fall 2020/STA 440/Case 1/case_study_one/naru_obama_pp.png}
+=======
+>>>>>>> ff2267c030cf7f5179303b8ed9d679345292487f
 
 The posterior predictive distribution of the lifespan of the 14th Dalai
 Lama is more uniform, with mode in the 90s. The posterior predictive
@@ -193,4 +349,11 @@ Discussion}\label{vi.-conclusion-and-further-discussion}}
 \hypertarget{vii.-appendix}{%
 \section{VII. Appendix}\label{vii.-appendix}}
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+
+=======
+>>>>>>> f3f68c29bd121ea31a42eb9f939b261bd39569de
+>>>>>>> ff2267c030cf7f5179303b8ed9d679345292487f
 \end{document}

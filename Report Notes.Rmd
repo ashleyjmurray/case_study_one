@@ -37,7 +37,7 @@ Goals:
   - Provide Interpretation of alphas/ betas (Alice)
   - Describe Interaction (not significant?) (Alice)
 - Report Graphs/ Tables
-  - Lexis diagram (Ashley)
+  - Lexis diagram (Ashley) **doesn't make sense**
   - Add other EDA plots? (anyone) - histograms of Age.Event and predictions
   - posterior distribution plots for 4 people of interest (Cathy) *done*
   - tidy output table (Matty) *done*
@@ -64,6 +64,26 @@ Goals:
 - Above and beyond/ Further research
   - somehow factor in GDP?
   
+## NEW
+
+- Finish the conclusion
+- Do the video 
+  - Cathy: Predictive posterior for the four leaders, lil trace plots(mcmc)
+  - Matty: Introduction, Model/Motivating Model (introducing Weibull)
+  - Alice: Interpretation of the Output, living people
+  - Ashley: Conclusion
+- Ashley: try to fix posterior predictive checks LOL, need to explain the plots outputted
+- Cathy: fix posterior predictive plots
+- Alice: add point estimate for all living people, add comparison to our prediction and the world live data
+- Matty: 
+    - fix the model table output *done*
+    - fix the residuals again *done*
+    - see what's happening with the residuals
+    - add explanation of the residual plots in the final report
+- Change function names
+- Comment on code
+- Check reproducibility
+- Add EDA to the data portion in the Final Report
   
   
   

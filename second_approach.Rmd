@@ -18,10 +18,13 @@ library(broom)
 
 ```{r}
 leaders_data <- get(load("Leaders.RData"))
+leaders_data$Censored[leaders$Name == "Jianwen Emperor"] <- "0" #typo for Jianwen Emperor
 
 leaders_data$Censored <- as.factor(leaders_data$Censored)
 leaders_data$Type <- as.factor(leaders_data$Type)
 leaders_data$Age.Event <- as.numeric(leaders_data$Age.Event)
+
+
 summary(leaders_data)
 ```
 
@@ -96,7 +99,7 @@ x_9 <- x_1*as.numeric(as.character(x_5))
 
 ```{r}
 set.seed(123)
-second_approach <- function() {
+build_model <- function() {
   for(i in 1:n_censored) {
     z_censored[i] ~ dpois(phi_censored[i])
     phi_censored[i] <- mu_censored[i] * pow(t_censored[i], r)
@@ -178,6 +181,36 @@ second_approach <- function() {
   mu_Naruhito <- exp(beta_Naruhito)
   survival_Naruhito ~ dweib(r, mu_Naruhito) %_% T(present_length_Naruhito, upper_length)
   age_Naruhito_predictive <- survival_Naruhito
+  
+  beta_Benedict <- beta_0 + beta_1*year_Benedict
+  mu_Benedict <- exp(beta_Benedict)
+  survival_Benedict ~ dweib(r, mu_Benedict) %_% T(present_length_Benedict, upper_length)
+  age_Benedict_predictive <- survival_Benedict
+  
+  beta_Carter <- beta_0 + (beta_1+beta_6)*year_Carter + beta_2
+  mu_Carter <- exp(beta_Carter)
+  survival_Carter ~ dweib(r, mu_Carter) %_% T(present_length_Carter, upper_length)
+  age_Carter_predictive <- survival_Cater
+  
+  beta_Clinton <- beta_0 + (beta_1+beta_6)*year_Clinton + beta_2
+  mu_Clinton <- exp(beta_Clinton)
+  survival_Clinton ~ dweib(r, mu_Clinton) %_% T(present_length_Clinton, upper_length)
+  age_Clinton_predictive <- survival_Clinton
+  
+  beta_Bush <- beta_0 + (beta_1+beta_6)*year_Bush + beta_2
+  mu_Bush <- exp(beta_Bush)
+  survival_Bush ~ dweib(r, mu_Bush) %_% T(present_length_Bush, upper_length)
+  age_Bush_predictive <- survival_Bush
+  
+  beta_Trump <- beta_0 + (beta_1+beta_6)*year_Trump + beta_2
+  mu_Trump <- exp(beta_Trump)
+  survival_Trump ~ dweib(r, mu_Trumo) %_% T(present_length_Trump, upper_length)
+  age_Trump_predictive <- survival_Trump
+  
+  beta_Akihito <- beta_0 + (beta_1+beta_9)*year_Akihito + beta_5
+  mu_Akihito <- exp(beta_Akihito)
+  survival_Akihito ~ dweib(r, mu_Akihito) %_% T(present_length_Akihito, upper_length)
+  age_Akihito_predictive <- survival_Akihito
 }
 ```
 
@@ -230,9 +263,8 @@ present_length_Naruhito <- leaders_data$Age.Event[leaders_data$Name =="Naruhito 
 
 upper_length <- 100
 
-# REMEBER TO RENAME FUNCTION data_Popes_second_approach
 
-data_Popes_second_approach <- list("n_censored",
+data_build_model <- list("n_censored",
                                    "n_non_censored",
                                    "z_censored",
                                    "t_censored",
@@ -265,7 +297,7 @@ data_Popes_second_approach <- list("n_censored",
                                    "present_length_Naruhito",
                                    "upper_length")
 
-Bayesian_Popes_second_approach <- jags(data = data_Popes_second_approach,  
+model_output <- jags(data = data_build_model,  
                                       parameters.to.save = c("beta_0",
                                                              "beta_1",
                                                              "beta_2", 
@@ -305,9 +337,9 @@ Bayesian_Popes_second_approach <- jags(data = data_Popes_second_approach,
 
                                       n.iter = 50000, 
                                       n.chains = 3,
-                                      model.file = second_approach)
+                                      model.file = build_model)
 
-Bayesian_Popes_second_approach
+model_output
 ```
 
 ```{r}
@@ -315,7 +347,7 @@ library(coda)
 parameters = c("beta_0", "beta_1", "beta_2", "beta_3", "beta_4", "beta_5", 
                "beta_6", "beta_7",  "beta_8", "beta_9", "r")
 
-res = data.frame(Bayesian_Popes_second_approach$BUGSoutput$sims.matrix)[,parameters]
+res = data.frame(model_output$BUGSoutput$sims.matrix)[,parameters]
 colnames(res) <- gsub("^.*\\.","", colnames(res) )
 
 # lapply(seq(1,length(res)), function(i) {
@@ -354,7 +386,7 @@ lapply(seq(1,length(res)), function(i) {
 ```{r}
 people = c("age_Francis_predictive", "age_Obama_predictive", "age_Dalai_predictive",
 "age_Naruhito_predictive")
-four_pred = data.frame(Bayesian_Popes_second_approach$BUGSoutput$sims.matrix)[,people]
+four_pred = data.frame(model_output$BUGSoutput$sims.matrix)[,people]
 
 print(paste("P(Dalai Lifespan > Francis Lifespan)=", mean(four_pred$age_Dalai_predictive>four_pred$age_Francis_predictive)))
 
@@ -486,9 +518,13 @@ ggplot(obama_naru, aes(x=plifespans)) +
 ```
 
 ```{r tidy-model-table}
-vars = data.frame(Bayesian_Popes_second_approach$BUGSoutput$root.short)
-output <- head(data.frame(Bayesian_Popes_second_approach$BUGSoutput$summary), 16)
-output <- output %>%
+
+# select betas and r from output and put into a tidy table
+vars = c("beta_0", "beta_1", "beta_2", "beta_3", "beta_4", "beta_5", "beta_6", 
+                    "beta_7", "beta_8", "beta_9", "r")
+output <- data.frame(model_output$BUGSoutput$summary)
+output <- output[row.names(output) %in% vars, ]
+coef <- output %>%
   mutate("Variable" = head(vars,16),
          "Mean" = output$mean,
          "Standard Deviation" = output$sd,
@@ -497,12 +533,13 @@ output <- output %>%
          "97.5% Quantile" = output$X97.5.
          ) %>%
   select("Variable", "Mean", "Standard Deviation", "2.5% Quantile", "Median", "97.5% Quantile")
-coef <- output %>%
-  slice(5:16)
 kable(coef)
 ```
 
 ```{r standardized-resid}
+# calculate and create graphs for standardized residuals
+
+#select estimated mean betas
 beta_0_est <- coef[1,2]
 beta_1_est <- coef[2,2]
 beta_2_est <- coef[3,2]
@@ -514,9 +551,11 @@ beta_7_est <- coef[8,2]
 beta_8_est <- coef[9,2]
 beta_9_est <- coef[10,2]
 
+# select only non-living leaders to calculate residuals for
 no_living <- leaders_data %>%
   filter(Censored == 0)
 
+# mutate data to calculate mus
 estimates <- no_living %>%
   mutate(Birth.Year.Cent = Birth.Year - mean(leaders_nopred$Birth.Year)) %>%
   mutate(ChinaEmp =case_when(Type == "ChinaEmp" ~ 1, TRUE ~ 0),
@@ -531,32 +570,35 @@ estimates <- no_living %>%
   mutate(intercept = 1) %>%
   mutate(predicted = exp(beta_0_est + beta_1_est*(Birth.Year.Cent) + beta_2_est*(UsPres) + beta_3_est*(ChinaEmp) + beta_4_est*(DalaiLama) + beta_5_est*(JapanEmp) + beta_6_est*(UsPres)*(Birth.Year.Cent) + beta_7_est*(ChinaEmp)*(Birth.Year.Cent) + beta_8_est*(DalaiLama)*(Birth.Year.Cent) + beta_9_est*(JapanEmp)*(Birth.Year.Cent)))
 
-
-# check using matrices -- Ts in the 200s
 data.mat = as.matrix(estimates[,c("intercept", "Birth.Year.Cent", "UsPres", "ChinaEmp", "DalaiLama", "JapanEmp","BYUsPres", "BYChinaEmp", "BYDalaiLama", "BYJapanEmp")], nrow = nrow(estimates), byrow = TRUE)
 
-pred_res = data.frame(t(Bayesian_Popes_second_approach$BUGSoutput$summary))
+pred_res = data.frame(t(model_output$BUGSoutput$summary))
 r = pred_res$r[1]
 betas = pred_res[,c("beta_0", "beta_1", "beta_2",  "beta_3", "beta_4", "beta_5",
                      "beta_6", "beta_7", "beta_8","beta_9")][1,]
 beta.mat = as.matrix(betas, nrow = p, byrow = TRUE)
 logmus = data.mat %*% t(beta.mat)
 
-# install.packages("TruncatedDistributions", repos="http://R-Forge.R-project.org")
+# install.packages("TruncatedDistributions", repos="http://R-Forge.R-project.org") 
 library(TruncatedDistributions)
 
+# draw predicted values based on mus calculated above
 set.seed(123)
 Ts = rtweibull(166, r, (1/exp(logmus))^(1/r), 0, 100) 
 
+#calculate residuals
 resid = estimates$Age.Event - Ts
-resid * estimates$predicted
 
+#calculate standard deviations
 meanTs = mean(Ts)
 diff = Ts - meanTs
 sd = sqrt((1/166)*(sum((diff)^2)) * (1+ (1/166) + (diff)^2/sum((diff)^2)))
 
-ggplot(data = estimates, aes(x = Ts, y = resid/sd)) + geom_point()
-ggplot(data = estimates, aes(x = Birth.Year, y = resid/sd)) + geom_point()
+# make plots
+ggplot(data = estimates, aes(x = Ts, y = resid/sd)) + geom_point() + 
+  labs(x = "Predicted Lifespan", y = "Standardized Residual")
+ggplot(data = estimates, aes(x = Birth.Year, y = resid/sd)) + geom_point() +
+  labs(x = "Birth Year", y = "Standardized Residual")
 ```
 
 ## Posterior Predictive Checks
@@ -564,7 +606,7 @@ ggplot(data = estimates, aes(x = Birth.Year, y = resid/sd)) + geom_point()
 ```{r}
 non_censored_prediction <- filter(leaders_data, Censored == 0)
 K <- 10
-ysims <- matrix(nrow = nrow(res), ncol = K)
+ysims <- matrix(nrow = 166, ncol = K)
 
 for(k in 1:K){
   for(i in 1:nrow(non_censored_prediction)){
