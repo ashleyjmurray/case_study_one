@@ -41,8 +41,6 @@ We assume that our priors are independent because intuitively a given observatio
 For our prior for r, we chose a prior of $exp(1)$, as we believe the hazard of death increases with time. 
 
 ## III d. Model Diagnostics
-
-*should we move the below to diagnostic analysis at the end of "Results"?*
 The combination of traceplots, lag-1 scatterplots, and acf plots suggest the chain for each parameters converges, and that 50000 iterations is sufficient. The Rhat's are all close to 1, which is another indicator of converge. All of the effective sample sizes are greater than 200, except for that of beta_0 (the intercept) and r.
 
 
