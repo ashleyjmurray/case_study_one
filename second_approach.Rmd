@@ -14,18 +14,21 @@ knitr::opts_chunk$set(echo = TRUE)
 
 World leaders are influential people that have the power to impact millions of people's lives. Some leaders are elected for terms while others serve for life, so their expected survival is of great interest. In this paper, we seek to compare Popes, US Presidents, Dalai Lamas, Chinese Emperors, and Japanese Emperors to see how their lifespans compare. Additionally, we want to analyze the impact on survival of a leader's birth year, and whether or not this impact might vary depending on the type of leadership. After we build a model to analyze the effects, we also wish to look at some specific cases and determine the probability that the current 14th Dalai Lama will outlive Pope Francis and the probability that President Obama will outlive Emperor Naruhito. We will accomplish this by using survival analysis. We use Bayesian Inference to estimate the model parameters with the help of the JAGS program. 
 
-The rest of the paper is structured as follows. First, we will describe the data used to carry out our analysis. Next, we will describe the methods used in our analysis plan. Then, we will show how we carried out our analysis plan and recount our results. After that, we discuss our conclusions and areas for further research. Finally, our code and some additional information can be foudn in the Appendix. 
+The rest of the paper is structured as follows. First, we will describe the data used to carry out our analysis. Next, we will describe the methods used in our analysis plan. Then, we will show how we carried out our analysis plan and recount our results. After that, we discuss our conclusions and areas for further research. Finally, our code and some additional information can be found in the Appendix. 
 
 
 # II. Data
 
-The data used in this analysis contains entries for 177 different world leaders. The types of world leaders present in the data include Popes, US Presidents, Dalai Lamas, Chinese Emperors, and Japanese Emperors. Each leader's birth date and type of leader is recorded. For some of these groups, we have data dating all the way back to the 14th century. Additionally, leaders who have passed away also have their death date and age of death recorded. For leaders that are still living, these columns instead contain the date the dataset was created (July 31, 2020) and their current age on that date. In order to further clarify who is dead or alive, there is a column titled "Censored," which takes a value of 0 if the person is still dead and a value of 1 if that person is still alive. Related to this, there is another column called "Fail," which takes on a value of 1 if the person is dead and a value of 0 if the person is alive. In total, there are 10 living leaders in our dataset, 4 of whose age of death we are trying to predict. 
+# II a. Description of the Data
+
+The data used in this analysis contains entries for 177 different world leaders. The types of world leaders present in the data include Popes, US Presidents, Dalai Lamas, Chinese Emperors, and Japanese Emperors. Each leader's birth date type of leader is recorded. For some of these groups, we have data dating all the way back to the 14th century. Additionally, leaders who have passed away also have their death date and age of death recorded. For leaders that are still living, these columns instead contain the date the dataset was created (July 31, 2020) and their current age on that date. In order to further clarify who is dead or alive, there is a column titled "Censored," which takes a value of 0 if the person is still dead and a value of 1 if that person is still alive. Related to this, there is another column called "Fail," which takes on a value of 1 if the person is dead and a value of 0 if the person is alive. In total, there are 10 living leaders in our dataset, 4 of whose age of death we are trying to predict. 
 
 ```{r, message=F, include=F}
-#library(R2jags)
 library(R2jags)
 library(tidyverse)
+library(ggplot2)
 library(lubridate)
+library(TruncatedDistributions)
 library(knitr)
 library(broom)
 ```
@@ -42,9 +45,9 @@ leaders_data$Age.Event <- as.numeric(leaders_data$Age.Event)
 summary(leaders_data)
 ```
 
-# Exploratory Data Analysis
-```{r, fig.height=2, fig.width=5,echo=F}
+# II b. Exploratory Data Analysis
 
+```{r, fig.height=2, fig.width=5,echo=F}
 # create EDA plots
 ggplot(data = leaders_data) +
   geom_point(aes(x = Birth.Date, y = Age.Event))
@@ -56,7 +59,7 @@ ggplot(data = leaders_data) +
   geom_histogram(aes(x = Age.Event), binwidth = 5)
 ```
 
-As seen from the above plots, there seems to be no discernible relationship between Birth Date and Lifespan. Additionally, the distribution of Popes and US Presidents is centered higher, which makes intuitive sense given that these leaders are elected later in life, while Dalai Lamas and Emperors can be elected at much younger ages. Lastly, the distribution of lifespans is unimodal and slightly left skewed. However, this skewing does not seem extreme so there is no need for a transformation. 
+As seen from the above plots, there seems to be no discernible relationship between Birth Date and Lifespan. Additionally, the distribution of the lifespans of Popes and US Presidents is centered higher, which makes intuitive sense given that these leaders are elected later in life, while Dalai Lamas and Emperors can be elected at much younger ages. Lastly, the distribution of lifespans is unimodal and slightly left skewed. However, this skewing does not seem extreme so there is no need for a transformation. 
 
 # III. Methods
 
@@ -92,7 +95,6 @@ To handle censored observations, we specify their contribution to the likelihood
 We assume that our priors are independent because intuitively a given observation could not be two types of leaders. Additionally, we do not have sufficiently strong prior knowledge about the relationship between birth year and type of leadership to specify an informative prior. Therefore, we use uninformative priors for the betas in our model. 
 
 For our prior for r, we chose a prior of $exp(1)$, as we believe the hazard of death increases with time. 
-
 
 ```{r, include=F}
 # 10 censored data
@@ -340,9 +342,7 @@ model_output <- jags(data = data_build_model,
                                                              "age_Francis_predictive",
                                                              "age_Obama_predictive",
                                                              "age_Dalai_predictive",
-                                                             "age_Naruhito_predictive"#,
-                                                             #"survival_non_censored"
-                                                             ), 
+                                                             "age_Naruhito_predictive"                                                             ), 
 
                                       n.iter = 50000, 
                                       n.chains = 3,
@@ -445,13 +445,7 @@ kable(coef1)
 
 - $\alpha_0$: 
 
-
 Our model predicts that the 85-year-old 14th Dalai Lama is expected to live 92.4 years (95% credible interval: 85.4 - 99.6 years), the 84-year-old Pope Francis is expected to live 92.4 years (95% credible interval: 84.2 - 99.4 years), the 60-year-old Janpanese Emperior Naruhito is expected to live 85.3 years (95% credible interval: 66.4 - 99.5 years) and the 60-year-old former President Barack Obama is expected to live 84.8 years (95% credible interval: 61.5 - 99.4 years). 
-
-
-## Posterior Predictive Plots (2 pairs)
-
-### Francis and Dalai Lama 
 
 ```{r francis-dalai-plot, message = F, fig.height=5, fig.width=10, echo = FALSE}
 people = c("age_Francis_predictive", "age_Obama_predictive", "age_Dalai_predictive",
@@ -500,8 +494,6 @@ ggplot(francis_dalai, aes(x=plifespans)) +
   ylim(c(0, 0.1)) + 
   geom_text(data = plot_txt, mapping = aes(x = 88.5, y = 0.09, label = label), size = 3)
 ```
-
-### Obama and Naruhito
 
 ```{r obama-naru-plot, message = F, fig.height=5, fig.width=10, echo = FALSE}
 obama_naru = data.frame(plifespans = c(four_pred$age_Obama_predictive, four_pred$age_Naruhito_predictive), person = c(rep("Obama", nrow(four_pred)), rep("Naruhito", nrow(four_pred))))
@@ -556,7 +548,6 @@ pprob2 =  mean(four_pred$age_Obama_predictive>four_pred$age_Naruhito_predictive)
 ```
 
 The probability that the 14th Dalai Lama will have a longer lifespan than Pope Francis is `r round(pprob1,4)`. The probability that President Obama will have a longer lifespan than Emperor Naruhito is `r round(pprob2,4)`.
-
 
 ```{r tidy-model-table, echo = F}
 # select betas and r from output and put into a tidy table
@@ -679,14 +670,12 @@ ggplot(data = subset, aes(x = Birth.Year, Age.Event)) + geom_point(color="pink")
 
 ```
 
-=======
-
 ```{r, echo = FALSE}
- r <- sample(nrow(non_censored_prediction), 2)
- hist(d[,1])
- abline(v=non_censored_prediction$Age.Event[r], col = "red")
- print(mean(d<0))
- print(mean(non_censored_prediction$Age.Event <0))
+r <- sample(nrow(non_censored_prediction), 2)
+hist(d[,1])
+abline(v=non_censored_prediction$Age.Event[r], col = "red")
+print(mean(d<0))
+print(mean(non_censored_prediction$Age.Event <0))
 ```
 
 For the posterior predictive checks, it appears that our model returns values that are more concentrated around the upper truncation limit, which is why the dataframe's Inf values are encoded as 100 (the upper truncation limit defined in our function). This follows what the standardized residuals found, where most of the values from the model are left-skewed. 
@@ -697,7 +686,6 @@ For the posterior predictive checks, it appears that our model returns values th
 We sought to compare Popes, US Presidents, Dalai Lamas, Chinese Emperors, and Japanese Emperors to see how their lifespans compare. Our model has found that the impact of birth year does not change based on leadership type. Additionally, our model has found that lifespan does not depend on year of birth. 
 
 This model could be improved by including more predictors; for example, health widely varies among people, and could lead to a better model for prediction. For further implementations of this research question, it would be valuable to interpret economic data as it concerns the different countries that the leaders grew up in, as the conditions that a person live in lead to changes in a person's lifespan. 
-
 
 # VII. References
 
