@@ -52,13 +52,13 @@ summary(leaders_data)
 ```{r, fig.height=2, fig.width=5,echo=F}
 # create EDA plots
 ggplot(data = leaders_data) +
-  geom_point(aes(x = Birth.Date, y = Age.Event))
+  geom_point(aes(x = Birth.Date, y = Age.Event)) + ggtitle("Distribution of Birthdate of the Leaders Versues their Age") + labs(x = "Birth Date", y = "Age")
 
 ggplot(data = leaders_data) +
-  geom_boxplot(aes(x = Type, y = Age.Event))
+  geom_boxplot(aes(x = Type, y = Age.Event)) + ggtitle("Distribution of Leader Type and Their Age") + labs(x = "Type of Leader", y = "Age")
 
 ggplot(data = leaders_data) +
-  geom_histogram(aes(x = Age.Event), binwidth = 5)
+  geom_histogram(aes(x = Age.Event), binwidth = 5) + ggtitle("Distribution of Leaders Age") + labs(x = "Age")
 ```
 
 As seen from the above plots, there seems to be no discernible relationship between Birth Date and Lifespan. Additionally, the distribution of the lifespans of Popes and US Presidents is centered higher, which makes intuitive sense given that these leaders are elected later in life, while Dalai Lamas and Emperors can be elected at much younger ages. Lastly, the distribution of lifespans is unimodal and slightly left skewed. However, this skewing does not seem extreme so there is no need for a transformation. 
@@ -670,13 +670,13 @@ The standardized residuals when plotted against Birth Year show random scatterin
 }
 ```
 
-```{r}
+```{r echo =FALSE}
 d <- data.frame(ysims) #create a dataframe from the ysims matrix
 d[sapply(d, is.infinite)] <- 100 #set all of the Inf values to the upper truncation value as defined in the previous weibull distribution
 ```
 
-
 ```{r, echo=F}
+#Scatterplot showing Birth Year of the Leaders versues their Age
 subset <- filter(leaders_data, Censored == 0)
 ggplot(data = subset, aes(x = Birth.Year, Age.Event)) + geom_point(color="pink") + ggtitle("Distribution of Leaders' Ages") + labs(x = "Birth Year", y = "Age")
 ```
