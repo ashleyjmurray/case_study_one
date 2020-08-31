@@ -69,7 +69,7 @@ As seen from the above plots, there seems to be no discernible relationship betw
 
 We use survival analysis as a way to model $T_i$, the lifespan of a given leader i depending on their year of birth and type of leadership. Survival analysis is useful in that it allows the consideration of "censored" data. This means that we do not always observe the outcome for each data point. For example, we do not know the death date of leaders that are still alive. Thus, we do not know their lifespan, we just know that their survival time $T_i$ will be greater than their current age. 
 
-We model the lifespan $T_i$ of an individual i after the Weibull distribution specified below. We choose to use the Weibull distribution because it is often utilized in survival analysis and allows the user to specify a flexible shape parameter for the distribution. The first parameter $r$, also known as the shape parameter, is a positive scalar, and the second parameter $\mu$, the scale parameter, is a linear function of the covariates (in this case, birth year centered at mean 1677 and types of leadership as well as their interactions). 
+We model the lifespan $T_i$ of an individual i after the Weibull distribution specified below. We choose to use the Weibull distribution because it is often utilized in survival analysis and allows the user to specify a flexible shape parameter for the distribution. The first parameter $r$, also known as the shape parameter, is a positive scalar, and the second parameter $\mu$, the scale parameter, is a linear function of the covariates (in this case, birth year centered at mean 1667 and types of leadership as well as their interactions). 
 
 
 $$ T_i \sim Weibull(\alpha, \mu) $$
@@ -400,7 +400,7 @@ The combination of traceplots, lag-1 scatterplots, and acf plots suggest the cha
 
 As Stander et al (2018) pointed out, following this Weibull distribution, $log(T_i)$ is equal in distribution to $\frac{1}{r} (\beta_0 + \beta_1x_{i1}+\beta_2x_{i2}+...+\beta_9x_{i1}x_{i5}) + \frac{1}{r}\log(\epsilon)$ where $\epsilon \sim exp(1)$. $\alpha_j = -\beta_j/r$, $j = 1,2,...,9$. The interpretation of coefficients depends on the interaction terms (i.e. both year of birth and the type of leadership). 
 
-For example, while keeping all others constant, if a Pope is born one year later, he is expected to live longer by a multiplicative factor of $exp(\alpha_1)$, or his lifespan is expected to increase by a percentage of $100*exp(\alpha_1-1)$. If a U.S. President is born one year later, he is expected to live longer by a multiplicative factor of $exp(\alpha_1 + \alpha_6)$. If a U.S. President and a Chinese Emperor are born in the same year $y$, the Chinese emperor is expected to live longer by a multiplicative factor of $exp(\alpha_3 - \alpha_2 + (\alpha_7-\alpha_6)*y)$ and so on. 
+For example, while keeping all others constant, if a Pope is born one year later, he is expected to live longer by a multiplicative factor of $exp(\alpha_1)$, or his lifespan is expected to increase by a percentage of $100*exp(\alpha_1-1)$. If a U.S. President is born one year later, he is expected to live longer by a multiplicative factor of $exp(\alpha_1 + \alpha_6)$. If a U.S. President and a Chinese Emperor are born in the same year, $y$ after 1677, the Chinese emperor is expected to live longer by a multiplicative factor of $exp(\alpha_3 - \alpha_2 + (\alpha_7-\alpha_6)*y)$ and so on. 
 
 # V. Results
 
@@ -432,7 +432,8 @@ vars1 = c("alpha_0", "alpha_1", "alpha_2", "alpha_3", "alpha_4", "alpha_5", "alp
          "percentage_increase_BYUsPres", "percentage_increase_BYChinaEmp",
          "percentage_increase_BYDalaiLama", "percentage_increase_BYJapanEmp"
          )
-output1 <- output[row.names(output) %in% vars1, ]
+output1 <- data.frame(model_output$BUGSoutput$summary)
+output1 <- output[row.names(output1) %in% vars1, ]
 coef1 <- output1 %>%
   mutate("Variable" = vars1,
          "Mean" = output1$mean,
@@ -445,9 +446,12 @@ coef1 <- output1 %>%
 kable(coef1)
 ```
 
-- $\alpha_0$: 
+- If a Pope is born one year later, he is expected to live longer by a multiplicative factor of $exp(\alpha_1) = exp(0.0003931) = 1$. This basically means the expected lifespan would hardly change. 
+- If a U.S. President is born one year later, he is expected to live longer by a multiplicative factor of $exp(\alpha_1 + \alpha_6) = exp(0.0003931+0.0004852) = 1$. 
+- If a U.S. President and a Chinese Emperor were born in the same year 1700, 33 years after the average birth year 1667, the Chinese emperor is expected to live longer by a multiplicative factor of $exp(\alpha_3 - \alpha_2 + (\alpha_7-\alpha_6)*y)$ = exp(-0.31925+0.1449877 + 33*(-0.0001094-0.0004852) = 0.82. That's to say, the Chinese emperor's life expectancy is 18% shorter. 
+- If a Japanese Emperor is born 100 years later, he is expected to live longer by a multiplicative factor of $exp(9 \alpha_9) = exp(100*-0.0000595) = 0.994$, which means the lifespan decreases by 6%, whereas for Dalai Lama, the lifespan is expected to increase by a factor of exp(100*-0.0016203) = 0.85, or decrease by 15%. 
 
-Our model predicts that the 85-year-old 14th Dalai Lama is expected to live 92.4 years (95% credible interval: 85.4 - 99.6 years), the 84-year-old Pope Francis is expected to live 92.4 years (95% credible interval: 84.2 - 99.4 years), the 60-year-old Janpanese Emperior Naruhito is expected to live 85.3 years (95% credible interval: 66.4 - 99.5 years) and the 60-year-old former President Barack Obama is expected to live 84.8 years (95% credible interval: 61.5 - 99.4 years). 
+Our model also predicts that the 85-year-old 14th Dalai Lama is expected to live 92.4 years (95% credible interval: 85.4 - 99.6 years), the 84-year-old Pope Francis is expected to live 92.4 years (95% credible interval: 84.2 - 99.4 years), the 60-year-old Japanese Emperior Naruhito is expected to live 85.3 years (95% credible interval: 66.4 - 99.5 years) and the 60-year-old former President Barack Obama is expected to live 84.8 years (95% credible interval: 61.5 - 99.4 years). 
 
 ```{r francis-dalai-plot, message = F, fig.height=5, fig.width=10, echo = FALSE}
 # plot francis and dalai lama histograms
@@ -573,7 +577,7 @@ kable(coef)
 ```
 
 
-```{r standardized-resid, fig.height=2, fig.width=5, echo=F}
+```{r standardized-resid, include = F}
 # calculate and create graphs for standardized residuals
 
 #select estimated mean betas
@@ -628,9 +632,15 @@ meanTs = mean(Ts)
 diff = Ts - meanTs
 sd = sqrt((1/167)*(sum((diff)^2)) * (1+ (1/167) + (diff)^2/sum((diff)^2)))
 
-# make plots
+```
+
+```{r resid-v-predictor, fig.height=2, fig.width=5,}
 ggplot(data = estimates, aes(x = Ts, y = resid/sd)) + geom_point() + 
   labs(x = "Predicted Lifespan", y = "Standardized Residual")
+```
+
+
+```{r resid-v-year, fig.height=2, fig.width=5,}
 ggplot(data = estimates, aes(x = Birth.Year, y = resid/sd)) + geom_point() +
   labs(x = "Birth Year", y = "Standardized Residual")
 ```
