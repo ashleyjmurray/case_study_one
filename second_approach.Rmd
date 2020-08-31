@@ -213,7 +213,7 @@ build_model <- function() {
 ```
 
 
-```{r, include=F}
+```{r, include = FALSE}
 censored_dex = which(censored==1) # index of ppl who are censored
 
 z_censored <- rep(0, length(censored_dex))
@@ -340,7 +340,7 @@ model_output <- jags(data = data_build_model,
 model_output
 ```
 
-```{r, include=F}
+```{r, include = FALSE}
 library(coda)
 parameters = c("beta_0", "beta_1", "beta_2", "beta_3", "beta_4", "beta_5", 
                "beta_6", "beta_7",  "beta_8", "beta_9", "r")
@@ -363,7 +363,7 @@ tps <- function(var){
 lapply(names(res), tps)
 ```
 
-```{r, include=F}
+```{r, include = FALSE}
 library(ggplot2)
 res_lag1 = lapply(seq(1:length(res)), function(i) {
   lres = lag(res[,i],1)
@@ -374,7 +374,7 @@ res_lag1 = lapply(seq(1:length(res)), function(i) {
 })
 ```
 
-```{r, include=F}
+```{r, include = FALSE}
 lapply(seq(1,length(res)), function(i) { 
   acf(res[,i], xlab = "Lag", ylab = "ACF", 
             main = paste("ACF Plot of ", colnames(res)[i]))
@@ -382,7 +382,7 @@ lapply(seq(1,length(res)), function(i) {
 ```
 
 ## III d. Model Diagnostics
-The combination of traceplots, lag-1 scatterplots, and acf plots suggest the chain for each parameters converges, and that 50000 iterations is sufficient. The Rhat's are all close to 1, which is another indicator of converge. All of the effective sample sizes are greater than 200, except for that of beta_0 (the intercept) and r.
+The combination of traceplots, lag-1 scatterplots, and acf plots suggest the chain for each parameters converges, and that 50000 iterations is sufficient. The Rhat's are all close to 1, which is another indicator of converge. All of the effective sample sizes are either close to or greater than 200.
 
 # IV. Analysis
 
@@ -401,7 +401,7 @@ Our model predicts that the 85-year-old 14th Dalai Lama is expected to live 92.4
 
 ### Francis and Dalai Lama 
 
-```{r francis-dalai-plot, fig.height=2, fig.width=5, echo = FALSE}
+```{r francis-dalai-plot, message = F, fig.height=5, fig.width=10, echo = FALSE}
 people = c("age_Francis_predictive", "age_Obama_predictive", "age_Dalai_predictive",
 "age_Naruhito_predictive")
 four_pred = data.frame(model_output$BUGSoutput$sims.matrix)[,people]
@@ -443,15 +443,15 @@ ggplot(francis_dalai, aes(x=plifespans)) +
   geom_vline(data=val95, aes(xintercept=vals_95), color = "red")+
   geom_hline(yintercept = 0, colour = "black") +
   xlab("Lifespan (yrs)") + ylab("Predictive Probability density") + 
-  labs(caption = paste("Fig. 3a The posterior predictive probability density function of the lifespan for hypothetical leaders with the same attributes as Pope Francis (right) and the 14th Dalai Lama (left). The black vertical line marks current age, the blue marks posterior median, and", "the red marks the posterior 95% quantile.", sep = "\n")) +
+  labs(caption = paste("Fig. 3a The posterior predictive probability density function of the lifespan for hypothetical leaders with the same attributes as Pope Francis (right) and the 14th Dalai", "Lama (left). The black vertical line marks current age, the blue marks posterior median, and the red marks the posterior 95% quantile.", sep = "\n")) +
   theme(plot.caption = element_text(hjust = 0))+
   ylim(c(0, 0.1)) + 
-  geom_text(data = plot_txt, mapping = aes(x = 88.5, y = 0.09, label = label), size = 2)
+  geom_text(data = plot_txt, mapping = aes(x = 88.5, y = 0.09, label = label), size = 3)
 ```
 
 ### Obama and Naruhito
 
-```{r obama-naru-plot, fig.height=2, fig.width=5, echo = FALSE}
+```{r obama-naru-plot, message = F, fig.height=5, fig.width=10, echo = FALSE}
 obama_naru = data.frame(plifespans = c(four_pred$age_Obama_predictive, four_pred$age_Naruhito_predictive), person = c(rep("Obama", nrow(four_pred)), rep("Naruhito", nrow(four_pred))))
 
 mins = obama_naru %>%
@@ -482,32 +482,31 @@ plot_txt <- data.frame(
 )
 
 ggplot(obama_naru, aes(x=plifespans)) + 
-  geom_histogram(aes(y=..density..), binwidth = 0.8,boundary = round(min(obama_naru$plifespans), 2)) +
+  geom_histogram(aes(y=..density..), binwidth = 0.8,boundary = round(min(obama_naru$plifespans), 3)) +
   facet_wrap(~person) +
   geom_vline(data=mins, aes(xintercept=min_vals), color = "black")+
   geom_vline(data=meds, aes(xintercept=med_vals), color = "blue")+
   geom_vline(data=val95, aes(xintercept=vals_95), color = "red")+
   geom_hline(yintercept = 0, colour = "black") +
   xlab("Lifespan (yrs)") + ylab("Predictive Probability density") +
-    labs(caption = paste("Fig. 3a The posterior predictive probability density function of the lifespan for hypothetical leaders with the same attributes as President Obama (right) and Emperor Naruhito (left). The black vertical line marks current age, the blue marks posterior median, and", "the red marks the posterior 95% quantile.", sep = "\n")) +
+    labs(caption = paste("Fig. 3b The posterior predictive probability density function of the lifespan for hypothetical leaders with the same attributes as President Obama (right) and", "Emperor Naruhito (left). The black vertical line marks current age, the blue marks posterior median, and the red marks the posterior 95% quantile.", sep = "\n")) +
   theme(plot.caption = element_text(hjust = 0))+
 
   ylim(c(0, 0.06)) +
   geom_text(data = plot_txt, mapping = aes(x = 72, y = 0.05, label = label), size = 3)
 ```
 
-The histogram of the posterior predictive distributions of the lifespans of a leaders with the same attributes as Pope Francis and the 14th Dalai Lama are more uniform. The posterior predictive distributions of the lifespans of President Obama and Emperor Naruhito are both left skewed, with the modes in the late 90s.
+The histogram of the posterior predictive distributions of the lifespans for a leader with the same birth year and leadership type as Pope Francis and that of a leader with the same above attributes as the 14th Dalai Lama are more uniform. The histogram for a leader with the same birth year and leadership type as President Obama and that of a leader with the same above attributes as Emperor Naruhito are both left skewed, with the modes in the late 90s.
 
 ```{r posterior-prob-comparison, include=F}
 pprob1 = mean(four_pred$age_Dalai_predictive>four_pred$age_Francis_predictive)
 pprob2 =  mean(four_pred$age_Obama_predictive>four_pred$age_Naruhito_predictive)
 ```
 
-The probability that the 14th Dalai Lama will have a longer lifespan than Pope Francis is `r pprob1`. The probability that President Obama will have a longer lifespan than Emperor Naruhito is `r pprob2`.
+The probability that the 14th Dalai Lama will have a longer lifespan than Pope Francis is `r round(pprob1,4)`. The probability that President Obama will have a longer lifespan than Emperor Naruhito is `r round(pprob2,4)`.
 
 
 ```{r tidy-model-table, echo = F}
-
 # select betas and r from output and put into a tidy table
 vars = c("beta_0", "beta_1", "beta_2", "beta_3", "beta_4", "beta_5", "beta_6", 
                     "beta_7", "beta_8", "beta_9", "r")
