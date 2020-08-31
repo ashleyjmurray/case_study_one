@@ -26,7 +26,7 @@ Goals:
  
 ## Code 
 - Model diagnostics 
-  - posterior predictive checks (Ashley)
+  - posterior predictive checks *done*
   - residual plots (standardized?) (Matty) *done*
 - Posterior Inference (answer questions)
   - sample many tries and average to get point/ interval estimate (Alice) - alr in the Bayesian_Popes_second_approach output
@@ -72,7 +72,7 @@ Goals:
   - Matty: Introduction, Model/Motivating Model (introducing Weibull)
   - Alice: Interpretation of the Output, living people
   - Ashley: Conclusion
-- Ashley: try to fix posterior predictive checks LOL, need to explain the plots outputted
+- Ashley: try to fix posterior predictive checks LOL, need to explain the plots outputted *done?*
 - Cathy: fix posterior predictive plots
 - Alice: add point estimate for all living people, add comparison to our prediction and the world live data
 - Matty: 
