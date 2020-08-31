@@ -72,6 +72,9 @@ ggplot(data = leaders_data) +
 
 ggplot(data = leaders_data) +
   geom_point(aes(x = Birth.Date, y = Age.Event))
+
+ggplot(data = leaders_data) +
+  geom_hist(aes(x = Age.Event))
 ```
 
 # Data Cleaning
@@ -581,6 +584,10 @@ ggplot(data = estimates, aes(x = Ts, y = resid/sd)) + geom_point() +
 ggplot(data = estimates, aes(x = Birth.Year, y = resid/sd)) + geom_point() +
   labs(x = "Birth Year", y = "Standardized Residual")
 ```
+
+The standardized residual plot for predicted lifespan shows patterning. It appears that our model tends to overpredict lifespan compared to what was actually observed in many cases. This might be due to the fact that we only have two predictors, Birth Year and Type of Leader. Therefore, we are missing information that might help predict whether or not a leader will die earlier, for example if they have some underlying health condition, etc. 
+
+The standardized residuals when plotted against Birth Year show random scattering, however, and this means that our model is not over or underpredicting lifespan according to the year a leader was born.
 
 ## Posterior Predictive Checks
 
