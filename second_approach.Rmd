@@ -56,10 +56,12 @@ ggplot(data = leaders_data) +
 
 ggplot(data = leaders_data) +
   geom_boxplot(aes(x = Type, y = Age.Event)) + ggtitle("Distribution of Leader Type and Their Age") + labs(x = "Type of Leader", y = "Age")
-
+```
+```{r, fig.height=2, fig.width=5,echo=F}
 ggplot(data = leaders_data) +
   geom_histogram(aes(x = Age.Event), binwidth = 5) + ggtitle("Distribution of Leaders Age") + labs(x = "Age")
 ```
+
 
 As seen from the above plots, there seems to be no discernible relationship between Birth Date and Lifespan. Additionally, the distribution of the lifespans of Popes and US Presidents is centered higher, which makes intuitive sense given that these leaders are elected later in life, while Dalai Lamas and Emperors can be elected at much younger ages. Lastly, the distribution of lifespans is unimodal and slightly left skewed. However, this skewing does not seem extreme so there is no need for a transformation. 
 
