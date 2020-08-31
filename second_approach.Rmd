@@ -610,4 +610,5 @@ print(mean(non_censored_prediction$Age.Event <0))
 ```{r}
 subset <- filter(leaders_data, Censored == 0)
 ggplot(data = subset, aes(x = Birth.Year, Age.Event)) + geom_point(color="pink") + ggtitle("Distribution of Leaders' Ages") + labs(x = "Birth Year", y = "Age")
+
 ```
