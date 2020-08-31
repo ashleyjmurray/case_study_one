@@ -51,13 +51,10 @@ summary(leaders_data)
 
 ```{r, fig.height=2, fig.width=5,echo=F}
 # create EDA plots
-ggplot(data = leaders_data) +
-  geom_point(aes(x = Birth.Date, y = Age.Event)) + ggtitle("Distribution of Birthdate of the Leaders Versues their Age") + labs(x = "Birth Date", y = "Age")
 
 ggplot(data = leaders_data) +
   geom_boxplot(aes(x = Type, y = Age.Event)) + ggtitle("Distribution of Leader Type and Their Age") + labs(x = "Type of Leader", y = "Age")
-```
-```{r, fig.height=2, fig.width=5,echo=F}
+
 ggplot(data = leaders_data) +
   geom_histogram(aes(x = Age.Event), binwidth = 5) + ggtitle("Distribution of Leaders Age") + labs(x = "Age")
 ```
