@@ -393,7 +393,7 @@ lapply(seq(1,length(res)), function(i) {
 ```
 
 ## III d. Model Diagnostics
-The combination of traceplots, lag-1 scatterplots, and acf plots suggest the chain for each parameters converges, and that 50000 iterations is sufficient. The Rhat's are all close to 1, which is another indicator of converge. All of the effective sample sizes are either close to or greater than 200.
+The combination of traceplots, lag-1 scatterplots, and acf plots suggest the chain for each parameters converges, and that 50000 iterations is sufficient. The Rhat's are all close to 1, which is another indicator of converge. All of the effective sample sizes are either close to or greater than 200. Sensitivity analysis was done by using a more informative prior and the resulting estimates remained the same.
 
 # IV. Analysis
 
@@ -703,5 +703,6 @@ Stander, J., Dalla Valle, L., and Cortina-Borja, M. (2018). A Bayesian Survival 
 
 # VIII. Appendix
 
+Please see Rmd.
 
 
