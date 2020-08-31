@@ -1,0 +1,612 @@
+---
+
+title: "Predicting the Lifespan of World Leaders"
+authors: "Cathy Lee, Alice Liao, Ashley Murray, and Matty Pahren"
+date: "8-30-20"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, message=F, include=F}
+# import libraries
+library(R2jags)
+library(tidyverse)
+library(ggplot2)
+library(lubridate)
+library(TruncatedDistributions)
+library(knitr)
+library(broom)
+library(coda)
+```
+
+```{r, include=F}
+# clean data and make sure columns have the right type
+leaders_data <- get(load("Leaders.RData"))
+leaders_data$Censored[leaders$Name == "Jianwen Emperor"] <- "0" #typo for Jianwen Emperor
+
+leaders_data$Censored <- as.factor(leaders_data$Censored)
+leaders_data$Type <- as.factor(leaders_data$Type)
+leaders_data$Age.Event <- as.numeric(leaders_data$Age.Event)
+
+summary(leaders_data)
+```
+
+# II b. Exploratory Data Analysis
+
+```{r, fig.height=2, fig.width=5,echo=F}
+# create EDA plots
+ggplot(data = leaders_data) +
+  geom_point(aes(x = Birth.Date, y = Age.Event))
+
+ggplot(data = leaders_data) +
+  geom_boxplot(aes(x = Type, y = Age.Event))
+
+ggplot(data = leaders_data) +
+  geom_histogram(aes(x = Age.Event), binwidth = 5)
+```
+
+```{r, include=F}
+# 10 censored data
+leaders_data$Name[leaders_data$Censored == "1"]
+  
+# create birth year
+leaders_data$Birth.Year <- year(leaders_data$Birth.Date)
+
+# create interactions
+leaders_data <- leaders_data %>%
+  mutate(TypeChinaEmp = as.factor(case_when(Type == "ChinaEmp" ~ 1,
+                             TRUE ~ 0)),
+         TypeDalaiLama = as.factor(case_when(Type == "DalaiLama" ~ 1,
+                                   TRUE ~ 0)),
+         TypeJapanEmp = as.factor(case_when(Type == "JapanEmp" ~ 1, 
+                                  TRUE ~ 0)),
+         TypePope = as.factor(case_when(Type == "Pope" ~ 1, 
+                              TRUE ~ 0)),
+         TypeUsPres = as.factor(case_when(Type == "UsPres" ~ 1,
+                                TRUE ~ 0)))
+
+# get rid of those we are trying to predict
+leaders_nopred <- leaders_data %>%
+  filter(!(Name %in% c("14th Dalai Lama (Tenzin Gyatso)", "Naruhito (Emperor Reiwa)", "Barack Obama", "Francis")))
+
+# set the survival and censored vectors
+survival_raw <- leaders_nopred$Age.Event
+n <- length(survival_raw)
+
+censored <- leaders_nopred$Censored
+survival <- ifelse(censored == 0, survival_raw, NA)
+
+censoring_limits <- ifelse(censored == 0, 100, survival_raw)
+x_1 <- leaders_nopred$Birth.Year - mean(leaders_nopred$Birth.Year)
+x_2 <- leaders_nopred$TypeUsPres
+x_3 <- leaders_nopred$TypeChinaEmp
+x_4 <- leaders_nopred$TypeDalaiLama
+x_5 <- leaders_nopred$TypeJapanEmp
+
+# add interaction b/w Birth.Year and Type
+x_6 <- x_1*as.numeric(as.character(x_2))
+x_7 <- x_1*as.numeric(as.character(x_3))
+x_8 <- x_1*as.numeric(as.character(x_4))
+x_9 <- x_1*as.numeric(as.character(x_5))
+```
+
+
+```{r, include=F}
+# mcmc sampler function
+set.seed(123)
+build_model <- function() {
+  for(i in 1:n_censored) {
+    z_censored[i] ~ dpois(phi_censored[i])
+    phi_censored[i] <- mu_censored[i] * pow(t_censored[i], r)
+    mu_censored[i] <- exp(beta_censored[i])
+    beta_censored[i] <- beta_0 + beta_1*x_1_censored[i] + beta_2*x_2_censored[i] + beta_3*x_3_censored[i] + beta_4*x_4_censored[i] + beta_5*x_5_censored[i] + beta_6*x_6_censored[i] + beta_7*x_7_censored[i] + beta_8*x_8_censored[i] + beta_9*x_9_censored[i]
+  }
+  
+  for(j in 1:n_non_censored) { #total rows - 6 ** 6 are censored in leaders_nopred
+    survival_non_censored[j] ~ dweib(r, mu[j])
+    mu[j] <- exp(beta[j])
+    beta[j] <- beta_0 + beta_1*x_1_non_censored[j] + beta_2*x_2_non_censored[j] + beta_3*x_3_non_censored[j] + beta_4*x_4_non_censored[j] + beta_5*x_5_non_censored[j] + beta_6*x_6_non_censored[j] + beta_7*x_7_non_censored[j] + beta_8*x_8_non_censored[j] + beta_9*x_9_non_censored[j]
+  }
+  
+  beta_0 ~ dnorm(0.0, 1.0E-3) # Prior on beta_0 is normal with low precision
+  beta_1 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
+  beta_2 ~ dnorm(0.0, 1.0E-3) # Prior on beta_2 is normal with low precision
+  beta_3 ~ dnorm(0.0, 1.0E-3) # Prior on beta_3 is normal with low precision
+  beta_4 ~ dnorm(0.0, 1.0E-3) # Prior on beta_4 is normal with low precision
+  beta_5 ~ dnorm(0.0, 1.0E-3) # Prior on beta_5 is normal with low precision
+  beta_6 ~ dnorm(0.0, 1.0E-3) # Prior on beta_6 is normal with low precision
+  beta_7 ~ dnorm(0.0, 1.0E-3) # Prior on beta_7 is normal with low precision
+  beta_8 ~ dnorm(0.0, 1.0E-3) # Prior on beta_8 is normal with low precision
+  beta_9 ~ dnorm(0.0, 1.0E-3) # Prior on beta_9 is normal with low precision
+  r ~ dexp(1) # Prior on r
+  
+  # sensitivity analysis priors
+  # beta_0 ~ dnorm(0.5, 1.0E-2) # Prior on beta_0 is normal with low precision
+  # beta_1 ~ dnorm(0.5, 1.0E-2) # Prior on beta_1 is normal with low precision
+  # beta_2 ~ dnorm(0.5, 1.0E-2) # Prior on beta_2 is normal with low precision
+  # beta_3 ~ dnorm(0.5, 1.0E-2) # Prior on beta_3 is normal with low precision
+  # beta_4 ~ dnorm(0.5, 1.0E-2) # Prior on beta_4 is normal with low precision
+  # beta_5 ~ dnorm(0.5, 1.0E-2) # Prior on beta_5 is normal with low precision
+  # beta_6 ~ dnorm(0.5, 1.0E-2) # Prior on beta_6 is normal with low precision
+  # beta_7 ~ dnorm(0.5, 1.0E-2) # Prior on beta_7 is normal with low precision
+  # beta_8 ~ dnorm(0.5, 1.0E-2) # Prior on beta_8 is normal with low precision
+  # beta_9 ~ dnorm(0.5, 1.0E-2) # Prior on beta_9 is normal with low precision
+  # r ~ dexp(1) # Prior on r
+  
+  # Define alphas
+  alpha_0 <- - beta_0 / r
+  alpha_1 <- - beta_1 / r
+  alpha_2 <- - beta_2 / r
+  alpha_3 <- - beta_3 / r
+  alpha_4 <- - beta_4 / r
+  alpha_5 <- - beta_5 / r  
+  alpha_6 <- - beta_6 / r
+  alpha_7 <- - beta_7 / r
+  alpha_8 <- - beta_8 / r
+  alpha_9 <- - beta_9 / r
+  
+  # Percentage increases
+  percentage_increase_year <- 100*(exp(alpha_1) - 1)
+  percentage_increase_UsPres <- 100*(exp(alpha_2) - 1)
+  percentage_increase_ChinaEmp <- 100*(exp(alpha_3) - 1)
+  percentage_increase_DalaiLama <- 100*(exp(alpha_4) - 1)
+  percentage_increase_JapanEmp <- 100*(exp(alpha_5) - 1)
+  percentage_increase_BYUsPres <- 100*(exp(alpha_6) - 1)
+  percentage_increase_BYChinaEmp <- 100*(exp(alpha_7) - 1)
+  percentage_increase_BYDalaiLama <- 100*(exp(alpha_8) - 1)
+  percentage_increase_BYJapanEmp <- 100*(exp(alpha_9) - 1)
+  
+  # Predictive distribution of age at the new values
+  beta_Francis <- beta_0 + beta_1*year_Francis
+  mu_Francis <- exp(beta_Francis)
+  survival_Francis ~ dweib(r, mu_Francis) %_% T(present_length_Francis, upper_length)
+  age_Francis_predictive <- survival_Francis
+
+  beta_Obama <- beta_0 + (beta_1+beta_6)*year_Obama + beta_2
+  mu_Obama <- exp(beta_Obama)
+  survival_Obama ~ dweib(r, mu_Obama) %_% T(present_length_Obama, upper_length)
+  age_Obama_predictive <- survival_Obama
+
+  beta_Dalai <- beta_0 + (beta_1+beta_8)*year_Dalai + beta_4
+  mu_Dalai <- exp(beta_Dalai)
+  survival_Dalai ~ dweib(r, mu_Dalai) %_% T(present_length_Dalai, upper_length)
+  age_Dalai_predictive <- survival_Dalai
+  
+  beta_Naruhito <- beta_0 + (beta_1+beta_9)*year_Naruhito + beta_5
+  mu_Naruhito <- exp(beta_Naruhito)
+  survival_Naruhito ~ dweib(r, mu_Naruhito) %_% T(present_length_Naruhito, upper_length)
+  age_Naruhito_predictive <- survival_Naruhito
+}
+```
+
+
+```{r, include = FALSE}
+censored_dex = which(censored==1) # index of ppl who are censored
+
+# set numeric vectors for censored ppl
+z_censored <- rep(0, length(censored_dex))
+t_censored <- censoring_limits[censored_dex]
+x_1_censored <- x_1[censored_dex] 
+x_2_censored <- x_2[censored_dex] 
+x_3_censored <- x_3[censored_dex]
+x_4_censored <- x_4[censored_dex]
+x_5_censored <- x_5[censored_dex]
+x_6_censored <- x_6[censored_dex]
+x_7_censored <- x_7[censored_dex]
+x_8_censored <- x_8[censored_dex]
+x_9_censored <- x_9[censored_dex]
+
+n_censored <- length(censored_dex)
+
+# set numeric vectors for non censored ppl
+survival_non_censored <- survival[-censored_dex] # Remove ALL ALIVE PEOPLE
+x_1_non_censored <- x_1[-censored_dex]
+x_2_non_censored <- x_2[-censored_dex]
+x_3_non_censored <- x_3[-censored_dex]
+x_4_non_censored <- x_4[-censored_dex]
+x_5_non_censored <- x_5[-censored_dex]
+x_6_non_censored <- x_6[-censored_dex]
+x_7_non_censored <- x_7[-censored_dex]
+x_8_non_censored <- x_8[-censored_dex]
+x_9_non_censored <- x_9[-censored_dex]
+
+n_non_censored <- length(survival_non_censored)
+
+# find attributes for the four leaders
+birth_year_Francis <- leaders_data$Birth.Year[leaders_data$Name == "Francis"]
+year_Francis <- birth_year_Francis - mean(leaders_nopred$Birth.Year)
+present_length_Francis <- leaders_data$Age.Event[leaders_data$Name =="Francis"]
+
+birth_year_Obama <- leaders_data$Birth.Year[leaders_data$Name == "Barack Obama"]
+year_Obama <- birth_year_Obama - mean(leaders_nopred$Birth.Year)
+present_length_Obama <- leaders_data$Age.Event[leaders_data$Name =="Barack Obama"]
+
+birth_year_Dalai <- leaders_data$Birth.Year[leaders_data$Name == "14th Dalai Lama (Tenzin Gyatso)"]
+year_Dalai <- birth_year_Dalai - mean(leaders_nopred$Birth.Year)
+present_length_Dalai <- leaders_data$Age.Event[leaders_data$Name =="14th Dalai Lama (Tenzin Gyatso)"]
+
+birth_year_Naruhito <- leaders_data$Birth.Year[leaders_data$Name == "Naruhito (Emperor Reiwa)"]
+year_Naruhito <- birth_year_Naruhito - mean(leaders_nopred$Birth.Year)
+present_length_Naruhito <- leaders_data$Age.Event[leaders_data$Name =="Naruhito (Emperor Reiwa)"]
+
+upper_length <- 100
+
+# build model inputs and run model
+data_build_model <- list("n_censored",
+                                   "n_non_censored",
+                                   "z_censored",
+                                   "t_censored",
+                                   "x_1_censored",
+                                   "x_2_censored",
+                                   "x_3_censored",
+                                   "x_4_censored",
+                                   "x_5_censored",
+                                   "x_6_censored",
+                                   "x_7_censored",
+                                   "x_8_censored",
+                                   "x_9_censored",
+                                   "survival_non_censored",
+                                   "x_1_non_censored",
+                                   "x_2_non_censored",
+                                   "x_3_non_censored",
+                                   "x_4_non_censored",
+                                   "x_5_non_censored",
+                                   "x_6_non_censored",
+                                   "x_7_non_censored",
+                                   "x_8_non_censored",
+                                   "x_9_non_censored", 
+                                   "year_Francis",
+                                   "year_Obama", 
+                                   "year_Dalai",
+                                   "year_Naruhito",
+                                   "present_length_Francis", 
+                                   "present_length_Obama",
+                                   "present_length_Dalai",
+                                   "present_length_Naruhito",
+                                   "upper_length")
+
+model_output <- jags(data = data_build_model,  
+                                      parameters.to.save = c("beta_0",
+                                                             "beta_1",
+                                                             "beta_2", 
+                                                             "beta_3", 
+                                                             "beta_4", 
+                                                             "beta_5",
+                                                             "beta_6",
+                                                             "beta_7", 
+                                                             "beta_8", 
+                                                             "beta_9",
+                                                             "r", 
+                                                             "alpha_0",
+                                                             "alpha_1",
+                                                             "alpha_2",
+                                                             "alpha_3",
+                                                             "alpha_4",
+                                                             "alpha_5",
+                                                             "alpha_6",
+                                                             "alpha_7",
+                                                             "alpha_8",
+                                                             "alpha_9",
+                                                             "percentage_increase_year",
+                                                             "percentage_increase_UsPres",
+                                                             "percentage_increase_ChinaEmp",
+                                                             "percentage_increase_DalaiLama",
+                                                             "percentage_increase_JapanEmp", 
+                                                             "percentage_increase_BYUsPres",
+                                                            "percentage_increase_BYChinaEmp",
+                                                          "percentage_increase_BYDalaiLama",
+                                                            "percentage_increase_BYJapanEmp",
+                                                             "age_Francis_predictive",
+                                                             "age_Obama_predictive",
+                                                             "age_Dalai_predictive",
+                                                             "age_Naruhito_predictive"                                                             ), 
+
+                                      n.iter = 50000, 
+                                      n.chains = 3,
+                                      model.file = build_model)
+model_output
+```
+
+
+```{r, include = FALSE}
+# run traceplots
+parameters = c("beta_0", "beta_1", "beta_2", "beta_3", "beta_4", "beta_5", 
+               "beta_6", "beta_7",  "beta_8", "beta_9", "r")
+
+res = data.frame(model_output$BUGSoutput$sims.matrix)[,parameters]
+colnames(res) <- gsub("^.*\\.","", colnames(res) )
+
+tps <- function(var){
+  ggplot(res, aes_(y=as.name(var), x=seq(1,nrow(res)))) +
+    geom_line() +
+    labs(title=paste("Traceplot of ", as.name(var)),
+         x ="Iterations", y = as.name(var))
+}
+lapply(names(res), tps)
+```
+
+```{r, include = FALSE}
+# run lag-1 scatterplots
+library(ggplot2)
+res_lag1 = lapply(seq(1:length(res)), function(i) {
+  lres = lag(res[,i],1)
+  plot(y=res[,i], x= lres, 
+       xlab = paste0(colnames(res)[i], "-1"),
+       ylab = paste0(colnames(res)[i]),
+       main = paste("Lag-1 Scatter Plot of", colnames(res)[i]))
+})
+```
+
+```{r, include = FALSE}
+# run acf plots
+lapply(seq(1,length(res)), function(i) { 
+  acf(res[,i], xlab = "Lag", ylab = "ACF", 
+            main = paste("ACF Plot of ", colnames(res)[i]))
+})
+```
+
+```{r tidy-model-table-beta, echo = F}
+# output beta results
+vars = c("beta_0", "beta_1", "beta_2", "beta_3", "beta_4", "beta_5", "beta_6", 
+                    "beta_7", "beta_8", "beta_9", "r")
+output <- data.frame(model_output$BUGSoutput$summary)
+output <- output[row.names(output) %in% vars, ]
+coef <- output %>%
+  mutate("Variable" = vars,
+         "Mean" = output$mean,
+         "Standard Deviation" = output$sd,
+         "2.5% Quantile" = output$X2.5.,
+         "Median" = output$X50.,
+         "97.5% Quantile" = output$X97.5.
+         ) %>%
+  select("Variable", "Mean", "Standard Deviation", "2.5% Quantile", "Median", "97.5% Quantile")
+kable(coef)
+```
+
+```{r tidy-model-table-alpha, echo = F}
+vars1 = c("alpha_0", "alpha_1", "alpha_2", "alpha_3", "alpha_4", "alpha_5", "alpha_6", 
+         "alpha_7", "alpha_8", "alpha_9", 
+         "percentage_increase_year", "percentage_increase_UsPres", 
+         "percentage_increase_ChinaEmp", "percentage_increase_DalaiLama",
+         "percentage_increase_BYUsPres", "percentage_increase_BYChinaEmp",
+         "percentage_increase_BYDalaiLama", "percentage_increase_BYJapanEmp"
+         )
+output1 <- output[row.names(output) %in% vars1, ]
+coef1 <- output1 %>%
+  mutate("Variable" = vars1,
+         "Mean" = output1$mean,
+         "Standard Deviation" = output1$sd,
+         "2.5% Quantile" = output1$X2.5.,
+         "Median" = output1$X50.,
+         "97.5% Quantile" = output1$X97.5.
+         ) %>%
+  select("Variable", "Mean", "Standard Deviation", "2.5% Quantile", "Median", "97.5% Quantile")
+kable(coef1)
+```
+
+
+```{r francis-dalai-plot, message = F, fig.height=5, fig.width=10, echo = FALSE}
+# plot francis and dalai lama histograms
+people = c("age_Francis_predictive", "age_Obama_predictive", "age_Dalai_predictive",
+"age_Naruhito_predictive")
+four_pred = data.frame(model_output$BUGSoutput$sims.matrix)[,people]
+
+francis_dalai = data.frame(plifespans = c(four_pred$age_Francis_predictive, four_pred$age_Dalai_predictive), person = c(rep("Francis", nrow(four_pred)), rep("Dalai", nrow(four_pred))))
+
+mins = francis_dalai %>%
+  group_by(person) %>%
+  summarise(min_vals = round(min(plifespans), 2))
+
+meds = francis_dalai %>%
+  group_by(person) %>%
+  summarise(med_vals = round(median(plifespans), 2))
+
+val95 = francis_dalai %>%
+  group_by(person) %>%
+  summarise(vals_95 = round(quantile(plifespans, 0.95), 2))
+
+francis_txt = paste(paste("Current age:", mins$min_vals[mins$person=="Francis"], "yrs"),
+      paste("Median:", meds$med_vals[meds$person=="Francis"],"yrs"),
+      paste("95% quantile:", val95$vals_95[val95$person=="Francis"], "yrs"),
+      sep = "\n")
+
+dalai_txt = paste(paste("Current age:", mins$min_vals[mins$person=="Dalai"], "yrs"),
+      paste("Median:",  meds$med_vals[meds$person=="Dalai"],"yrs"),
+      paste("95% quantile:", val95$vals_95[val95$person=="Dalai"], "yrs"),
+      sep = "\n")
+
+plot_txt <- data.frame(
+  label = c(francis_txt, dalai_txt),
+  person = c("Francis", "Dalai")
+)
+
+ggplot(francis_dalai, aes(x=plifespans)) + 
+  geom_histogram(aes(y=..density..), binwidth = 0.8, boundary = round(min(francis_dalai$plifespans), 2)) +
+  facet_wrap(~person) +
+  geom_vline(data=mins, aes(xintercept=min_vals), color = "black")+
+  geom_vline(data=meds, aes(xintercept=med_vals), color = "blue")+
+  geom_vline(data=val95, aes(xintercept=vals_95), color = "red")+
+  geom_hline(yintercept = 0, colour = "black") +
+  xlab("Lifespan (yrs)") + ylab("Predictive Probability density") + 
+  labs(caption = paste("Fig. 3a The posterior predictive probability density function of the lifespan for hypothetical leaders with the same attributes as Pope Francis (right) and the 14th Dalai", "Lama (left). The black vertical line marks current age, the blue marks posterior median, and the red marks the posterior 95% quantile.", sep = "\n")) +
+  theme(plot.caption = element_text(hjust = 0))+
+  ylim(c(0, 0.1)) + 
+  geom_text(data = plot_txt, mapping = aes(x = 88.5, y = 0.09, label = label), size = 3)
+```
+
+```{r obama-naru-plot, message = F, fig.height=5, fig.width=10, echo = FALSE}
+# plot obama and naruhito histograms
+obama_naru = data.frame(plifespans = c(four_pred$age_Obama_predictive, four_pred$age_Naruhito_predictive), person = c(rep("Obama", nrow(four_pred)), rep("Naruhito", nrow(four_pred))))
+
+mins = obama_naru %>%
+  group_by(person) %>%
+  summarise(min_vals = round(min(plifespans), 2))
+
+meds = obama_naru %>%
+  group_by(person) %>%
+  summarise(med_vals = round(median(plifespans), 2))
+
+val95 = obama_naru %>%
+  group_by(person) %>%
+  summarise(vals_95 = round(quantile(plifespans, 0.95), 2))
+
+obama_txt = paste(paste("Current age:", mins$min_vals[mins$person=="Obama"], "yrs"),
+      paste("Median:", meds$med_vals[meds$person=="Obama"],"yrs"),
+      paste("95% quantile:", val95$vals_95[val95$person=="Obama"], "yrs"),
+      sep = "\n")
+
+naru_txt = paste(paste("Current age:", mins$min_vals[mins$person=="Naruhito"], "yrs"),
+      paste("Median:",  meds$med_vals[meds$person=="Naruhito"],"yrs"),
+      paste("95% quantile:", val95$vals_95[val95$person=="Naruhito"], "yrs"),
+      sep = "\n")
+
+plot_txt <- data.frame(
+  label = c(obama_txt, naru_txt),
+  person = c("Obama", "Naruhito")
+)
+
+ggplot(obama_naru, aes(x=plifespans)) + 
+  geom_histogram(aes(y=..density..), binwidth = 0.8,boundary = round(min(obama_naru$plifespans), 3)) +
+  facet_wrap(~person) +
+  geom_vline(data=mins, aes(xintercept=min_vals), color = "black")+
+  geom_vline(data=meds, aes(xintercept=med_vals), color = "blue")+
+  geom_vline(data=val95, aes(xintercept=vals_95), color = "red")+
+  geom_hline(yintercept = 0, colour = "black") +
+  xlab("Lifespan (yrs)") + ylab("Predictive Probability density") +
+    labs(caption = paste("Fig. 3b The posterior predictive probability density function of the lifespan for hypothetical leaders with the same attributes as President Obama (right) and", "Emperor Naruhito (left). The black vertical line marks current age, the blue marks posterior median, and the red marks the posterior 95% quantile.", sep = "\n")) +
+  theme(plot.caption = element_text(hjust = 0))+
+
+  ylim(c(0, 0.06)) +
+  geom_text(data = plot_txt, mapping = aes(x = 72, y = 0.05, label = label), size = 3)
+```
+
+
+```{r posterior-prob-comparison, include=F}
+# comparison values
+pprob1 = mean(four_pred$age_Dalai_predictive>four_pred$age_Francis_predictive)
+pprob2 =  mean(four_pred$age_Obama_predictive>four_pred$age_Naruhito_predictive)
+```
+
+
+```{r tidy-model-table, echo = F}
+# select betas and r from output and put into a tidy table
+vars = c("beta_0", "beta_1", "beta_2", "beta_3", "beta_4", "beta_5", "beta_6", 
+                    "beta_7", "beta_8", "beta_9", "r")
+output <- data.frame(model_output$BUGSoutput$summary)
+output <- output[row.names(output) %in% vars, ]
+coef <- output %>%
+  mutate("Variable" = vars,
+         "Mean" = output$mean,
+         "Standard Deviation" = output$sd,
+         "2.5% Quantile" = output$X2.5.,
+         "Median" = output$X50.,
+         "97.5% Quantile" = output$X97.5.
+         ) %>%
+  select("Variable", "Mean", "Standard Deviation", "2.5% Quantile", "Median", "97.5% Quantile")
+kable(coef)
+```
+
+
+```{r standardized-resid, fig.height=2, fig.width=5, echo=F}
+# calculate and create graphs for standardized residuals
+
+#select estimated mean betas
+beta_0_est <- coef[1,2]
+beta_1_est <- coef[2,2]
+beta_2_est <- coef[3,2]
+beta_3_est <- coef[4,2]
+beta_4_est <- coef[5,2]
+beta_5_est <- coef[6,2]
+beta_6_est <- coef[7,2]
+beta_7_est <- coef[8,2]
+beta_8_est <- coef[9,2]
+beta_9_est <- coef[10,2]
+
+# select only non-living leaders to calculate residuals for
+no_living <- leaders_data %>%
+  filter(Censored == 0)
+
+# mutate data to calculate mus
+estimates <- no_living %>%
+  mutate(Birth.Year.Cent = Birth.Year - mean(leaders_nopred$Birth.Year)) %>%
+  mutate(ChinaEmp =case_when(Type == "ChinaEmp" ~ 1, TRUE ~ 0),
+         DalaiLama =case_when(Type == "DalaiLama" ~ 1, TRUE ~ 0),
+         JapanEmp =case_when(Type == "JapanEmp" ~ 1, TRUE ~ 0),
+         Pope =case_when(Type == "Pope" ~ 1, TRUE ~ 0),
+         UsPres =case_when(Type == "UsPres" ~ 1, TRUE ~ 0)) %>%
+  mutate(BYUsPres = Birth.Year.Cent*UsPres) %>%
+  mutate(BYChinaEmp = Birth.Year.Cent*ChinaEmp) %>%
+  mutate(BYDalaiLama = Birth.Year.Cent*DalaiLama) %>%
+  mutate(BYJapanEmp = Birth.Year.Cent*JapanEmp) %>%
+  mutate(intercept = 1) %>%
+  mutate(predicted = exp(beta_0_est + beta_1_est*(Birth.Year.Cent) + beta_2_est*(UsPres) + beta_3_est*(ChinaEmp) + beta_4_est*(DalaiLama) + beta_5_est*(JapanEmp) + beta_6_est*(UsPres)*(Birth.Year.Cent) + beta_7_est*(ChinaEmp)*(Birth.Year.Cent) + beta_8_est*(DalaiLama)*(Birth.Year.Cent) + beta_9_est*(JapanEmp)*(Birth.Year.Cent)))
+
+data.mat = as.matrix(estimates[,c("intercept", "Birth.Year.Cent", "UsPres", "ChinaEmp", "DalaiLama", "JapanEmp","BYUsPres", "BYChinaEmp", "BYDalaiLama", "BYJapanEmp")], nrow = nrow(estimates), byrow = TRUE)
+
+pred_res = data.frame(t(model_output$BUGSoutput$summary))
+r = pred_res$r[1]
+betas = pred_res[,c("beta_0", "beta_1", "beta_2",  "beta_3", "beta_4", "beta_5",
+                     "beta_6", "beta_7", "beta_8","beta_9")][1,]
+beta.mat = as.matrix(betas, nrow = p, byrow = TRUE)
+logmus = data.mat %*% t(beta.mat)
+
+# draw predicted values based on mus calculated above
+set.seed(123)
+Ts = rtweibull(167, r, (1/exp(logmus))^(1/r), 0, 100) 
+
+#calculate residuals
+resid = estimates$Age.Event - Ts
+
+#calculate standard deviations
+meanTs = mean(Ts)
+diff = Ts - meanTs
+sd = sqrt((1/167)*(sum((diff)^2)) * (1+ (1/167) + (diff)^2/sum((diff)^2)))
+
+# make plots
+ggplot(data = estimates, aes(x = Ts, y = resid/sd)) + geom_point() + 
+  labs(x = "Predicted Lifespan", y = "Standardized Residual")
+ggplot(data = estimates, aes(x = Birth.Year, y = resid/sd)) + geom_point() +
+  labs(x = "Birth Year", y = "Standardized Residual")
+```
+
+```{r, include=F}
+ non_censored_prediction <- filter(leaders_data, Censored == 0)
+ K <- 10
+ ysims <- matrix(nrow = nrow(non_censored_prediction), ncol = K)
+ 
+ for(k in 1:K){
+   for(i in 1:nrow(non_censored_prediction)){
+     w <- sample(nrow(res), 1)
+     samp <- res[w,]
+     val <- non_censored_prediction[i, ]
+     beta_temp <- samp$beta_0 + samp$beta_1*val$Birth.Year + samp$beta_2*as.integer(val$TypeUsPres) + samp$beta_3*as.integer(val$TypeChinaEmp) + samp$beta_4*as.integer(val$TypeDalaiLama) + samp$beta_5*as.integer(val$TypeJapanEmp) + samp$beta_6*val$Birth.Year*as.integer(val$TypeUsPres) + samp$beta_7*val$Birth.Year*as.integer(val$TypeChinaEmp) + samp$beta_8*val$Birth.Year*as.integer(val$TypeDalaiLama) + samp$beta_9*val$Birth.Year*as.integer(val$TypeJapanEmp)
+     mu <- exp(beta_temp)
+     t <- rtweibull(1, samp$r, (1/mu)^(1/samp$r), 50, 100)
+     ysims[i, k] <- t
+   }
+}
+```
+
+```{r}
+d <- data.frame(ysims)
+d[sapply(d, is.infinite)] <- 100
+```
+
+
+```{r, echo=F}
+subset <- filter(leaders_data, Censored == 0)
+ggplot(data = subset, aes(x = Birth.Year, Age.Event)) + geom_point(color="pink") + ggtitle("Distribution of Leaders' Ages") + labs(x = "Birth Year", y = "Age")
+
+
+```
+
+```{r, echo = FALSE}
+r <- sample(nrow(non_censored_prediction), 2)
+hist(d[,1])
+abline(v=non_censored_prediction$Age.Event[r], col = "red")
+print(mean(d<0))
+print(mean(non_censored_prediction$Age.Event <0))
+```
