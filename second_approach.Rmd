@@ -28,6 +28,7 @@ library(R2jags)
 library(tidyverse)
 library(ggplot2)
 library(lubridate)
+install.packages("TruncatedDistributions", repos="http://R-Forge.R-project.org") 
 library(TruncatedDistributions)
 library(knitr)
 library(broom)
@@ -610,9 +611,6 @@ betas = pred_res[,c("beta_0", "beta_1", "beta_2",  "beta_3", "beta_4", "beta_5",
                      "beta_6", "beta_7", "beta_8","beta_9")][1,]
 beta.mat = as.matrix(betas, nrow = p, byrow = TRUE)
 logmus = data.mat %*% t(beta.mat)
-
-# install.packages("TruncatedDistributions", repos="http://R-Forge.R-project.org") 
-library(TruncatedDistributions)
 
 # draw predicted values based on mus calculated above
 set.seed(123)
