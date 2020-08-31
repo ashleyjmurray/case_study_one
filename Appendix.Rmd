@@ -597,7 +597,6 @@ d <- data.frame(ysims) #create a dataframe from the ysims matrix
 d[sapply(d, is.infinite)] <- 100 #set all of the Inf values to the upper truncation value as defined in the previous weibull distribution
 ```
 
-
 ```{r, echo=F}
 #Scatterplot showing Birth Year of the Leaders versues their Age
 subset <- filter(leaders_data, Censored == 0)
