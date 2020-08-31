@@ -18,6 +18,43 @@ The rest of the paper is structured as follows. First, we will describe the data
 
 The data used in this analysis contains entries for 177 different world leaders. The types of world leaders present in the data include Popes, US Presidents, Dalai Lamas, Chinese Emperors, and Japanese Emperors. Each leader's birth date type of leader is recorded. For some of these groups, we have data dating all the way back to the 14th century. Additionally, leaders who have passed away also have their death date and age of death recorded. For leaders that are still living, these columns instead contain the date the dataset was created (July 31, 2020) and their current age on that date. In order to further clarify who is dead or alive, there is a column titled "Censored," which takes a value of 0 if the person is still dead and a value of 1 if that person is still alive. Related to this, there is another column called "Fail," which takes on a value of 1 if the person is dead and a value of 0 if the person is alive. In total, there are 11 living leaders in our dataset, 4 of whose age of death we are trying to predict. 
 
+```{r, message=F, include=F}
+#library(R2jags)
+library(R2jags)
+library(tidyverse)
+library(lubridate)
+library(knitr)
+library(broom)
+```
+
+```{r, include=F}
+leaders_data <- get(load("Leaders.RData"))
+leaders_data$Censored[leaders$Name == "Jianwen Emperor"] <- "0" #typo for Jianwen Emperor
+
+leaders_data$Censored <- as.factor(leaders_data$Censored)
+leaders_data$Type <- as.factor(leaders_data$Type)
+leaders_data$Age.Event <- as.numeric(leaders_data$Age.Event)
+
+
+summary(leaders_data)
+```
+
+# Exploratory Data Analysis
+```{r, fig.height=2, fig.width=5,echo=F}
+
+# create EDA plots
+ggplot(data = leaders_data) +
+  geom_point(aes(x = Birth.Date, y = Age.Event))
+
+ggplot(data = leaders_data) +
+  geom_boxplot(aes(x = Type, y = Age.Event))
+
+ggplot(data = leaders_data) +
+  geom_histogram(aes(x = Age.Event), binwidth = 5)
+```
+
+As seen from the above plots, there seems to be no discernible relationship between Birth Date and Lifespan. Additionally, the distribution of Popes and US Presidents is centered higher, which makes intuitive sense given that these leaders are elected later in life, while Dalai Lamas and Emperors can be elected at much younger ages. Lastly, the distribution of lifespans is unimodal and slightly left skewed. However, this skewing does not seem extreme so there is no need for a transformation. 
+
 # III. Methods
 
 ## III a. Motivating the Model
@@ -44,35 +81,6 @@ We assume that our priors are independent because intuitively a given observatio
 
 For our prior for r, we chose a prior of $exp(1)$, as we believe the hazard of death increases with time. 
 
-```{r, message=F, include=F}
-#library(R2jags)
-library(R2jags)
-library(tidyverse)
-library(lubridate)
-library(knitr)
-library(broom)
-```
-
-```{r, include=F}
-leaders_data <- get(load("Leaders.RData"))
-leaders_data$Censored[leaders$Name == "Jianwen Emperor"] <- "0" #typo for Jianwen Emperor
-
-leaders_data$Censored <- as.factor(leaders_data$Censored)
-leaders_data$Type <- as.factor(leaders_data$Type)
-leaders_data$Age.Event <- as.numeric(leaders_data$Age.Event)
-
-
-summary(leaders_data)
-```
-
-# Boxplot of age (Age.Event) by Type
-```{r, echo=F}
-ggplot(data = leaders_data) +
-  geom_boxplot(aes(x = Type, y = Age.Event))
-
-ggplot(data = leaders_data) +
-  geom_point(aes(x = Birth.Date, y = Age.Event))
-```
 
 # Data Cleaning
 ```{r, include=F}
@@ -516,7 +524,7 @@ coef <- output %>%
 kable(coef)
 ```
 
-```{r standardized-resid, echo=F}
+```{r standardized-resid, fig.height=2, fig.width=5, echo=F}
 # calculate and create graphs for standardized residuals
 
 #select estimated mean betas
@@ -581,6 +589,10 @@ ggplot(data = estimates, aes(x = Birth.Year, y = resid/sd)) + geom_point() +
   labs(x = "Birth Year", y = "Standardized Residual")
 ```
 
+The standardized residual plot for predicted lifespan shows patterning. It appears that our model tends to overpredict lifespan compared to what was actually observed in many cases. This might be due to the fact that we only have two predictors, Birth Year and Type of Leader. Therefore, we are missing information that might help predict whether or not a leader will die earlier, for example if they have some underlying health condition, etc. 
+
+The standardized residuals when plotted against Birth Year show random scattering, however, and this means that our model is not over or underpredicting lifespan according to the year a leader was born.
+
 ## Posterior Predictive Checks
 
 ```{r, include=F}
@@ -632,6 +644,6 @@ This model could be improved by including more predictors; for example, health w
 
 # VII. References
 
-*cite Stander et al* 
+Stander, J., Valle, L. D., &amp; Cortina-Borja, M. (2018). A Bayesian Survival Analysis of a Historical Dataset: How Long Do Popes Live? The American Statistician, 72(4), 368-375.
 
 # VIII. Appendix
