@@ -329,9 +329,7 @@ model_output <- jags(data = data_build_model,
                                                              "age_Francis_predictive",
                                                              "age_Obama_predictive",
                                                              "age_Dalai_predictive",
-                                                             "age_Naruhito_predictive"#,
-                                                             #"survival_non_censored"
-                                                             ), 
+                                                             "age_Naruhito_predictive"                                                             ), 
 
                                       n.iter = 50000, 
                                       n.chains = 3,
@@ -397,7 +395,7 @@ For example, if a Pope is born one year later, he is expected to live longer by 
 Our model predicts that the 85-year-old 14th Dalai Lama is expected to live 92.4 years (95% credible interval: 85.4 - 99.6 years), the 84-year-old Pope Francis is expected to live 92.4 years (95% credible interval: 84.2 - 99.4 years), the 60-year-old Janpanese Emperior Naruhito is expected to live 85.3 years (95% credible interval: 66.4 - 99.5 years) and the 60-year-old former President Barack Obama is expected to live 84.8 years (95% credible interval: 61.5 - 99.4 years). 
 
 
-## Posterior Predictive Plots (2 pairs)
+## Posterior Predictive Plots
 
 ### Francis and Dalai Lama 
 
