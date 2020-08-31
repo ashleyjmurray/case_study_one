@@ -1,4 +1,5 @@
 ---
+
 title: "Predicting the Lifespan of World Leaders"
 authors: "Cathy Lee, Alice Liao, Ashley Murray, and Matty Pahren"
 date: "8-30-20"
@@ -18,7 +19,7 @@ The rest of the paper is structured as follows. First, we will describe the data
 
 # II. Data
 
-The data used in this analysis contains entries for 177 different world leaders. The types of world leaders present in the data include Popes, US Presidents, Dalai Lamas, Chinese Emperors, and Japanese Emperors. Each leader's birth date type of leader is recorded. For some of these groups, we have data dating all the way back to the 14th century. Additionally, leaders who have passed away also have their death date and age of death recorded. For leaders that are still living, these columns instead contain the date the dataset was created (July 31, 2020) and their current age on that date. In order to further clarify who is dead or alive, there is a column titled "Censored," which takes a value of 0 if the person is still dead and a value of 1 if that person is still alive. Related to this, there is another column called "Fail," which takes on a value of 1 if the person is dead and a value of 0 if the person is alive. In total, there are 11 living leaders in our dataset, 4 of whose age of death we are trying to predict. 
+The data used in this analysis contains entries for 177 different world leaders. The types of world leaders present in the data include Popes, US Presidents, Dalai Lamas, Chinese Emperors, and Japanese Emperors. Each leader's birth date and type of leader is recorded. For some of these groups, we have data dating all the way back to the 14th century. Additionally, leaders who have passed away also have their death date and age of death recorded. For leaders that are still living, these columns instead contain the date the dataset was created (July 31, 2020) and their current age on that date. In order to further clarify who is dead or alive, there is a column titled "Censored," which takes a value of 0 if the person is still dead and a value of 1 if that person is still alive. Related to this, there is another column called "Fail," which takes on a value of 1 if the person is dead and a value of 0 if the person is alive. In total, there are 10 living leaders in our dataset, 4 of whose age of death we are trying to predict. 
 
 ```{r, message=F, include=F}
 #library(R2jags)
@@ -61,10 +62,14 @@ As seen from the above plots, there seems to be no discernible relationship betw
 
 ## III a. Motivating the Model
 
-We use survival analysis as a way to model $T_i$, the lifespan of a given leader i depending on their year of birth and type of leadership. Survival analysis is useful in that it allows the consideration of "censored" data. This means that we do not always observe the outcome for each data point, for example, we do not know the death date of leaders that are still alive. Thus, we do not know their lifespan, we just know that their survival time $T_i$ will be greater than their current age. 
+We use survival analysis as a way to model $T_i$, the lifespan of a given leader i depending on their year of birth and type of leadership. Survival analysis is useful in that it allows the consideration of "censored" data. This means that we do not always observe the outcome for each data point. For example, we do not know the death date of leaders that are still alive. Thus, we do not know their lifespan, we just know that their survival time $T_i$ will be greater than their current age. 
 
+We model the lifespan $T_i$ of an individual i after the Weibull distribution specified below. We choose to use the Weibull distribution because it is often utilized in survival analysis and allows the user to specify a flexible shape parameter for the distribution. The first parameter $r$, also known as the shape parameter, is a positive scalar, and the second parameter $\mu$, the scale parameter, is a linear function of the covariates (in this case, birth year centered at mean 1677 and types of leadership as well as their interactions). 
+
+
+$$ T_i \sim Weibull(\alpha, \mu) $$
 We model the lifespan $T_i$ of an individual i after the Weibull distribution specified below. We choose to use the Weibull distribution because it is often utilized in survival analysis and allows the user to specify a flexible shape parameter for the distribution. The first parameter $r$, also known as the shape parameter, is a positive scalar, and the second parameter $\mu$, the scale parameter, is a linear function of the covariates (birth year and types of leadership as well as their interactions). 
-$$ T_i \sim Weibull(r, \mu) $$
+
 $$\log(\mu_i) = \beta_0+\beta_1 (Year \ of \ Birth_i)+\beta_2 (Leadership_i = UsPres) + \beta_3 (Leadership_i = ChinaEmp) $$
 $$+ \beta_4 (Leadership_i = DalaiLama) +\beta_5 (Leadership_i = JapanEmp) \\$$
 $$+ \beta_6 (Year \ of \ Birth_i * (Leadership_i = UsPres)) \\$$
@@ -75,7 +80,12 @@ where Leadership_i = Popes is the baseline for comparison.
 
 ## III b. Addressing Censored Data
 
-To handle censored observations, we specify their contribution to the likelihood function using the "zeroes trick." Since the sampling distribution of the censored observations is not known to be a standard distribution, we use the Poisson "zeroes trick" where the likelihood of a Poisson(phi) observation equal to zero is exp(-phi), and when observation[i] has a likelihood of L[i], then phi[i] is assigned to -log(L[i]) if our observed data is a set of 0's. This is necessary because we don't know the lifespan of currently living people, so we need a way to model their expected survival times. This method is also generally more computationally efficient (Stander et al, 2018).
+To handle censored observations, we specify their contribution to the likelihood function using the "zeroes trick." Since the sampling distribution of the censored observations is not known to be a standard distribution, we use the Poisson "zeroes trick" where the likelihood of a $Poisson(\phi)$ observation equal to zero is $exp(-\phi)$, and when observation $i$ has a likelihood of $L_i$, then $\phi_i$ is assigned to $-log(L_i)$ if our observed data is a set of 0's. This is necessary because we don't know the lifespan of currently living people, so we need a way to model their expected survival times. This method is also generally more computationally efficient (Stander et al, 2018).
+
+==
+### I THINK THIS IS HOW THE ZERO'S TRICK WORKS:  http://www.ejwagenmakers.com/BayesCourse/BugsBookZerosTrick.pdf - Alice
+
+To handle censored observations, we specify their contribution to the likelihood function using the "zeros trick." Since the sampling distribution of the censored observations is not known to be a standard distribution, we use the Poisson "zeros trick" where a set of 0's are created with the likelihood of observing an 0 following a $Poisson(\phi_i)$ distribution. The likelihood $L_i$ is $Pr(z_i = 0) = exp(-\phi)$. In other words, $\phi_i$ equals $-log(L_i)$. This mechanism is necessary because we don't know the lifespan of currently living people, so we need a way to model their expected survival times. This method is also generally more computationally efficient (Stander et al, 2018).
 
 ## III c. Prior Choice
 
@@ -84,7 +94,6 @@ We assume that our priors are independent because intuitively a given observatio
 For our prior for r, we chose a prior of $exp(1)$, as we believe the hazard of death increases with time. 
 
 
-# Data Cleaning
 ```{r, include=F}
 # 10 censored data
 leaders_data$Name[leaders_data$Censored == "1"]
@@ -338,9 +347,9 @@ model_output <- jags(data = data_build_model,
                                       n.iter = 50000, 
                                       n.chains = 3,
                                       model.file = build_model)
-
 model_output
 ```
+
 
 ```{r, include = FALSE}
 library(coda)
@@ -390,10 +399,51 @@ The combination of traceplots, lag-1 scatterplots, and acf plots suggest the cha
 
 As Stander et al (2018) pointed out, following this Weibull distribution, $log(T_i)$ is equal in distribution to $\frac{1}{r} (\beta_0 + \beta_1x_{i1}+\beta_2x_{i2}+...+\beta_9x_{i1}x_{i5}) + \frac{1}{r}\log(\epsilon)$ where $\epsilon \sim exp(1)$. $\alpha_j = -\beta_j/r$, $j = 1,2,...,9$. The interpretation of coefficients depends on the interaction terms (i.e. both year of birth and the type of leadership). 
 
-For example, if a Pope is born one year later, he is expected to live longer by a multiplicative factor of $exp(\alpha_1)$, or his lifespan is expected to increase by a percentage of $100*exp(\alpha_1-1)$. If a U.S. President is born one year later, he is expected to live longer by a multiplicative factor of $exp(\alpha_1 + \alpha_6)$; for a U.S. President and a Chinese Emperor were born in the same year $y$, the Chinese emperor is expected to live longer by a multiplicative factor of $exp(\alpha_3 - \alpha_2 + (\alpha_7-\alpha_6)*y)$ and so on. 
+For example, while keeping all others constant, if a Pope is born one year later, he is expected to live longer by a multiplicative factor of $exp(\alpha_1)$, or his lifespan is expected to increase by a percentage of $100*exp(\alpha_1-1)$. If a U.S. President is born one year later, he is expected to live longer by a multiplicative factor of $exp(\alpha_1 + \alpha_6)$. If a U.S. President and a Chinese Emperor are born in the same year $y$, the Chinese emperor is expected to live longer by a multiplicative factor of $exp(\alpha_3 - \alpha_2 + (\alpha_7-\alpha_6)*y)$ and so on. 
 
 # V. Results
-*insert model output summary here*
+
+```{r tidy-model-table-beta, echo = F}
+vars = c("beta_0", "beta_1", "beta_2", "beta_3", "beta_4", "beta_5", "beta_6", 
+                    "beta_7", "beta_8", "beta_9", "r")
+output <- data.frame(model_output$BUGSoutput$summary)
+output <- output[row.names(output) %in% vars, ]
+coef <- output %>%
+  mutate("Variable" = vars,
+         "Mean" = output$mean,
+         "Standard Deviation" = output$sd,
+         "2.5% Quantile" = output$X2.5.,
+         "Median" = output$X50.,
+         "97.5% Quantile" = output$X97.5.
+         ) %>%
+  select("Variable", "Mean", "Standard Deviation", "2.5% Quantile", "Median", "97.5% Quantile")
+kable(coef)
+```
+
+While we may expect leaders who were born earlier to live a shorter life, $\hat{\beta_1}$ which correpsond to the leaders' year of birth appears to be insignificant parameter it is very close to 0 (-0.0016) and is statistically insignificant (95% credible interval includes 0). $\hat{\beta_6}$ to $\hat{\beta_9}$ which correspond to the interaction effects are very weak and mostly insginificant as well. Types of leadership ($\hat{\beta_2}$ to $\hat{\beta_5}$) do seem to be significant. As explained in Section IV, the model is easier to understand if we interprate the output in terms of $\alpha_j$, defined as $\alpha_j = -\beta_j/r$, $j = 1,2,...,9$. Some examples of the interpretation are provided below.
+
+```{r tidy-model-table-alpha, echo = F}
+vars1 = c("alpha_0", "alpha_1", "alpha_2", "alpha_3", "alpha_4", "alpha_5", "alpha_6", 
+         "alpha_7", "alpha_8", "alpha_9", 
+         "percentage_increase_year", "percentage_increase_UsPres", 
+         "percentage_increase_ChinaEmp", "percentage_increase_DalaiLama",
+         "percentage_increase_BYUsPres", "percentage_increase_BYChinaEmp",
+         "percentage_increase_BYDalaiLama", "percentage_increase_BYJapanEmp"
+         )
+output1 <- output[row.names(output) %in% vars1, ]
+coef1 <- output1 %>%
+  mutate("Variable" = vars1,
+         "Mean" = output1$mean,
+         "Standard Deviation" = output1$sd,
+         "2.5% Quantile" = output1$X2.5.,
+         "Median" = output1$X50.,
+         "97.5% Quantile" = output1$X97.5.
+         ) %>%
+  select("Variable", "Mean", "Standard Deviation", "2.5% Quantile", "Median", "97.5% Quantile")
+kable(coef1)
+```
+
+- $\alpha_0$: 
 
 
 Our model predicts that the 85-year-old 14th Dalai Lama is expected to live 92.4 years (95% credible interval: 85.4 - 99.6 years), the 84-year-old Pope Francis is expected to live 92.4 years (95% credible interval: 84.2 - 99.4 years), the 60-year-old Janpanese Emperior Naruhito is expected to live 85.3 years (95% credible interval: 66.4 - 99.5 years) and the 60-year-old former President Barack Obama is expected to live 84.8 years (95% credible interval: 61.5 - 99.4 years). 
@@ -526,6 +576,7 @@ coef <- output %>%
 kable(coef)
 ```
 
+
 ```{r standardized-resid, fig.height=2, fig.width=5, echo=F}
 # calculate and create graphs for standardized residuals
 
@@ -621,6 +672,15 @@ d[sapply(d, is.infinite)] <- 100
 ```
 
 
+```{r, echo=F}
+subset <- filter(leaders_data, Censored == 0)
+ggplot(data = subset, aes(x = Birth.Year, Age.Event)) + geom_point(color="pink") + ggtitle("Distribution of Leaders' Ages") + labs(x = "Birth Year", y = "Age")
+
+
+```
+
+=======
+
 ```{r, echo = FALSE}
  r <- sample(nrow(non_censored_prediction), 2)
  hist(d[,1])
@@ -628,13 +688,9 @@ d[sapply(d, is.infinite)] <- 100
  print(mean(d<0))
  print(mean(non_censored_prediction$Age.Event <0))
 ```
+
 For the posterior predictive checks, it appears that our model returns values that are more concentrated around the upper truncation limit, which is why the dataframe's Inf values are encoded as 100 (the upper truncation limit defined in our function). This follows what the standardized residuals found, where most of the values from the model are left-skewed. 
 
-
-```{r, echo=F}
-#subset <- filter(leaders_data, Censored == 0)
-#ggplot(data = subset, aes(x = Birth.Year, Age.Event)) + geom_point(color="pink") + ggtitle("Distribution of #Leaders' Ages") + labs(x = "Birth Year", y = "Age")
-```
 
 # VI. Conclusion and Further Discussion
 
@@ -645,6 +701,9 @@ This model could be improved by including more predictors; for example, health w
 
 # VII. References
 
-Stander, J., Valle, L. D., &amp; Cortina-Borja, M. (2018). A Bayesian Survival Analysis of a Historical Dataset: How Long Do Popes Live? The American Statistician, 72(4), 368-375.
+Stander, J., Dalla Valle, L., and Cortina-Borja, M. (2018). A Bayesian Survival Analysis of a Historical Dataset: How Long Do Popes Live? The American Statistician 72(4):368-375.
 
 # VIII. Appendix
+
+
+
