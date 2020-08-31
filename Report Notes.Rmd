@@ -69,7 +69,7 @@ Goals:
 - Finish the conclusion
 - Do the video 
   - Cathy: Predictive posterior for the four leaders, lil trace plots(mcmc)
-  - Matty: Introduction, Model/Motivating Model (introducing Weibull)
+  - Matty: Introduction, Model/Motivating Model (introducing Weibull) *done*
   - Alice: Interpretation of the Output, living people
   - Ashley: Conclusion
 - Ashley: try to fix posterior predictive checks LOL, need to explain the plots outputted
