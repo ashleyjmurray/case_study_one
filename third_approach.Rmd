@@ -784,5 +784,3 @@ Stander, J., Dalla Valle, L., and Cortina-Borja, M. (2018). A Bayesian Survival 
 # VIII. Appendix
 
 *add old model and resid code here*
-
-
