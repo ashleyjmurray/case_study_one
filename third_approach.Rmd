@@ -104,6 +104,7 @@ We assume that our priors are independent because intuitively a given observatio
 leaders_data$Name[leaders_data$Censored == "1"]
 
 # create interactions
+# refyr = 1796
 leaders_data <- leaders_data %>%
   mutate(TypeChinaEmp = as.factor(case_when(Type == "ChinaEmp" ~ 1,
                              TRUE ~ 0)),
@@ -114,7 +115,23 @@ leaders_data <- leaders_data %>%
          TypePope = as.factor(case_when(Type == "Pope" ~ 1, 
                               TRUE ~ 0)),
          TypeUsPres = as.factor(case_when(Type == "UsPres" ~ 1,
-                                TRUE ~ 0)))
+                                TRUE ~ 0))) %>%
+  mutate(Yr14 = as.factor(case_when(year(Birth.Date) <= 1400 ~1,
+                                        TRUE ~0)),
+         Yr15 = as.factor(case_when(year(Birth.Date) >= 1401 & year(Birth.Date) <= 1500 ~ 1,
+                                         TRUE ~0)),
+         Yr16 = as.factor(case_when(year(Birth.Date) >= 1501 & year(Birth.Date) <= 1600 ~ 1,
+                                         TRUE ~0)),
+         Yr17 = as.factor(case_when(year(Birth.Date) >= 1601 & year(Birth.Date) <= 1700 ~ 1,
+                                         TRUE ~0)),
+         Yr18 = as.factor(case_when(year(Birth.Date) >= 1701 & year(Birth.Date) <= 1800 ~ 1,
+                                         TRUE ~0)),
+         Yr19 = as.factor(case_when(year(Birth.Date) >= 1801 & year(Birth.Date) <= 1900 ~ 1,
+                                         TRUE ~0)),
+         Yr20 = as.factor(case_when(year(Birth.Date) >= 1901 & year(Birth.Date) <= 2000 ~ 1,
+                                         TRUE ~0))
+         ) 
+
 
 # get rid of those we are trying to predict
 leaders_nopred <- leaders_data # %>%
@@ -129,24 +146,45 @@ survival <- ifelse(censored == 0, survival_raw, NA)
 
 censoring_limits <- ifelse(censored == 0, 100, survival_raw)
 
-x_1 <- (leaders_nopred$Birth.Year - mean(leaders_nopred$Birth.Year))/100
-x_1_2 <- (x_1)^2
-x_2 <- leaders_nopred$TypeUsPres
-x_3 <- leaders_nopred$TypeChinaEmp
-x_4 <- leaders_nopred$TypeDalaiLama
-x_5 <- leaders_nopred$TypeJapanEmp
+x_1 <- as.numeric(as.character(leaders_nopred$Yr15))
+x_2 <- as.numeric(as.character(leaders_nopred$Yr16))
+x_3 <- as.numeric(as.character(leaders_nopred$Yr17))
+x_4 <- as.numeric(as.character(leaders_nopred$Yr18))
+x_5 <- as.numeric(as.character(leaders_nopred$Yr19))
+x_6 <- as.numeric(as.character(leaders_nopred$Yr20))
 
-# add interaction b/w Birth.Year and Type
-x_6 <- x_1*as.numeric(as.character(x_2))
-x_6_2 <- x_1_2*as.numeric(as.character(x_2))
-x_7 <- x_1*as.numeric(as.character(x_3))
-x_7_2 <- x_1_2*as.numeric(as.character(x_3))
+x_7 <- as.numeric(as.character(leaders_nopred$TypeUsPres))
+x_8 <- as.numeric(as.character(leaders_nopred$TypeChinaEmp))
+x_9 <- as.numeric(as.character(leaders_nopred$TypeDalaiLama))
+x_10 <- as.numeric(as.character(leaders_nopred$TypeJapanEmp))
 
-x_8 <- x_1*as.numeric(as.character(x_4))
-x_8_2 <- x_1_2*as.numeric(as.character(x_4))
+# add interaction b/w Yr__ and Type___
+x_1_7 <- x_1*x_7; x_1_8 <- x_1*x_8; x_1_9 <- x_1*x_9; x_1_10 <- x_1*x_10
 
-x_9 <- x_1*as.numeric(as.character(x_5))
-x_9_2 <- x_1_2*as.numeric(as.character(x_5))
+x_2_7 <- x_2*x_7
+x_2_8 <- x_2*x_8
+x_2_9 <- x_2*x_9
+x_2_10 <- x_2*x_10
+
+x_3_7 <- x_3*x_7
+x_3_8 <- x_3*x_8
+x_3_9 <- x_3*x_9
+x_3_10 <- x_3*x_10
+
+x_4_7 <- x_4*x_7
+x_4_8 <- x_4*x_8
+x_4_9 <- x_4*x_9
+x_4_10 <- x_4*x_10
+
+x_5_7 <- x_5*x_7
+x_5_8 <- x_5*x_8
+x_5_9 <- x_5*x_9
+x_5_10 <- x_5*x_10
+
+x_6_7 <- x_6*x_7
+x_6_8 <- x_6*x_8
+x_6_9 <- x_6*x_9
+x_6_10 <- x_6*x_10
 ```
 
 *write based on residual plots, choose polynomial term for time*
@@ -159,33 +197,115 @@ build_model <- function() {
     z_censored[i] ~ dpois(phi_censored[i])
     phi_censored[i] <- mu_censored[i] * pow(t_censored[i], r)
     mu_censored[i] <- exp(beta_censored[i])
-    beta_censored[i] <- beta_0 + beta_1*x_1_censored[i] + beta_1_2*x_1_2_censored[i] +
-      beta_2*x_2_censored[i] + beta_3*x_3_censored[i] + beta_4*x_4_censored[i] + beta_5*x_5_censored[i] + beta_6*x_6_censored[i] + beta_6_2*x_6_2_censored[i]+ beta_7*x_7_censored[i] +beta_7_2*x_7_2_censored[i] + beta_8*x_8_censored[i] + beta_8_2*x_8_2_censored[i]+ beta_9*x_9_censored[i] +beta_9_2*x_9_2_censored[i]
+    beta_censored[i] <- beta_0 + beta_1*x_1_censored[i] + 
+      beta_2*x_2_censored[i] + beta_3*x_3_censored[i] + beta_4*x_4_censored[i] + beta_5*x_5_censored[i] + beta_6*x_6_censored[i] + beta_7*x_7_censored[i] + beta_8*x_8_censored[i] + beta_9*x_9_censored[i] + beta_10*x_10_censored[i] +
+    
+    beta_1_7*x_1_7_censored[i] + beta_1_8*x_1_8_censored[i] +  beta_1_9*x_1_9_censored[i] + beta_1_10*x_1_10_censored[i] +
+      
+          beta_2_7*x_2_7_censored[i] +
+          beta_2_8*x_2_8_censored[i] +
+          beta_2_9*x_2_9_censored[i] +
+          beta_2_10*x_2_10_censored[i] +
+      
+          beta_3_7*x_3_7_censored[i] +
+          beta_3_8*x_3_8_censored[i] +
+          beta_3_9*x_3_9_censored[i] +
+          beta_3_10*x_3_10_censored[i] +
+      
+          beta_4_7*x_4_7_censored[i] +
+          beta_4_8*x_4_8_censored[i] +
+          beta_4_9*x_4_9_censored[i] +
+          beta_4_10*x_4_10_censored[i] +
+      
+          beta_5_7*x_5_7_censored[i] +
+          beta_5_8*x_5_8_censored[i] +
+          beta_5_9*x_5_9_censored[i] +
+          beta_5_10*x_5_10_censored[i] +
+      
+          beta_6_7*x_6_7_censored[i] +
+          beta_6_8*x_6_8_censored[i] +
+          beta_6_9*x_6_9_censored[i] +
+          beta_6_10*x_6_10_censored[i] 
 
   }
   
   for(j in 1:n_non_censored) { #total rows - 6 ** 6 are censored in leaders_nopred
     survival_non_censored[j] ~ dweib(r, mu[j])
     mu[j] <- exp(beta[j])
-    beta[j] <- beta_0 + beta_1*x_1_non_censored[j] + beta_1_2*x_1_2_non_censored[j] +
-      beta_2*x_2_non_censored[j] + beta_3*x_3_non_censored[j] + beta_4*x_4_non_censored[j] + beta_5*x_5_non_censored[j] + beta_6*x_6_non_censored[j] + beta_6_2*x_6_2_non_censored[j]+ beta_7*x_7_non_censored[j] +beta_7_2*x_7_2_non_censored[j] + beta_8*x_8_non_censored[j] + beta_8_2*x_8_2_non_censored[j]+ beta_9*x_9_non_censored[j] +beta_9_2*x_9_2_non_censored[j]
+    beta[j] <- beta_0 + beta_1*x_1_non_censored[j] + 
+      beta_2*x_2_non_censored[j] + beta_3*x_3_non_censored[j] + beta_4*x_4_non_censored[j] + beta_5*x_5_non_censored[j] + beta_6*x_6_non_censored[j] + beta_7*x_7_non_censored[j] + beta_8*x_8_non_censored[j] + beta_9*x_9_non_censored[j] + beta_10*x_10_non_censored[j] +
+    
+    beta_1_7*x_1_7_non_censored[j] + beta_1_8*x_1_8_non_censored[j] +  beta_1_9*x_1_9_non_censored[j] + beta_1_10*x_1_10_non_censored[j] +
+      
+          beta_2_7*x_2_7_non_censored[j] +
+          beta_2_8*x_2_8_non_censored[j] +
+          beta_2_9*x_2_9_non_censored[j] +
+          beta_2_10*x_2_10_non_censored[j] +
+      
+          beta_3_7*x_3_7_non_censored[j] +
+          beta_3_8*x_3_8_non_censored[j] +
+          beta_3_9*x_3_9_non_censored[j] +
+          beta_3_10*x_3_10_non_censored[j] +
+      
+          beta_4_7*x_4_7_non_censored[j] +
+          beta_4_8*x_4_8_non_censored[j] +
+          beta_4_9*x_4_9_non_censored[j] +
+          beta_4_10*x_4_10_non_censored[j] +
+      
+          beta_5_7*x_5_7_non_censored[j] +
+          beta_5_8*x_5_8_non_censored[j] +
+          beta_5_9*x_5_9_non_censored[j] +
+          beta_5_10*x_5_10_non_censored[j] +
+      
+          beta_6_7*x_6_7_non_censored[j] +
+          beta_6_8*x_6_8_non_censored[j] +
+          beta_6_9*x_6_9_non_censored[j] +
+          beta_6_10*x_6_10_non_censored[j] 
   }
+  
+  
   
   beta_0 ~ dnorm(0.0, 1.0E-3) # Prior on beta_0 is normal with low precision
   beta_1 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_1_2 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
   beta_2 ~ dnorm(0.0, 1.0E-3) # Prior on beta_2 is normal with low precision
   beta_3 ~ dnorm(0.0, 1.0E-3) # Prior on beta_3 is normal with low precision
   beta_4 ~ dnorm(0.0, 1.0E-3) # Prior on beta_4 is normal with low precision
   beta_5 ~ dnorm(0.0, 1.0E-3) # Prior on beta_5 is normal with low precision
   beta_6 ~ dnorm(0.0, 1.0E-3) # Prior on beta_6 is normal with low precision
-  beta_6_2 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
   beta_7 ~ dnorm(0.0, 1.0E-3) # Prior on beta_7 is normal with low precision
-  beta_7_2 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
   beta_8 ~ dnorm(0.0, 1.0E-3) # Prior on beta_8 is normal with low precision
-  beta_8_2 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
   beta_9 ~ dnorm(0.0, 1.0E-3) # Prior on beta_9 is normal with low precision
-  beta_9_2 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
+  beta_10 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
+  beta_1_7 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
+  beta_1_8 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
+  beta_1_9 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
+  beta_1_10 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
+
+  beta_2_7 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
+  beta_2_8 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
+  beta_2_9 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
+  beta_2_10 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
+
+  beta_3_7 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
+  beta_3_8 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
+  beta_3_9 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
+  beta_3_10 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
+
+  beta_4_7 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
+  beta_4_8 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
+  beta_4_9 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
+  beta_4_10 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
+
+  beta_5_7 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
+  beta_5_8 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
+  beta_5_9 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
+  beta_5_10 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
+
+  beta_6_7 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
+  beta_6_8 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
+  beta_6_9 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
+  beta_6_10 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
+
   r ~ dexp(0.1) # Prior on r
   
   # sensitivity analysis priors
@@ -230,7 +350,7 @@ build_model <- function() {
   # survival_Francis ~ dweib(r, mu_Francis) %_% T(present_length_Francis, upper_length)
   # age_Francis_predictive <- survival_Francis
 
-  beta_Obama <- beta_0 + (beta_1+beta_1_2+beta_6+beta_6_2)*year_Obama + beta_2
+  beta_Obama <- beta_0 + beta_6 + beta_7 + beta_6_7
   mu_Obama <- exp(beta_Obama)
   survival_Obama ~ dweib(r, mu_Obama) %_% T(present_length_Obama, upper_length)
   age_Obama_predictive <- survival_Obama
@@ -255,38 +375,93 @@ censored_dex = which(censored==1) # index of ppl who are censored
 z_censored <- rep(0, length(censored_dex))
 t_censored <- censoring_limits[censored_dex]
 x_1_censored <- x_1[censored_dex] 
-x_1_2_censored <- x_1_2[censored_dex]
 x_2_censored <- x_2[censored_dex] 
 x_3_censored <- x_3[censored_dex]
 x_4_censored <- x_4[censored_dex]
 x_5_censored <- x_5[censored_dex]
 x_6_censored <- x_6[censored_dex]
-x_6_2_censored <- x_6_2[censored_dex]
 x_7_censored <- x_7[censored_dex]
-x_7_2_censored <- x_7_2[censored_dex]
 x_8_censored <- x_8[censored_dex]
-x_8_2_censored <- x_8_2[censored_dex]
 x_9_censored <- x_9[censored_dex]
-x_9_2_censored <- x_9_2[censored_dex]
+x_10_censored <- x_10[censored_dex] 
+
+x_1_7_censored <- x_1_7[censored_dex] 
+x_1_8_censored <- x_1_8[censored_dex] 
+x_1_9_censored <- x_1_9[censored_dex] 
+x_1_10_censored <- x_1_10[censored_dex] 
+
+x_2_7_censored <- x_2_7[censored_dex] 
+x_2_8_censored <- x_2_8[censored_dex] 
+x_2_9_censored <- x_2_9[censored_dex] 
+x_2_10_censored <- x_2_10[censored_dex] 
+
+x_3_7_censored <- x_3_7[censored_dex] 
+x_3_8_censored <- x_3_8[censored_dex] 
+x_3_9_censored <- x_3_9[censored_dex] 
+x_3_10_censored <- x_3_10[censored_dex] 
+
+x_4_7_censored <- x_4_7[censored_dex] 
+x_4_8_censored <- x_4_8[censored_dex] 
+x_4_9_censored <- x_4_9[censored_dex] 
+x_4_10_censored <- x_4_10[censored_dex] 
+
+x_5_7_censored <- x_5_7[censored_dex] 
+x_5_8_censored <- x_5_8[censored_dex] 
+x_5_9_censored <- x_5_9[censored_dex] 
+x_5_10_censored <- x_5_10[censored_dex] 
+
+x_6_7_censored <- x_6_7[censored_dex] 
+x_6_8_censored <- x_6_8[censored_dex] 
+x_6_9_censored <- x_6_9[censored_dex] 
+x_6_10_censored <- x_6_10[censored_dex] 
+
 
 n_censored <- length(censored_dex)
 
 # set numeric vectors for non censored ppl
 survival_non_censored <- survival[-censored_dex] # Remove ALL ALIVE PEOPLE
 x_1_non_censored <- x_1[-censored_dex]
-x_1_2_non_censored <- x_1_2[-censored_dex]
 x_2_non_censored <- x_2[-censored_dex]
 x_3_non_censored <- x_3[-censored_dex]
 x_4_non_censored <- x_4[-censored_dex]
 x_5_non_censored <- x_5[-censored_dex]
 x_6_non_censored <- x_6[-censored_dex]
-x_6_2_non_censored <- x_6_2[-censored_dex]
 x_7_non_censored <- x_7[-censored_dex]
-x_7_2_non_censored <- x_7_2[-censored_dex]
 x_8_non_censored <- x_8[-censored_dex]
-x_8_2_non_censored <- x_8_2[-censored_dex]
 x_9_non_censored <- x_9[-censored_dex]
-x_9_2_non_censored <- x_9_2[-censored_dex]
+x_10_non_censored <- x_10[-censored_dex]
+
+
+x_1_7_non_censored <- x_1_7[-censored_dex] 
+x_1_8_non_censored <- x_1_8[-censored_dex] 
+x_1_9_non_censored <- x_1_9[-censored_dex] 
+x_1_10_non_censored <- x_1_10[-censored_dex] 
+
+x_2_7_non_censored <- x_2_7[-censored_dex] 
+x_2_8_non_censored <- x_2_8[-censored_dex] 
+x_2_9_non_censored <- x_2_9[-censored_dex] 
+x_2_10_non_censored <- x_2_10[-censored_dex] 
+
+x_3_7_non_censored <- x_3_7[-censored_dex] 
+x_3_8_non_censored <- x_3_8[-censored_dex] 
+x_3_9_non_censored <- x_3_9[-censored_dex] 
+x_3_10_non_censored <- x_3_10[-censored_dex] 
+
+x_4_7_non_censored <- x_4_7[-censored_dex] 
+x_4_8_non_censored <- x_4_8[-censored_dex] 
+x_4_9_non_censored <- x_4_9[-censored_dex] 
+x_4_10_non_censored <- x_4_10[-censored_dex] 
+
+x_5_7_non_censored <- x_5_7[-censored_dex] 
+x_5_8_non_censored <- x_5_8[-censored_dex] 
+x_5_9_non_censored <- x_5_9[-censored_dex] 
+x_5_10_non_censored <- x_5_10[-censored_dex] 
+
+x_6_7_non_censored <- x_6_7[-censored_dex] 
+x_6_8_non_censored <- x_6_8[-censored_dex] 
+x_6_9_non_censored <- x_6_9[-censored_dex] 
+x_6_10_non_censored <- x_6_10[-censored_dex] 
+
 
 n_non_censored <- length(survival_non_censored)
 
@@ -315,41 +490,87 @@ data_build_model <- list("n_censored",
                                    "z_censored",
                                    "t_censored",
                                    "x_1_censored",
-                                   "x_1_2_censored",
                                    "x_2_censored",
                                    "x_3_censored",
                                    "x_4_censored",
                                    "x_5_censored",
                                    "x_6_censored",
-                                  "x_6_2_censored",
                                    "x_7_censored",
-                                    "x_7_2_censored",
-
                                    "x_8_censored",
-                                    "x_8_2_censored",
-
                                    "x_9_censored",
-                                     "x_9_2_censored",
+                                   "x_10_censored",
+"x_1_7_censored",
+"x_1_8_censored",
+"x_1_9_censored",
+"x_1_10_censored",
+
+"x_2_7_censored",
+"x_2_8_censored",
+"x_2_9_censored",
+"x_2_10_censored",
+
+"x_3_7_censored",
+"x_3_8_censored",
+"x_3_9_censored",
+"x_3_10_censored",
+
+"x_4_7_censored",
+"x_4_8_censored",
+"x_4_9_censored",
+"x_4_10_censored",
+
+"x_5_7_censored",
+"x_5_8_censored",
+"x_5_9_censored",
+"x_5_10_censored",
+
+"x_6_7_censored",
+"x_6_8_censored",
+"x_6_9_censored",
+"x_6_10_censored",
+
+
 
                                    "survival_non_censored",
-                                   "x_1_non_censored",
-                         "x_1_2_non_censored",
+                                    "x_1_non_censored",
                                    "x_2_non_censored",
                                    "x_3_non_censored",
                                    "x_4_non_censored",
                                    "x_5_non_censored",
                                    "x_6_non_censored",
-                                                  "x_6_2_non_censored",
-
                                    "x_7_non_censored",
-                                                  "x_7_2_non_censored",
-
                                    "x_8_non_censored",
-                                                  "x_8_2_non_censored",
+                                   "x_9_non_censored",
+                                   "x_10_non_censored",
+"x_1_7_non_censored",
+"x_1_8_non_censored",
+"x_1_9_non_censored",
+"x_1_10_non_censored",
 
-                                   "x_9_non_censored", 
-                                                  "x_9_2_non_censored",
+"x_2_7_non_censored",
+"x_2_8_non_censored",
+"x_2_9_non_censored",
+"x_2_10_non_censored",
 
+"x_3_7_non_censored",
+"x_3_8_non_censored",
+"x_3_9_non_censored",
+"x_3_10_non_censored",
+
+"x_4_7_non_censored",
+"x_4_8_non_censored",
+"x_4_9_non_censored",
+"x_4_10_non_censored",
+
+"x_5_7_non_censored",
+"x_5_8_non_censored",
+"x_5_9_non_censored",
+"x_5_10_non_censored",
+
+"x_6_7_non_censored",
+"x_6_8_non_censored",
+"x_6_9_non_censored",
+"x_6_10_non_censored",
                                    #"year_Francis",
                                    "year_Obama", 
                                    #"year_Dalai",
@@ -363,22 +584,16 @@ data_build_model <- list("n_censored",
 model_output <- jags(data = data_build_model,  
                                       parameters.to.save = c("beta_0",
                                                              "beta_1",
-                                                             "beta_1_2",
                                                              "beta_2", 
                                                              "beta_3", 
                                                              "beta_4", 
                                                              "beta_5",
                                                              "beta_6",
-                                                                                                                          "beta_6_2",
-
                                                              "beta_7", 
-                                                                                                                          "beta_7_2",
-
                                                              "beta_8",
-                                                                                                                          "beta_8_2",
-
                                                              "beta_9",
-                                                                                                                          "beta_9_2",
+                                                             "beta_10",
+                                                             
 
                                                              "r", 
                                                              # "alpha_0",
@@ -692,14 +907,70 @@ estimates <- no_living %>%
   mutate(predicted = exp(beta_0_est + beta_1_est*(Birth.Year.Cent) + beta_2_est*(UsPres) + beta_3_est*(ChinaEmp) + beta_4_est*(DalaiLama) + beta_5_est*(JapanEmp) + beta_6_est*(UsPres)*(Birth.Year.Cent) + beta_7_est*(ChinaEmp)*(Birth.Year.Cent) + beta_8_est*(DalaiLama)*(Birth.Year.Cent) + beta_9_est*(JapanEmp)*(Birth.Year.Cent)))
 
 
-data.mat = as.matrix(cbind(x_1, x_1_2, x_2, x_3, x_4, x_5, x_6, x_6_2, x_7, x_7_2, x_8, x_8_2, x_9, x_9_2))
+data.mat = as.matrix(cbind(x_1, x_2, x_3, x_4, x_5, x_6, x_7, x_8, x_9, x_10, 
+                           x_1_7,
+                           x_1_8,
+                           x_1_9,
+                           x_1_10,
+                             x_2_7,
+                           x_2_8,
+                           x_2_9,
+                           x_2_10,
+                             x_3_7,
+                           x_3_8,
+                           x_3_9,
+                           x_3_10,
+                             x_4_7,
+                           x_4_8,
+                           x_4_9,
+                           x_4_10,
+                             x_5_7,
+                           x_5_8,
+                           x_5_9,
+                           x_5_10,
+                             x_6_7,
+                           x_6_8,
+                           x_6_9,
+                           x_6_10))
 
 # data.mat = as.matrix(c(x_1, x_1_2, x_2, x_3, x_4, x_5, x_6, x_6_2, x_7, x_7_2, x_8, x_8_2, x_9, x_9_2), nrow = nrow(leaders_nopred), byrow = TRUE)
 
 pred_res = data.frame(t(model_output$BUGSoutput$summary))
 r = pred_res$r[1]
-betas = pred_res[,c("beta_0", "beta_1", "beta_1_2", "beta_2",  "beta_3", "beta_4", "beta_5",
-                     "beta_6",  "beta_6_2", "beta_7", "beta_7_2", "beta_8", "beta_8_2", "beta_9", "beta_9_2")][1,]
+betas = pred_res[,c("beta_0", "beta_1",
+                                                             "beta_2", 
+                                                             "beta_3", 
+                                                             "beta_4", 
+                                                             "beta_5",
+                                                             "beta_6",
+                                                             "beta_7", 
+                                                             "beta_8",
+                                                             "beta_9",
+                                                             "beta_10",
+                                                             "beta_1_7",
+                                                             "beta_1_8",
+                                                             "beta_1_9",
+                                                             "beta_1_10",
+                                                                         "beta_2_7",
+                                                             "beta_2_8",
+                                                             "beta_2_9",
+                                                             "beta_2_10",
+                                                                         "beta_3_7",
+                                                             "beta_3_8",
+                                                             "beta_3_9",
+                                                             "beta_3_10",
+                                                                         "beta_4_7",
+                                                             "beta_4_8",
+                                                             "beta_4_9",
+                                                             "beta_4_10",
+                                                                         "beta_5_7",
+                                                             "beta_5_8",
+                                                             "beta_5_9",
+                                                             "beta_5_10",
+                                                                         "beta_6_7",
+                                                             "beta_6_8",
+                                                             "beta_6_9",
+                                                             "beta_6_10")][1,]
 
 beta.mat = as.matrix(betas[2:length(betas)], nrow = p, byrow = TRUE)
 temp = data.mat %*% t(beta.mat)
