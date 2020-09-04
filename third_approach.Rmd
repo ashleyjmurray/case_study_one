@@ -345,25 +345,25 @@ build_model <- function() {
   # percentage_increase_BYJapanEmp <- 100*(exp(alpha_9) - 1)
   
   # Predictive distribution of age at the new values
-  # beta_Francis <- beta_0 + beta_1*year_Francis
-  # mu_Francis <- exp(beta_Francis)
-  # survival_Francis ~ dweib(r, mu_Francis) %_% T(present_length_Francis, upper_length)
-  # age_Francis_predictive <- survival_Francis
+  beta_Francis <- beta_0 + beta_6
+  mu_Francis <- exp(beta_Francis)
+  survival_Francis ~ dweib(r, mu_Francis) %_% T(present_length_Francis, upper_length)
+  age_Francis_predictive <- survival_Francis
 
   beta_Obama <- beta_0 + beta_6 + beta_7 + beta_6_7
   mu_Obama <- exp(beta_Obama)
   survival_Obama ~ dweib(r, mu_Obama) %_% T(present_length_Obama, upper_length)
   age_Obama_predictive <- survival_Obama
 
-  # beta_Dalai <- beta_0 + (beta_1+beta_8)*year_Dalai + beta_4
-  # mu_Dalai <- exp(beta_Dalai)
-  # survival_Dalai ~ dweib(r, mu_Dalai) %_% T(present_length_Dalai, upper_length)
-  # age_Dalai_predictive <- survival_Dalai
-  # 
-  # beta_Naruhito <- beta_0 + (beta_1+beta_9)*year_Naruhito + beta_5
-  # mu_Naruhito <- exp(beta_Naruhito)
-  # survival_Naruhito ~ dweib(r, mu_Naruhito) %_% T(present_length_Naruhito, upper_length)
-  # age_Naruhito_predictive <- survival_Naruhito
+  beta_Dalai <- beta_0 + beta_6 + beta_10 + beta_6_10
+  mu_Dalai <- exp(beta_Dalai)
+  survival_Dalai ~ dweib(r, mu_Dalai) %_% T(present_length_Dalai, upper_length)
+  age_Dalai_predictive <- survival_Dalai
+
+  beta_Naruhito <- beta_0 + beta_6 + beta_9 + beta_6_9
+  mu_Naruhito <- exp(beta_Naruhito)
+  survival_Naruhito ~ dweib(r, mu_Naruhito) %_% T(present_length_Naruhito, upper_length)
+  age_Naruhito_predictive <- survival_Naruhito
 }
 ```
 
@@ -572,13 +572,13 @@ data_build_model <- list("n_censored",
 "x_6_9_non_censored",
 "x_6_10_non_censored",
                                    #"year_Francis",
-                                   "year_Obama", 
+                                   # "year_Obama", 
                                    #"year_Dalai",
                                    #"year_Naruhito",
-                                   #"present_length_Francis", 
+                                   "present_length_Francis", 
                                    "present_length_Obama",
-                                   #"present_length_Dalai",
-                                   #"present_length_Naruhito",
+                                   "present_length_Dalai",
+                                   "present_length_Naruhito",
                                    "upper_length")
 
 model_output <- jags(data = data_build_model,  
@@ -615,10 +615,10 @@ model_output <- jags(data = data_build_model,
                                                           #   "percentage_increase_BYChinaEmp",
                                                           # "percentage_increase_BYDalaiLama",
                                                             # "percentage_increase_BYJapanEmp",
-                                                            # "age_Francis_predictive",
-                                                             "age_Obama_predictive"),#,
-                                                             # "age_Dalai_predictive",
-                                                             # "age_Naruhito_predictive"                                                             ), 
+                                                            "age_Francis_predictive",
+                                                             "age_Obama_predictive",#,
+                                                             "age_Dalai_predictive",
+                                                              "age_Naruhito_predictive"                                                             ), 
 
                                       n.iter = 50000, 
                                       n.chains = 3,
@@ -678,46 +678,46 @@ For example, while keeping all others constant, if a Pope is born one year later
 ## V a. Output and Interpretation of the Model
 
 ```{r tidy-model-table-beta, echo = F}
-# output beta results
-vars = c("beta_0", "beta_1", "beta_2", "beta_3", "beta_4", "beta_5", "beta_6", 
-                    "beta_7", "beta_8", "beta_9", "r")
-output <- data.frame(model_output$BUGSoutput$summary)
-output <- output[row.names(output) %in% vars, ]
-coef <- output %>%
-  mutate("Variable" = vars,
-         "Mean" = output$mean,
-         "Standard Deviation" = output$sd,
-         "2.5% Quantile" = output$X2.5.,
-         "Median" = output$X50.,
-         "97.5% Quantile" = output$X97.5.
-         ) %>%
-  select("Variable", "Mean", "Standard Deviation", "2.5% Quantile", "Median", "97.5% Quantile")
-kable(coef)
+# # output beta results
+# vars = c("beta_0", "beta_1", "beta_2", "beta_3", "beta_4", "beta_5", "beta_6", 
+#                     "beta_7", "beta_8", "beta_9", "r")
+# output <- data.frame(model_output$BUGSoutput$summary)
+# output <- output[row.names(output) %in% vars, ]
+# coef <- output %>%
+#   mutate("Variable" = vars,
+#          "Mean" = output$mean,
+#          "Standard Deviation" = output$sd,
+#          "2.5% Quantile" = output$X2.5.,
+#          "Median" = output$X50.,
+#          "97.5% Quantile" = output$X97.5.
+#          ) %>%
+#   select("Variable", "Mean", "Standard Deviation", "2.5% Quantile", "Median", "97.5% Quantile")
+# kable(coef)
 ```
 
 While we may expect leaders who were born earlier to live a shorter life, $\hat{\beta_1}$ which correpsond to the leaders' year of birth appears to be an insignificant parameter as it is very close to 0 (-0.0016) although statistically significant. $\hat{\beta_6}$ to $\hat{\beta_9}$ which correspond to the interaction effects are very weak and mostly insignificant as well. Types of leadership ($\hat{\beta_2}$ to $\hat{\beta_5}$) do seem to be significant. As explained in Section IV, the model is easier to understand if we interprate the output in terms of $\alpha_j$, defined as $\alpha_j = -\beta_j/r$, $j = 1,2,...,9$. Some examples of the interpretation are provided below.
 
 ```{r tidy-model-table-alpha, echo = F}
-vars1 = c("alpha_0", "alpha_1", "alpha_2", "alpha_3", "alpha_4", "alpha_5", "alpha_6", 
-         "alpha_7", "alpha_8", "alpha_9", 
-         "percentage_increase_year", "percentage_increase_UsPres", 
-         "percentage_increase_ChinaEmp", "percentage_increase_DalaiLama",
-         "percentage_increase_JapanEmp",
-         "percentage_increase_BYUsPres", "percentage_increase_BYChinaEmp",
-         "percentage_increase_BYDalaiLama", "percentage_increase_BYJapanEmp"
-         )
-output1 <- data.frame(model_output$BUGSoutput$summary)
-output1 <- output[row.names(output1) %in% vars1, ]
-coef1 <- output1 %>%
-  mutate("Variable" = vars1,
-         "Mean" = output1$mean,
-         "Standard Deviation" = output1$sd,
-         "2.5% Quantile" = output1$X2.5.,
-         "Median" = output1$X50.,
-         "97.5% Quantile" = output1$X97.5.
-         ) %>%
-  select("Variable", "Mean", "Standard Deviation", "2.5% Quantile", "Median", "97.5% Quantile")
-kable(coef1)
+# vars1 = c("alpha_0", "alpha_1", "alpha_2", "alpha_3", "alpha_4", "alpha_5", "alpha_6", 
+#          "alpha_7", "alpha_8", "alpha_9", 
+#          "percentage_increase_year", "percentage_increase_UsPres", 
+#          "percentage_increase_ChinaEmp", "percentage_increase_DalaiLama",
+#          "percentage_increase_JapanEmp",
+#          "percentage_increase_BYUsPres", "percentage_increase_BYChinaEmp",
+#          "percentage_increase_BYDalaiLama", "percentage_increase_BYJapanEmp"
+#          )
+# output1 <- data.frame(model_output$BUGSoutput$summary)
+# output1 <- output[row.names(output1) %in% vars1, ]
+# coef1 <- output1 %>%
+#   mutate("Variable" = vars1,
+#          "Mean" = output1$mean,
+#          "Standard Deviation" = output1$sd,
+#          "2.5% Quantile" = output1$X2.5.,
+#          "Median" = output1$X50.,
+#          "97.5% Quantile" = output1$X97.5.
+#          ) %>%
+#   select("Variable", "Mean", "Standard Deviation", "2.5% Quantile", "Median", "97.5% Quantile")
+# kable(coef1)
 ```
 
 - If a Pope is born one year later, he is expected to live longer by a multiplicative factor of $exp(\alpha_1) = exp(0.0003931) = 1$. This basically means the expected lifespan would hardly change. 
@@ -843,7 +843,7 @@ p1=ggplot(DalaivFrancis, aes(x=diff)) +
       ylim(c(0,0.08)) +
       xlab("Difference in Lifespan") +
       theme(axis.title.y = element_blank()) + 
-  annotate("text", x = 1, y = 0.04, label = paste("mean =", round(meandf,2)), size=3.5, color = "blue") + 
+  annotate("text", x = 2, y = 0.04, label = paste("mean =", round(meandf,2)), size=3.5, color = "blue") + 
   labs(caption = paste("Figure 4a. This histogram shows the posterior predictive distribution of the", "difference in lifespan (14th Dalai Lama - Pope Francis).", sep = "\n")) +
     theme(plot.caption = element_text(hjust = 0))
 
@@ -854,7 +854,7 @@ p2=ggplot(ObamavNaruhito, aes(x=diff)) +
       ylim(c(0,0.04)) +
       xlab("Difference in Lifespan") +
       theme(axis.title.y = element_blank()) + 
-  annotate("text", x = 3, y = 0.02, label = paste("mean =", round(meandf,2)), size=3.5, color = "blue") + 
+  annotate("text", x = 0, y = 0.02, label = paste("mean =", round(meandf,2)), size=3.5, color = "blue") + 
   labs(caption = paste("Figure 4b. This histogram shows the posterior predictive distribution of the", "difference in lifespan (Obama - Emperor Naruhito).", sep = "\n")) +
     theme(plot.caption = element_text(hjust = 0))
 
