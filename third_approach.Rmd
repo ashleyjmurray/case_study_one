@@ -42,6 +42,16 @@ library(grid)
 leaders_data <- get(load("Leaders.RData"))
 leaders_data$Censored[leaders$Name == "Jianwen Emperor"] <- "0" #typo for Jianwen Emperor
 
+# reset censoring end date
+leaders_data = leaders_data %>%
+  mutate(Event.Date = case_when(
+    Censored == 1 ~ as.Date("2020-08-24"),
+    TRUE ~ Event.Date
+  )) %>%
+  mutate(Age.Event = case_when(
+    Censored == 1 ~ time_length(difftime(Event.Date, Birth.Date), "years"),
+    TRUE ~ Age.Event))
+
 leaders_data$Censored <- as.factor(leaders_data$Censored)
 leaders_data$Type <- as.factor(leaders_data$Type)
 leaders_data$Age.Event <- as.numeric(leaders_data$Age.Event)
@@ -103,8 +113,7 @@ We assume that our priors are independent because intuitively a given observatio
 # 10 censored data
 leaders_data$Name[leaders_data$Censored == "1"]
 
-# create interactions
-# refyr = 1796
+# create dummy variables
 leaders_data <- leaders_data %>%
   mutate(TypeChinaEmp = as.factor(case_when(Type == "ChinaEmp" ~ 1,
                              TRUE ~ 0)),
@@ -1156,10 +1165,11 @@ logmus = as.numeric(betas["beta_0"]) + temp
 
 # draw predicted values based on mus calculated above
 set.seed(123)
-Ts = rtweibull(n, r, (1/exp(logmus))^(1/r), 0, 100) 
+cv_n = nrow(monarchs)
+Ts = rtweibull(cv_n, r, (1/exp(logmus))^(1/r), 0, 100) 
 
 #calculate residuals
-resid = leaders_nopred$Age.Event - Ts
+resid = monarchs$Age - Ts
 
 #calculate standard deviations
 meanTs = mean(Ts)
@@ -1168,16 +1178,16 @@ sd = sqrt((1/n)*(sum((diff)^2)) * (1+ (1/n) + (diff)^2/sum((diff)^2)))
 ```
 
 ```{r resid-v-predictor, fig.height=2, fig.width=5, echo = FALSE}
-ggplot(data = leaders_nopred, aes(x = Ts, y = resid/sd)) + geom_point() + 
+ggplot(data = monarchs, aes(x = Ts, y = resid/sd)) + geom_point() + 
   labs(x = "Predicted Lifespan", y = "Standardized Residual")
 ```
 
 
 ```{r resid-v-year, fig.height=2, fig.width=5, echo = FALSE}
-ggplot(data = leaders_nopred, aes(x = Birth.Year, y = resid/sd)) + geom_point() +
+ggplot(data = monarchs, aes(x = V2, y = resid/sd)) + geom_point() +
   labs(x = "Birth Year", y = "Standardized Residual")
 ```
-
+*write about how external cross validation looks bad*
 
 
 # VI. Conclusion and Further Discussion
