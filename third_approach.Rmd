@@ -100,7 +100,7 @@ T_i \sim Weibull(r, \mu_i) \\
 + \sum_{j = 1, \cdots, 6,\ k = 7, \cdots, 10}\beta_{j,k} I(Birth \ Century_i = j)*I(Leadership_i = k) 
 $$
 
-where the indicator functions $Birth \ Century_i = 1, \cdots, 6$ corresponds to a leader $i$ born in the 15th, 16th, 17th, 18th, 19th and 20th century respectively. The 14th century is the baseline for comparison. $Leadership_i = 7, \cdots, 10$ corresponds to a leader $i$ being a U.S. President, a Chinese Emperor, a Dalai Lamai and a Japanese Emperor respoectively. $Leadership_i$ uses Pope the baseline for comparison. $\beta_{j,k}$ is the parameter for the interaction effect between brith year century $j$ and leadership type $k$. 
+where the indicator functions $Birth \ Century_i = 1, \cdots, 6$ corresponds to a leader $i$ born in the 15th, 16th, 17th, 18th, 19th and 20th century respectively. The 14th century is the baseline for comparison. $Leadership_i = 7, \cdots, 10$ corresponds to a leader $i$ being a U.S. President, a Chinese Emperor, a Dalai Lamai and a Japanese Emperor respectively. $Leadership_i$ uses Pope the baseline for comparison. $\beta_{j,k}$ is the parameter for the interaction effect between brith year century $j$ and leadership type $k$. 
 
 For example, for Pope Francis who was born in 1963, his birth year century is the 20th century and his leadership type is Pope. $I(Birth \ Century_{Francis} = j)$ will all be 0 except for $j = 6$ (which indicates he was born in the 20th century) and $I(Leadership_i = k)$ will all be 0 since Pope is the baseline for comparison for leadership types. We can write $\log(\mu_{Francis}) = \beta_0 + \beta_6$ for Pope Francis. 
 
@@ -1167,13 +1167,23 @@ The standardized residuals when plotted against Birth Year show random scatterin
  non_censored_prediction <- filter(leaders_data, Censored == 0) #get all of the leaders that are non-censored, as these are the only people that you are able to do posterior predictive checks on, intuitively
  K <- 10 # set the total number of iterations
  ysims <- matrix(nrow = nrow(non_censored_prediction), ncol = K) #create a matrix of the resulting simulations
+ parameters = c(all_betas, "r")
+ res = data.frame(model_output$BUGSoutput$sims.matrix)[,parameters]
  
  for(k in 1:K){ #for each iteration
    for(i in 1:nrow(non_censored_prediction)){ #for each row of the non-censored data
      w <- sample(nrow(res), 1) #sample from the model's simulations
      samp <- res[w,] #get the resulting values from the model's random sample
      val <- non_censored_prediction[i, ] #get the resulting values from the specific row
-     beta_temp <- samp$beta_0 + samp$beta_1*val$Birth.Year + samp$beta_2*as.integer(val$TypeUsPres) + samp$beta_3*as.integer(val$TypeChinaEmp) + samp$beta_4*as.integer(val$TypeDalaiLama) + samp$beta_5*as.integer(val$TypeJapanEmp) + samp$beta_6*val$Birth.Year*as.integer(val$TypeUsPres) + samp$beta_7*val$Birth.Year*as.integer(val$TypeChinaEmp) + samp$beta_8*val$Birth.Year*as.integer(val$TypeDalaiLama) + samp$beta_9*val$Birth.Year*as.integer(val$TypeJapanEmp) #calculate the beta values as defined by our model
+     
+     beta_temp <- samp$beta_0 + as.integer(val$Yr15)*samp$beta_1 + as.integer(val$Yr16)*samp$beta_2 + as.integer(val$Yr17)*samp$beta_3 + as.integer(val$Yr18)*samp$beta_4 +as.integer(val$Yr19)*samp$beta_5 + as.integer(val$Yr20)*samp$beta_6 + as.integer(val$TypeUsPres)*samp$beta_7 + as.integer(val$TypeChinaEmp)*samp$beta_8 + as.integer(val$TypeDalaiLama)*samp$beta_9 + as.integer(val$TypeJapanEmp)*samp$beta_10 + 
+       
+       as.integer(val$Yr15)*as.integer(val$TypeChinaEmp)*samp$beta_1_8 + as.integer(val$Yr15)*as.integer(val$TypeDalaiLama)*samp$beta_1_9 + as.integer(val$Yr15)*as.integer(val$TypeJapanEmp)*samp$beta_1_10 + 
+       as.integer(val$Yr16)*as.integer(val$TypeChinaEmp)*samp$beta_2_8 + as.integer(val$Yr16)*as.integer(val$TypeDalaiLama)*samp$beta_2_9 + as.integer(val$Yr16)*as.integer(val$TypeJapanEmp)*samp$beta_2_10 + 
+       as.integer(val$Yr17)*as.integer(val$TypeChinaEmp)*samp$beta_3_8 + as.integer(val$Yr17)*as.integer(val$TypeDalaiLama)*samp$beta_3_9 + as.integer(val$Yr17)*as.integer(val$TypeJapanEmp)*samp$beta_3_10 + 
+       as.integer(val$Yr18)*as.integer(val$TypeUsPres)*samp$beta_4_7 + as.integer(val$Yr18)*as.integer(val$TypeChinaEmp)*samp$beta_4_8 + as.integer(val$Yr18)*as.integer(val$TypeDalaiLama)*samp$beta_4_9 + as.integer(val$Yr18)*as.integer(val$TypeJapanEmp)*samp$beta_4_10 + 
+       as.integer(val$Yr19)*as.integer(val$TypeUsPres)*samp$beta_5_7 + as.integer(val$Yr19)*as.integer(val$TypeChinaEmp)*samp$beta_5_8 + as.integer(val$Yr19)*as.integer(val$TypeDalaiLama)*samp$beta_5_9 + as.integer(val$Yr19)*as.integer(val$TypeJapanEmp)*samp$beta_5_10 + 
+       as.integer(val$Yr20)*as.integer(val$TypeUsPres)*samp$beta_6_7 + as.integer(val$Yr20)*as.integer(val$TypeChinaEmp)*samp$beta_6_8 + as.integer(val$Yr20)*as.integer(val$TypeDalaiLama)*samp$beta_6_9 + as.integer(val$Yr20)*as.integer(val$TypeJapanEmp)*samp$beta_6_10 #calculate the beta values as defined by our model
      mu <- exp(beta_temp) #calculate mu from the betas
      t <- rtweibull(1, samp$r, (1/mu)^(1/samp$r), 50, 100) #put the mu and the sample's r value into the weibull equation
      ysims[i, k] <- t #put the resulting value into the ysims matrix
@@ -1198,7 +1208,7 @@ hist(d[,1], main = "Histogram of Distribution of One Simulated Dataset", xlab = 
 abline(v=non_censored_prediction$Age.Event[r], col = "red")  #get the ages defined in the data
 ```
 
-For the posterior predictive checks, it appears that our model returns values that are more concentrated around the upper truncation limit, which is why the dataframe's Inf values are encoded as 100 (the upper truncation limit defined in our function). This follows what the standardized residuals found, where most of the values from the model are left-skewed. 
+For the posterior predictive checks, it appears that our model returns values that are more concentrated around the upper truncation limit, which is why the dataframe's Inf values are encoded as 100 (the upper truncation limit defined in our function). This follows what the standardized residuals found, where most of the values from the model are left-skewed. Additionally, the red lines on our model are defined as the ages from two randomly sampled leaders that are non-censored. 
 
 # VI. Sensitivity Analysis
 
