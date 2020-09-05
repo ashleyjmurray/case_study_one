@@ -45,12 +45,10 @@ leaders_data$Censored[leaders$Name == "Jianwen Emperor"] <- "0" #typo for Jianwe
 # reset censoring end date
 leaders_data = leaders_data %>%
   mutate(Event.Date = case_when(
-    Censored == 1 ~ as.Date("2020-08-24"),
+    Censored == 1 ~ as.Date("2020-08-31"),
     TRUE ~ Event.Date
   )) %>%
-  mutate(Age.Event = case_when(
-    Censored == 1 ~ time_length(difftime(Event.Date, Birth.Date), "years"),
-    TRUE ~ Age.Event))
+  mutate(Age.Event = as.numeric(time_length(difftime(Event.Date, Birth.Date), "years")))
 
 leaders_data$Censored <- as.factor(leaders_data$Censored)
 leaders_data$Type <- as.factor(leaders_data$Type)
@@ -629,7 +627,7 @@ model_output <- jags(data = data_build_model,
                                                              "age_Dalai_predictive",
                                                               "age_Naruhito_predictive"                                                             ), 
 
-                                      n.iter = 50000, 
+                                      n.iter = 100000, 
                                       n.chains = 3,
                                       model.file = build_model)
 model_output
