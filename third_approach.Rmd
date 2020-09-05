@@ -996,7 +996,7 @@ coef <- output %>%
          "97.5% Quantile" = output$X97.5.
          ) %>%
   select("Variable", "Mean", "Standard Deviation", "2.5% Quantile", "Median", "97.5% Quantile")
-kable(coef)
+kable(coef, digits = 3)
 ```
 
 While we may expect leaders who were born earlier to live a shorter life, $\hat{\beta_1}$ which correpsond to the leaders' year of birth appears to be an insignificant parameter as it is very close to 0 (-0.0016) although statistically significant. $\hat{\beta_6}$ to $\hat{\beta_9}$ which correspond to the interaction effects are very weak and mostly insignificant as well. Types of leadership ($\hat{\beta_2}$ to $\hat{\beta_5}$) do seem to be significant. As explained in Section IV, the model is easier to understand if we interpret the output in terms of $\alpha_j$, defined as $\alpha_j = -\beta_j/r$, $j = 1,2,...,9$. Some examples of the interpretation are provided below.
@@ -1015,7 +1015,7 @@ coef <- output %>%
          "97.5% Quantile" = output$X97.5.
          ) %>%
   select("Variable", "Mean", "Standard Deviation", "2.5% Quantile", "Median", "97.5% Quantile")
-kable(coef)
+kable(coef, digits = 3)
 ```
 
 
@@ -1033,7 +1033,7 @@ coef <- output %>%
          "97.5% Quantile" = output$X97.5.
          ) %>%
   select("Variable", "Mean", "Standard Deviation", "2.5% Quantile", "Median", "97.5% Quantile")
-kable(coef)
+kable(coef, digits = 3)
 ```
 - If a Pope is born one year later, he is expected to live longer by a multiplicative factor of $exp(\alpha_1) = exp(0.0003931) = 1$. This basically means the expected lifespan would hardly change. 
 - If a U.S. President is born one year later, he is expected to live longer by a multiplicative factor of $exp(\alpha_1 + \alpha_6) = exp(0.0003931+0.0004852) = 1$. 
