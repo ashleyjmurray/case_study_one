@@ -210,10 +210,7 @@ build_model <- function() {
     z_censored[i] ~ dpois(phi_censored[i])
     phi_censored[i] <- mu_censored[i] * pow(t_censored[i], r)
     mu_censored[i] <- exp(beta_censored[i])
-    beta_censored[i] <- beta_0 + beta_1*x_1_censored[i] +
-      beta_2*x_2_censored[i] + beta_3*x_3_censored[i] + beta_4*x_4_censored[i] + beta_5*x_5_censored[i] + beta_6*x_6_censored[i] + beta_7*x_7_censored[i] + beta_8*x_8_censored[i] + beta_9*x_9_censored[i] + beta_10*x_10_censored[i] +
-
-     beta_1_8*x_1_8_censored[i] +  beta_1_9*x_1_9_censored[i] + beta_1_10*x_1_10_censored[i] +
+    beta_censored[i] <- beta_0 + beta_1*x_1_censored[i] + beta_2*x_2_censored[i] + beta_3*x_3_censored[i] + beta_4*x_4_censored[i] + beta_5*x_5_censored[i] + beta_6*x_6_censored[i] + beta_7*x_7_censored[i] + beta_8*x_8_censored[i] + beta_9*x_9_censored[i] + beta_10*x_10_censored[i] + beta_1_8*x_1_8_censored[i] +  beta_1_9*x_1_9_censored[i] + beta_1_10*x_1_10_censored[i] +
 
           beta_2_8*x_2_8_censored[i] +
           beta_2_9*x_2_9_censored[i] +
@@ -245,9 +242,7 @@ build_model <- function() {
     survival_non_censored[j] ~ dweib(r, mu[j])
     mu[j] <- exp(beta[j])
     beta[j] <- beta_0 + beta_1*x_1_non_censored[j] +
-      beta_2*x_2_non_censored[j] + beta_3*x_3_non_censored[j] + beta_4*x_4_non_censored[j] + beta_5*x_5_non_censored[j] + beta_6*x_6_non_censored[j] + beta_7*x_7_non_censored[j] + beta_8*x_8_non_censored[j] + beta_9*x_9_non_censored[j] + beta_10*x_10_non_censored[j] +
-
-    beta_1_8*x_1_8_non_censored[j] +  beta_1_9*x_1_9_non_censored[j] + beta_1_10*x_1_10_non_censored[j] +
+      beta_2*x_2_non_censored[j] + beta_3*x_3_non_censored[j] + beta_4*x_4_non_censored[j] + beta_5*x_5_non_censored[j] + beta_6*x_6_non_censored[j] + beta_7*x_7_non_censored[j] + beta_8*x_8_non_censored[j] + beta_9*x_9_non_censored[j] + beta_10*x_10_non_censored[j] + beta_1_8*x_1_8_non_censored[j] +  beta_1_9*x_1_9_non_censored[j] + beta_1_10*x_1_10_non_censored[j] +
 
           beta_2_8*x_2_8_non_censored[j] +
           beta_2_9*x_2_9_non_censored[j] +
@@ -276,39 +271,39 @@ build_model <- function() {
 
 
 
-  beta_0 ~ dnorm(0.0, 1.0E-3) # Prior on beta_0 is normal with low precision
-  beta_1 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_2 ~ dnorm(0.0, 1.0E-3) # Prior on beta_2 is normal with low precision
-  beta_3 ~ dnorm(0.0, 1.0E-3) # Prior on beta_3 is normal with low precision
-  beta_4 ~ dnorm(0.0, 1.0E-3) # Prior on beta_4 is normal with low precision
-  beta_5 ~ dnorm(0.0, 1.0E-3) # Prior on beta_5 is normal with low precision
-  beta_6 ~ dnorm(0.0, 1.0E-3) # Prior on beta_6 is normal with low precision
-  beta_7 ~ dnorm(0.0, 1.0E-3) # Prior on beta_7 is normal with low precision
-  beta_8 ~ dnorm(0.0, 1.0E-3) # Prior on beta_8 is normal with low precision
-  beta_9 ~ dnorm(0.0, 1.0E-3) # Prior on beta_9 is normal with low precision
-  beta_10 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_1_8 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_1_9 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_1_10 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_2_8 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_2_9 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_2_10 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
+  beta_0 ~ dnorm(0.0, 1.0E-3) # Priors on betas are all normal with low precision
+  beta_1 ~ dnorm(0.0, 1.0E-3) 
+  beta_2 ~ dnorm(0.0, 1.0E-3) 
+  beta_3 ~ dnorm(0.0, 1.0E-3) 
+  beta_4 ~ dnorm(0.0, 1.0E-3) 
+  beta_5 ~ dnorm(0.0, 1.0E-3) 
+  beta_6 ~ dnorm(0.0, 1.0E-3) 
+  beta_7 ~ dnorm(0.0, 1.0E-3) 
+  beta_8 ~ dnorm(0.0, 1.0E-3) 
+  beta_9 ~ dnorm(0.0, 1.0E-3) 
+  beta_10 ~ dnorm(0.0, 1.0E-3) 
+  beta_1_8 ~ dnorm(0.0, 1.0E-3) 
+  beta_1_9 ~ dnorm(0.0, 1.0E-3) 
+  beta_1_10 ~ dnorm(0.0, 1.0E-3) 
+  beta_2_8 ~ dnorm(0.0, 1.0E-3) 
+  beta_2_9 ~ dnorm(0.0, 1.0E-3) 
+  beta_2_10 ~ dnorm(0.0, 1.0E-3) 
 
-  beta_3_8 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_3_9 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_3_10 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_4_7 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_4_8 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_4_9 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_4_10 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_5_7 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_5_8 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_5_9 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_5_10 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_6_7 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_6_8 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_6_9 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_6_10 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
+  beta_3_8 ~ dnorm(0.0, 1.0E-3) 
+  beta_3_9 ~ dnorm(0.0, 1.0E-3) 
+  beta_3_10 ~ dnorm(0.0, 1.0E-3) 
+  beta_4_7 ~ dnorm(0.0, 1.0E-3) 
+  beta_4_8 ~ dnorm(0.0, 1.0E-3) 
+  beta_4_9 ~ dnorm(0.0, 1.0E-3)
+  beta_4_10 ~ dnorm(0.0, 1.0E-3) 
+  beta_5_7 ~ dnorm(0.0, 1.0E-3) 
+  beta_5_8 ~ dnorm(0.0, 1.0E-3) 
+  beta_5_9 ~ dnorm(0.0, 1.0E-3) 
+  beta_5_10 ~ dnorm(0.0, 1.0E-3) 
+  beta_6_7 ~ dnorm(0.0, 1.0E-3) 
+  beta_6_8 ~ dnorm(0.0, 1.0E-3) 
+  beta_6_9 ~ dnorm(0.0, 1.0E-3) 
+  beta_6_10 ~ dnorm(0.0, 1.0E-3) 
 
   r ~ dexp(0.1) # Prior on r
 
@@ -318,7 +313,7 @@ build_model <- function() {
    alpha_1 <- - beta_1 / r
    alpha_2 <- - beta_2 / r
    alpha_3 <- - beta_3 / r
-  alpha_4 <- - beta_4 / r
+   alpha_4 <- - beta_4 / r
    alpha_5 <- - beta_5 / r
    alpha_6 <- - beta_6 / r
    alpha_7 <- - beta_7 / r
@@ -392,10 +387,10 @@ build_model <- function() {
    p_i_Yr20UsPres <- 100*(exp(alpha_6_7) - 1)
    p_i_Yr20ChinaEmp <- 100*(exp(alpha_6_8) - 1)
    p_i_Yr20DalaiLama <- 100*(exp(alpha_6_9) - 1)
-  p_i_Yr20JapanEmp <- 100*(exp(alpha_6_10) - 1)
+   p_i_Yr20JapanEmp <- 100*(exp(alpha_6_10) - 1)
 
 
-  # Predictive distribution of age at the new values
+  # Predictive distribution of age at the new values (i.e. 10 alive leaders)
   beta_Francis <- beta_0 + beta_6
   mu_Francis <- exp(beta_Francis)
   survival_Francis ~ dweib(r, mu_Francis) %_% T(present_length_Francis, upper_length)
@@ -539,7 +534,7 @@ x_6_10_non_censored <- x_6_10[-censored_dex]
 
 n_non_censored <- length(survival_non_censored)
 
-# find attributes for the four leaders
+# find attributes for the 10 alive leaders
 birth_year_Francis <- leaders_data$Birth.Year[leaders_data$Name == "Francis"]
 year_Francis <- birth_year_Francis - mean(leaders_nopred$Birth.Year)
 present_length_Francis <- leaders_data$Age.Event[leaders_data$Name =="Francis"]
@@ -585,7 +580,7 @@ upper_length <- 100
 # build model inputs and run model
 data_build_model <- list("n_censored", "n_non_censored", "z_censored", "t_censored",
 "x_1_censored", "x_2_censored", "x_3_censored", "x_4_censored", "x_5_censored", "x_6_censored", "x_7_censored", "x_8_censored", "x_9_censored", "x_10_censored", "x_1_8_censored", "x_1_9_censored", "x_1_10_censored", "x_2_8_censored", "x_2_9_censored", "x_2_10_censored",    "x_3_8_censored", "x_3_9_censored", "x_3_10_censored",  "x_4_7_censored", "x_4_8_censored", "x_4_9_censored", "x_4_10_censored",
-"x_5_7_censored", "x_5_8_censored", "x_5_9_censored", "x_5_10_censored","x_6_7_censored", "x_6_8_censored", "x_6_9_censored", "x_6_10_censored","survival_non_censored", "x_1_non_censored", "x_2_non_censored", "x_3_non_censored", "x_4_non_censored", "x_5_non_censored", "x_6_non_censored", "x_7_non_censored", "x_8_non_censored", "x_9_non_censored", "x_10_non_censored", "x_1_8_non_censored", "x_1_9_non_censored", "x_1_10_non_censored",  "x_2_8_non_censored", "x_2_9_non_censored", "x_2_10_non_censored",    "x_3_8_non_censored", "x_3_9_non_censored", "x_3_10_non_censored",  "x_4_7_non_censored", "x_4_8_non_censored", "x_4_9_non_censored", "x_4_10_non_censored",   "x_5_7_non_censored", "x_5_8_non_censored", "x_5_9_non_censored", "x_5_10_non_censored",  "x_6_7_non_censored", "x_6_8_non_censored", "x_6_9_non_censored", "x_6_10_non_censored",  "present_length_Francis", "present_length_Obama", "present_length_Dalai", "present_length_Naruhito","present_length_Benedict", "present_length_Carter", "present_length_Clinton", "present_length_Bush", "present_length_Trump", "present_length_Akihito", "upper_length")
+"x_5_7_censored", "x_5_8_censored", "x_5_9_censored", "x_5_10_censored","x_6_7_censored", "x_6_8_censored", "x_6_9_censored", "x_6_10_censored","survival_non_censored", "x_1_non_censored", "x_2_non_censored", "x_3_non_censored", "x_4_non_censored", "x_5_non_censored", "x_6_non_censored", "x_7_non_censored", "x_8_non_censored", "x_9_non_censored", "x_10_non_censored", "x_1_8_non_censored", "x_1_9_non_censored", "x_1_10_non_censored",  "x_2_8_non_censored", "x_2_9_non_censored", "x_2_10_non_censored",  "x_3_8_non_censored", "x_3_9_non_censored", "x_3_10_non_censored",  "x_4_7_non_censored", "x_4_8_non_censored", "x_4_9_non_censored", "x_4_10_non_censored",   "x_5_7_non_censored", "x_5_8_non_censored", "x_5_9_non_censored", "x_5_10_non_censored",  "x_6_7_non_censored", "x_6_8_non_censored", "x_6_9_non_censored", "x_6_10_non_censored",  "present_length_Francis", "present_length_Obama", "present_length_Dalai", "present_length_Naruhito","present_length_Benedict", "present_length_Carter", "present_length_Clinton", "present_length_Bush", "present_length_Trump", "present_length_Akihito", "upper_length")
 ```
 
 ```{r, output-list}
@@ -594,40 +589,40 @@ params_to_output = c("beta_0", "beta_1", "beta_2", "beta_3", "beta_4", "beta_5",
 
 ```{r, model-priors}
 priors = "
-  beta_0 ~ dnorm(0.0, 1.0E-3) # Prior on beta_0 is normal with low precision
-  beta_1 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_2 ~ dnorm(0.0, 1.0E-3) # Prior on beta_2 is normal with low precision
-  beta_3 ~ dnorm(0.0, 1.0E-3) # Prior on beta_3 is normal with low precision
-  beta_4 ~ dnorm(0.0, 1.0E-3) # Prior on beta_4 is normal with low precision
-  beta_5 ~ dnorm(0.0, 1.0E-3) # Prior on beta_5 is normal with low precision
-  beta_6 ~ dnorm(0.0, 1.0E-3) # Prior on beta_6 is normal with low precision
-  beta_7 ~ dnorm(0.0, 1.0E-3) # Prior on beta_7 is normal with low precision
-  beta_8 ~ dnorm(0.0, 1.0E-3) # Prior on beta_8 is normal with low precision
-  beta_9 ~ dnorm(0.0, 1.0E-3) # Prior on beta_9 is normal with low precision
-  beta_10 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_1_8 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_1_9 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_1_10 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
+  beta_0 ~ dnorm(0.0, 1.0E-3) # priors on betas are all normal w/ low precision
+  beta_1 ~ dnorm(0.0, 1.0E-3) 
+  beta_2 ~ dnorm(0.0, 1.0E-3) 
+  beta_3 ~ dnorm(0.0, 1.0E-3) 
+  beta_4 ~ dnorm(0.0, 1.0E-3) 
+  beta_5 ~ dnorm(0.0, 1.0E-3) 
+  beta_6 ~ dnorm(0.0, 1.0E-3) 
+  beta_7 ~ dnorm(0.0, 1.0E-3) 
+  beta_8 ~ dnorm(0.0, 1.0E-3) 
+  beta_9 ~ dnorm(0.0, 1.0E-3) 
+  beta_10 ~ dnorm(0.0, 1.0E-3) 
+  beta_1_8 ~ dnorm(0.0, 1.0E-3) 
+  beta_1_9 ~ dnorm(0.0, 1.0E-3) 
+  beta_1_10 ~ dnorm(0.0, 1.0E-3) 
 
-  beta_2_8 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_2_9 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_2_10 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
+  beta_2_8 ~ dnorm(0.0, 1.0E-3) 
+  beta_2_9 ~ dnorm(0.0, 1.0E-3) 
+  beta_2_10 ~ dnorm(0.0, 1.0E-3) 
   
-  beta_3_8 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_3_9 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_3_10 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_4_7 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_4_8 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_4_9 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_4_10 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_5_7 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_5_8 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_5_9 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_5_10 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_6_7 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_6_8 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_6_9 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_6_10 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
+  beta_3_8 ~ dnorm(0.0, 1.0E-3) 
+  beta_3_9 ~ dnorm(0.0, 1.0E-3) 
+  beta_3_10 ~ dnorm(0.0, 1.0E-3) 
+  beta_4_7 ~ dnorm(0.0, 1.0E-3) 
+  beta_4_8 ~ dnorm(0.0, 1.0E-3) 
+  beta_4_9 ~ dnorm(0.0, 1.0E-3) 
+  beta_4_10 ~ dnorm(0.0, 1.0E-3) 
+  beta_5_7 ~ dnorm(0.0, 1.0E-3) 
+  beta_5_8 ~ dnorm(0.0, 1.0E-3) 
+  beta_5_9 ~ dnorm(0.0, 1.0E-3) 
+  beta_5_10 ~ dnorm(0.0, 1.0E-3) 
+  beta_6_7 ~ dnorm(0.0, 1.0E-3) 
+  beta_6_8 ~ dnorm(0.0, 1.0E-3) 
+  beta_6_9 ~ dnorm(0.0, 1.0E-3) 
+  beta_6_10 ~ dnorm(0.0, 1.0E-3) 
 
   r ~ dexp(0.1) # Prior on r
   "
@@ -876,7 +871,7 @@ model_output
 
 # IV. Analysis
 
-As Stander et al (2018) pointed out, following this Weibull distribution, $log(T_i)$ is equal in distribution to $\frac{1}{r} (\beta_0 + \beta_1x_{i1}+\beta_2x_{i2}+...+\beta_9x_{i1}x_{i5}) + \frac{1}{r}\log(\epsilon)$ where $\epsilon \sim exp(1)$. $\alpha_j = -\beta_j/r$, $j = 1,2,...,9$. The interpretation of coefficients depends on the interaction terms (i.e. both year of birth and the type of leadership). 
+As Stander et al (2018) pointed out, following this Weibull distribution, $log(T_i)$ is equal in distribution to $\frac{1}{r} (\beta_0 + \beta_1x_{i1}+\beta_2x_{i2}+...+\beta_9x_{i1}x_{i5}) + \frac{1}{r}\log(\epsilon)$ where $\epsilon \sim exp(1)$. $\alpha_j = -\beta_j/r$, $j = 1,2,...,9$. The interpretation of coefficients depends on the interaction terms (i.e. both year of birth year century and the types of leadership). 
 
 For example, while keeping all others constant, if a Pope is born one year later, he is expected to live longer by a multiplicative factor of $exp(\alpha_1)$, or his lifespan is expected to increase by a percentage of $100*exp(\alpha_1-1)$. If a U.S. President is born one year later, he is expected to live longer by a multiplicative factor of $exp(\alpha_1 + \alpha_6)$. If a U.S. President and a Chinese Emperor are born in the same year, $y$ after 1677, the Chinese emperor is expected to live longer by a multiplicative factor of $exp(\alpha_3 - \alpha_2 + (\alpha_7-\alpha_6)*y)$ and so on. 
 
@@ -944,7 +939,7 @@ kable(coef, digits = 3)
 
 Our model also predicts that the 85-year-old 14th Dalai Lama is expected to live 92.4 years (95% credible interval: 85.4 - 99.6 years), the 84-year-old Pope Francis is expected to live 92.4 years (95% credible interval: 84.2 - 99.4 years), the 60-year-old Japanese Emperior Naruhito is expected to live 85.3 years (95% credible interval: 66.4 - 99.5 years) and the 60-year-old former President Barack Obama is expected to live 84.8 years (95% credible interval: 61.5 - 99.4 years). 
 
-## V b. Posterior Inference for the 4 Leaders of Interest
+## V b. Posterior Inference for the 10 Alive Leaders
 
 ```{r, francis-dalai, message = F, fig.height=5, fig.width=10, echo = FALSE}
 people = c("age_Francis_predictive", "age_Obama_predictive", "age_Dalai_predictive",
