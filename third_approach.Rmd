@@ -56,6 +56,9 @@ leaders_data$Age.Event <- as.numeric(leaders_data$Age.Event)
 
 summary(leaders_data)
 
+# 10 censored data
+leaders_data$Name[leaders_data$Censored == "1"]
+
 # create birth year
 leaders_data$Birth.Year <- year(leaders_data$Birth.Date)
 ```
@@ -87,17 +90,26 @@ From the boxplot, the distribution of the lifespans of Popes and US Presidents i
 
 We use survival analysis as a way to model $T_i$, the lifespan of a given leader i depending on their year of birth and type of leadership. Survival analysis is useful in that it allows the consideration of "censored" data. This means that we do not always observe the outcome for each data point. For example, we do not know the death date of leaders that are still alive. Thus, we do not know their lifespan, we just know that their survival time $T_i$ will be greater than their current age. 
 
-We model the lifespan $T_i$ of an individual i after the Weibull distribution specified below. We choose to use the Weibull distribution because it is often utilized in survival analysis and allows the user to specify a flexible shape parameter for the distribution. The first parameter $r$, also known as the shape parameter, is a positive scalar, and the second parameter $\mu$, the scale parameter, is a linear function of the covariates (in this case, birth year centered at mean 1667 and types of leadership as well as their interactions). 
+We model the lifespan $T_i$ of an individual i after the Weibull distribution specified below. We choose to use the Weibull distribution because it is often utilized in survival analysis and allows the user to specify a flexible shape parameter for the distribution. The first parameter $r$, also known as the shape parameter, is a positive scalar, and the second parameter $\mu$, the scale parameter, is a linear function of the covariates (in this case, the century of the birth year and types of leadership as well as their interactions). 
 
 
-$$ T_i \sim Weibull(r, \mu_i) $$
-$$\log(\mu_i) = \beta_0+\beta_1 (Year \ of \ Birth_i)+\beta_2 (Leadership_i = UsPres) + \beta_3 (Leadership_i = ChinaEmp) $$
-$$+ \beta_4 (Leadership_i = DalaiLama) +\beta_5 (Leadership_i = JapanEmp) \\$$
-$$+ \beta_6 (Year \ of \ Birth_i * (Leadership_i = UsPres)) \\$$
-$$+ \beta_7 (Year \ of \ Birth_i * (Leadership_i = ChinaEmp)) \\$$
-$$+ \beta_8 (Year \ of \ Birth_i * (Leadership_i = DalaiLama)) \\$$
-$$+ \beta_9 (Year \ of \ Birth_i * (Leadership_i = JapanEmp))$$
-where Leadership_i = Popes is the baseline for comparison.
+$$ 
+T_i \sim Weibull(r, \mu_i) \\
+
+\log(\mu_i) = \beta_0+ \sum_{j = 1, \cdots, 6} \beta_j I(Birth \ Century_i = j)+ \sum_{k = 7, \cdots, 10}\beta_k I(Leadership_i = k) \\
++ \sum_{j = 1, \cdots, 6,\ k = 7, \cdots, 10}\beta_{j,k} I(Birth \ Century_i = j)*I(Leadership_i = k) 
+$$
+
+where the indicator functions $Birth \ Century_i = 1, \cdots, 6$ corresponds to a leader $i$ born in the 15th, 16th, 17th, 18th, 19th and 20th century respectively. The 14th century is the baseline for comparison. $Leadership_i = 7, \cdots, 10$ corresponds to a leader $i$ being a U.S. President, a Chinese Emperor, a Dalai Lamai and a Japanese Emperor respoectively. $Leadership_i$ uses Pope the baseline for comparison. $\beta_{j,k}$ is the parameter for the interaction effect between brith year century $j$ and leadership type $k$. 
+
+For example, for Pope Francis who was born in 1963, his birth year century is the 20th century and his leadership type is Pope. $I(Birth \ Century_{Francis} = j)$ will all be 0 except for $j = 6$ (which indicates he was born in the 20th century) and $I(Leadership_i = k)$ will all be 0 since Pope is the baseline for comparison for leadership types. We can write $\log(\mu_{Francis}) = \beta_0 + \beta_6$ for Pope Francis. 
+
+Note that the first U.S. President, George Washington, was born in 1732 (18th century, $j = 4$) and hence the interactions between $Birth \ Century_i= 1,2,3$ (born in the 15th century, 16th century or 17th century) and $Leadership_7$ (being a U.S. President) are meaningless. As such, we didn't include those interaction terms in our model. 
+
+Prior to using this model, we considered a model that used leaders' birth years as a continuous variable instead of binning them into centuries. However, that model resulted in a less desirable model predictive ability as we ran model diagnostic. The residual plot showed a clear trend between residuals and predicted lifespans. Using a quadratic polynomial improved the residuals, but our current model is still superior. Residual plots of models with continuous birth year variable can be found in the Appendix. *make sure we include them in the Appendix*
+
+
+We chose to bin the birth year of leaders instead of using brith year as a continuous variable because this approach yields a better model for prediction, as seen from the residual plot in section V c. MCMC and Model Diagnostic. 
 
 ## III b. Addressing Censored Data
 
@@ -108,9 +120,6 @@ To handle censored observations, we specify their contribution to the likelihood
 We assume that our priors are independent because intuitively a given observation could not be two types of leaders. Additionally, we do not have sufficiently strong prior knowledge about the relationship between birth year and type of leadership to specify an informative prior. Therefore, we use uninformative priors for the betas in our model. For our prior for r, we chose a prior of $exp(1)$, as we believe the hazard of death increases with time. 
 
 ```{r, include=F}
-# 10 censored data
-leaders_data$Name[leaders_data$Censored == "1"]
-
 # create dummy variables
 leaders_data <- leaders_data %>%
   mutate(TypeChinaEmp = as.factor(case_when(Type == "ChinaEmp" ~ 1,
@@ -194,7 +203,7 @@ x_6_9 <- x_6*x_9
 x_6_10 <- x_6*x_10
 ```
 
-*write based on residual plots, choose binning for time*
+
 
 ```{r, og-model-text, include=F}
 # mcmc sampler function
