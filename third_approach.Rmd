@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # I. Introduction
 
-World leaders are influential people that have the power to impact millions of people's lives. Some leaders are elected for terms while others serve for life, so their expected survival is of great interest. In this paper, we seek to compare Popes, US Presidents, Dalai Lamas, Chinese Emperors, and Japanese Emperors to see how their lifespans compare. Additionally, we want to analyze the impact on survival of a leader's birth year, and whether or not this impact might vary depending on the type of leadership. After we build a model to analyze the effects, we also wish to look at some specific cases and determine the probability that the current 14th Dalai Lama will outlive Pope Francis and the probability that President Obama will outlive Emperor Naruhito. We will accomplish this by using survival analysis. We use Bayesian Inference to estimate the model parameters with the help of the JAGS program. 
+World leaders are influential people that have the power to impact millions of people's lives. Some leaders are elected for terms while others serve for life, so their expected survival is of great interest. In this paper, we seek to examine Popes, US Presidents, Dalai Lamas, Chinese Emperors, and Japanese Emperors to see how their lifespans compare. Additionally, we want to analyze the impact of a leader's birth year on survival, and whether or not this impact might vary depending on the type of leadership. After we build a model to analyze the effects, we also wish to look at some specific cases and determine the probability that the current 14th Dalai Lama will outlive Pope Francis and the probability that President Obama will outlive Emperor Naruhito. We will accomplish this by using survival analysis. We use Bayesian Inference to estimate the model parameters with the help of the JAGS program. 
 
 The rest of the paper is structured as follows. First, we will describe the data used to carry out our analysis. Next, we will describe the methods used in our analysis plan. Then, we will show how we carried out our analysis plan and recount our results. After that, we discuss our conclusions and areas for further research. Finally, our code and some additional information can be found in the Appendix. 
 
@@ -20,7 +20,7 @@ The rest of the paper is structured as follows. First, we will describe the data
 
 ## II a. Description of the Data
 
-The data used in this analysis contains entries for 177 different world leaders. The types of world leaders present in the data include Popes, US Presidents, Dalai Lamas, Chinese Emperors, and Japanese Emperors. Each leader's birth date type of leader is recorded. For some of these groups, we have data dating all the way back to the 14th century. Additionally, leaders who have passed away also have their death date and age of death recorded. For leaders that are still living, these columns instead contain the date the dataset was created (July 31, 2020) and their current age on that date. In order to further clarify who is dead or alive, there is a column titled "Censored," which takes a value of 0 if the person is still dead and a value of 1 if that person is still alive. Related to this, there is another column called "Fail," which takes on a value of 1 if the person is dead and a value of 0 if the person is alive. In total, there are 10 living leaders in our dataset, 4 of whose age of death we are trying to predict. 
+The data used in this analysis contains entries for 177 different world leaders. The types of world leaders present in the data include Popes, US Presidents, Dalai Lamas, Chinese Emperors, and Japanese Emperors. Each leader's birth date and their type of leadership is recorded. For some of these groups, we have data dating all the way back to the 14th century. Additionally, leaders who have passed away also have their death date and age of death recorded. For leaders that are still living, these columns instead contain the date the dataset was created (July 31, 2020) and their current age on that date. In order to further clarify who is dead or alive, there is a column titled "Censored," which takes a value of 0 if the person is dead and a value of 1 if that person is still alive. Related to this, there is another column called "Fail," which takes on a value of 1 if the person is dead and a value of 0 if the person is alive. In total, there are 10 living leaders in our dataset, 4 of whose age of death we are trying to predict. 
 
 ```{r, message=F, include=F}
 # import libraries
@@ -314,42 +314,93 @@ build_model <- function() {
   beta_6_10 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
 
   r ~ dexp(0.1) # Prior on r
+
   
-  # sensitivity analysis priors
-  # beta_0 ~ dnorm(0.5, 1.0E-2) # Prior on beta_0 is normal with low precision
-  # beta_1 ~ dnorm(0.5, 1.0E-2) # Prior on beta_1 is normal with low precision
-  # beta_2 ~ dnorm(0.5, 1.0E-2) # Prior on beta_2 is normal with low precision
-  # beta_3 ~ dnorm(0.5, 1.0E-2) # Prior on beta_3 is normal with low precision
-  # beta_4 ~ dnorm(0.5, 1.0E-2) # Prior on beta_4 is normal with low precision
-  # beta_5 ~ dnorm(0.5, 1.0E-2) # Prior on beta_5 is normal with low precision
-  # beta_6 ~ dnorm(0.5, 1.0E-2) # Prior on beta_6 is normal with low precision
-  # beta_7 ~ dnorm(0.5, 1.0E-2) # Prior on beta_7 is normal with low precision
-  # beta_8 ~ dnorm(0.5, 1.0E-2) # Prior on beta_8 is normal with low precision
-  # beta_9 ~ dnorm(0.5, 1.0E-2) # Prior on beta_9 is normal with low precision
-  # r ~ dexp(1) # Prior on r
+  #Define alphas
+  alpha_0 <- - beta_0 / r
+  alpha_1 <- - beta_1 / r
+  alpha_2 <- - beta_2 / r
+  alpha_3 <- - beta_3 / r
+  alpha_4 <- - beta_4 / r
+  alpha_5 <- - beta_5 / r
+  alpha_6 <- - beta_6 / r
+  alpha_7 <- - beta_7 / r
+  alpha_8 <- - beta_8 / r
+  alpha_9 <- - beta_9 / r
+  alpha_10 <- - beta_10 / r
+  alpha_1_7 <- - beta_1_7 / r
+  alpha_1_8 <- - beta_1_8 / r
+  alpha_1_9 <- - beta_1_9 / r
+  alpha_1_10 <- - beta_1_10 / r
   
-  # Define alphas
-  # alpha_0 <- - beta_0 / r
-  # alpha_1 <- - beta_1 / r
-  # alpha_2 <- - beta_2 / r
-  # alpha_3 <- - beta_3 / r
-  # alpha_4 <- - beta_4 / r
-  # alpha_5 <- - beta_5 / r  
-  # alpha_6 <- - beta_6 / r
-  # alpha_7 <- - beta_7 / r
-  # alpha_8 <- - beta_8 / r
-  # alpha_9 <- - beta_9 / r
+  alpha_2_7 <- - beta_2_7 / r
+  alpha_2_8 <- - beta_2_8 / r
+  alpha_2_9 <- - beta_2_9 / r
+  alpha_2_10 <- - beta_2_10 / r
+  
+  alpha_3_7 <- - beta_3_7 / r
+  alpha_3_8 <- - beta_3_8 / r
+  alpha_3_9 <- - beta_3_9 / r
+  alpha_3_10 <- - beta_3_10 / r
+  
+  alpha_4_7 <- - beta_4_7 / r
+  alpha_4_8 <- - beta_4_8 / r
+  alpha_4_9 <- - beta_4_9 / r
+  alpha_4_10 <- - beta_4_10 / r
+
+  alpha_5_7 <- - beta_5_7 / r
+  alpha_5_8 <- - beta_5_8 / r
+  alpha_5_9 <- - beta_5_9 / r
+  alpha_5_10 <- - beta_5_10 / r
+  
+  alpha_6_7 <- - beta_6_7 / r
+  alpha_6_8 <- - beta_6_8 / r
+  alpha_6_9 <- - beta_6_9 / r
+  alpha_6_10 <- - beta_6_10 / r
+  
   
   # Percentage increases
-  # percentage_increase_year <- 100*(exp(alpha_1) - 1)
-  # percentage_increase_UsPres <- 100*(exp(alpha_2) - 1)
-  # percentage_increase_ChinaEmp <- 100*(exp(alpha_3) - 1)
-  # percentage_increase_DalaiLama <- 100*(exp(alpha_4) - 1)
-  # percentage_increase_JapanEmp <- 100*(exp(alpha_5) - 1)
-  # percentage_increase_BYUsPres <- 100*(exp(alpha_6) - 1)
-  # percentage_increase_BYChinaEmp <- 100*(exp(alpha_7) - 1)
-  # percentage_increase_BYDalaiLama <- 100*(exp(alpha_8) - 1)
-  # percentage_increase_BYJapanEmp <- 100*(exp(alpha_9) - 1)
+  p_i_Yr15 <- 100*(exp(alpha_1) - 1)
+  p_i_Yr16 <- 100*(exp(alpha_2) - 1)
+  p_i_Yr17 <- 100*(exp(alpha_3) - 1)
+  p_i_Yr18 <- 100*(exp(alpha_4) - 1)
+  p_i_Yr19 <- 100*(exp(alpha_5) - 1)
+  p_i_Yr20 <- 100*(exp(alpha_6) - 1)
+  p_i_UsPres <- 100*(exp(alpha_7) - 1)
+  p_i_ChinaEmp <- 100*(exp(alpha_8) - 1)
+  p_i_DalaiLama <- 100*(exp(alpha_9) - 1)
+  p_i_JapanEmp <- 100*(exp(alpha_10) - 1)
+  
+  p_i_Yr15UsPres <- 100*(exp(alpha_1_7) - 1)
+  p_i_Yr15ChinaEmp <- 100*(exp(alpha_1_8) - 1)
+  p_i_Yr15DalaiLama <- 100*(exp(alpha_1_9) - 1)
+  p_i_Yr15JapanEmp <- 100*(exp(alpha_1_10) - 1)
+  
+  p_i_Yr16UsPres <- 100*(exp(alpha_2_7) - 1)
+  p_i_Yr16ChinaEmp <- 100*(exp(alpha_2_8) - 1)
+  p_i_Yr16DalaiLama <- 100*(exp(alpha_2_9) - 1)
+  p_i_Yr16JapanEmp <- 100*(exp(alpha_2_10) - 1)
+  
+  p_i_Yr17UsPres <- 100*(exp(alpha_3_7) - 1)
+  p_i_Yr17ChinaEmp <- 100*(exp(alpha_3_8) - 1)
+  p_i_Yr17DalaiLama <- 100*(exp(alpha_3_9) - 1)
+  p_i_Yr17JapanEmp <- 100*(exp(alpha_3_10) - 1)
+  
+  p_i_Yr18UsPres <- 100*(exp(alpha_4_7) - 1)
+  p_i_Yr18ChinaEmp <- 100*(exp(alpha_4_8) - 1)
+  p_i_Yr18DalaiLama <- 100*(exp(alpha_4_9) - 1)
+  p_i_Yr18JapanEmp <- 100*(exp(alpha_4_10) - 1)
+  
+  p_i_Yr19UsPres <- 100*(exp(alpha_5_7) - 1)
+  p_i_Yr19ChinaEmp <- 100*(exp(alpha_5_8) - 1)
+  p_i_Yr19DalaiLama <- 100*(exp(alpha_5_9) - 1)
+  p_i_Yr19JapanEmp <- 100*(exp(alpha_5_10) - 1)
+  
+  p_i_Yr20UsPres <- 100*(exp(alpha_6_7) - 1)
+  p_i_Yr20ChinaEmp <- 100*(exp(alpha_6_8) - 1)
+  p_i_Yr20DalaiLama <- 100*(exp(alpha_6_9) - 1)
+  p_i_Yr20JapanEmp <- 100*(exp(alpha_6_10) - 1)
+  
   
   # Predictive distribution of age at the new values
   beta_Francis <- beta_0 + beta_6
@@ -371,6 +422,37 @@ build_model <- function() {
   mu_Naruhito <- exp(beta_Naruhito)
   survival_Naruhito ~ dweib(r, mu_Naruhito) %_% T(present_length_Naruhito, upper_length)
   age_Naruhito_predictive <- survival_Naruhito
+  
+  beta_Benedict <- beta_0 + beta_6
+  mu_Benedict <- exp(beta_Benedict)
+  survival_Benedict ~ dweib(r, mu_Benedict) %_% T(present_length_Benedict, upper_length)
+  age_Benedict_predictive <- survival_Benedict
+  
+  beta_Carter <- beta_0 + beta_6 + beta_7 + beta_6_7
+  mu_Carter <- exp(beta_Carter)
+  survival_Carter ~ dweib(r, mu_Carter) %_% T(present_length_Carter, upper_length)
+  age_Carter_predictive <- survival_Carter
+  
+  beta_Clinton <- beta_0 + beta_6 + beta_7 + beta_6_7
+  mu_Clinton <- exp(beta_Clinton)
+  survival_Clinton ~ dweib(r, mu_Clinton) %_% T(present_length_Clinton, upper_length)
+  age_Clinton_predictive <- survival_Clinton
+  
+  beta_Bush <- beta_0 + beta_6 + beta_7 + beta_6_7 
+  mu_Bush <- exp(beta_Bush)
+  survival_Bush ~ dweib(r, mu_Bush) %_% T(present_length_Bush, upper_length)
+  age_Bush_predictive <- survival_Bush
+  
+  beta_Trump <- beta_0 + beta_6 + beta_7 + beta_6_7 
+  mu_Trump <- exp(beta_Trump)
+  survival_Trump ~ dweib(r, mu_Trump) %_% T(present_length_Trump, upper_length)
+  age_Trump_predictive <- survival_Trump
+  
+  beta_Akihito <- beta_0 + beta_6 + beta_9 + beta_6_9 
+  mu_Akihito <- exp(beta_Naruhito)
+  survival_Akihito ~ dweib(r, mu_Akihito) %_% T(present_length_Akihito, upper_length)
+  age_Akihito_predictive <- survival_Akihito
+  
 }
 ```
 
@@ -489,143 +571,97 @@ birth_year_Naruhito <- leaders_data$Birth.Year[leaders_data$Name == "Naruhito (E
 year_Naruhito <- birth_year_Naruhito - mean(leaders_nopred$Birth.Year)
 present_length_Naruhito <- leaders_data$Age.Event[leaders_data$Name =="Naruhito (Emperor Reiwa)"]
 
+birth_year_Benedict <- leaders_data$Birth.Year[leaders_data$Name == "Benedict XVI)"]
+year_Benedict <- birth_year_Benedict - mean(leaders_nopred$Birth.Year)
+present_length_Benedict <- leaders_data$Age.Event[leaders_data$Name =="Benedict XVI"]
+
+birth_year_Carter <- leaders_data$Birth.Year[leaders_data$Name == "Jimmy Carter"]
+year_Carter <- birth_year_Carter - mean(leaders_nopred$Birth.Year)
+present_length_Carter <- leaders_data$Age.Event[leaders_data$Name =="Jimmy Carter"]
+
+birth_year_Clinton <- leaders_data$Birth.Year[leaders_data$Name == "Bill Clinton"]
+year_Clinton <- birth_year_Clinton - mean(leaders_nopred$Birth.Year)
+present_length_Clinton <- leaders_data$Age.Event[leaders_data$Name =="Bill Clinton"]
+
+birth_year_Bush <- leaders_data$Birth.Year[leaders_data$Name == "George W. Bush"]
+year_Bush <- birth_year_Bush - mean(leaders_nopred$Birth.Year)
+present_length_Bush <- leaders_data$Age.Event[leaders_data$Name =="George W. Bush"]
+
+birth_year_Trump <- leaders_data$Birth.Year[leaders_data$Name == "Donald Trump"]
+year_Trump <- birth_year_Trump - mean(leaders_nopred$Birth.Year)
+present_length_Trump <- leaders_data$Age.Event[leaders_data$Name =="Donald Trump"]
+
+birth_year_Akihito <- leaders_data$Birth.Year[leaders_data$Name == "Akihito (Emperor Heisei)"]
+year_Akihito <- birth_year_Akihito - mean(leaders_nopred$Birth.Year)
+present_length_Akihito <- leaders_data$Age.Event[leaders_data$Name =="Akihito (Emperor Heisei)"]
+
 upper_length <- 100
 
 # build model inputs and run model
-data_build_model <- list("n_censored",
-                                   "n_non_censored",
-                                   "z_censored",
-                                   "t_censored",
-                                   "x_1_censored",
-                                   "x_2_censored",
-                                   "x_3_censored",
-                                   "x_4_censored",
-                                   "x_5_censored",
-                                   "x_6_censored",
-                                   "x_7_censored",
-                                   "x_8_censored",
-                                   "x_9_censored",
-                                   "x_10_censored",
-"x_1_7_censored",
-"x_1_8_censored",
-"x_1_9_censored",
-"x_1_10_censored",
-
-"x_2_7_censored",
-"x_2_8_censored",
-"x_2_9_censored",
-"x_2_10_censored",
-
-"x_3_7_censored",
-"x_3_8_censored",
-"x_3_9_censored",
-"x_3_10_censored",
-
-"x_4_7_censored",
-"x_4_8_censored",
-"x_4_9_censored",
-"x_4_10_censored",
-
-"x_5_7_censored",
-"x_5_8_censored",
-"x_5_9_censored",
-"x_5_10_censored",
-
-"x_6_7_censored",
-"x_6_8_censored",
-"x_6_9_censored",
-"x_6_10_censored",
+data_build_model <- list("n_censored", "n_non_censored", "z_censored", "t_censored",
+                         "x_1_censored", "x_2_censored", "x_3_censored", "x_4_censored", "x_5_censored",
+                         "x_6_censored", "x_7_censored", "x_8_censored", "x_9_censored", "x_10_censored",
+                         "x_1_7_censored", "x_1_8_censored", "x_1_9_censored", "x_1_10_censored",
+                         "x_2_7_censored", "x_2_8_censored", "x_2_9_censored", "x_2_10_censored",
+                         "x_3_7_censored", "x_3_8_censored", "x_3_9_censored", "x_3_10_censored", 
+                         "x_4_7_censored", "x_4_8_censored", "x_4_9_censored", "x_4_10_censored",
+                         "x_5_7_censored", "x_5_8_censored", "x_5_9_censored", "x_5_10_censored",
+                         "x_6_7_censored", "x_6_8_censored", "x_6_9_censored", "x_6_10_censored",
+                         "survival_non_censored", 
+                         "x_1_non_censored", "x_2_non_censored", "x_3_non_censored", "x_4_non_censored", "x_5_non_censored",
+                         "x_6_non_censored", "x_7_non_censored", "x_8_non_censored", "x_9_non_censored", "x_10_non_censored",
+                         "x_1_7_non_censored", "x_1_8_non_censored", "x_1_9_non_censored", "x_1_10_non_censored",
+                         "x_2_7_non_censored", "x_2_8_non_censored", "x_2_9_non_censored", "x_2_10_non_censored", 
+                         "x_3_7_non_censored", "x_3_8_non_censored", "x_3_9_non_censored", "x_3_10_non_censored",
+                         "x_4_7_non_censored", "x_4_8_non_censored", "x_4_9_non_censored", "x_4_10_non_censored", 
+                         "x_5_7_non_censored", "x_5_8_non_censored", "x_5_9_non_censored", "x_5_10_non_censored", 
+                         "x_6_7_non_censored", "x_6_8_non_censored", "x_6_9_non_censored", "x_6_10_non_censored",
+                         "year_Francis", "year_Obama", "year_Dalai", "year_Naruhito", "year_Benedict", 
+                         "year_Carter", "year_Clinton", "year_Bush", "year_Trump", "year_Akihito",
+                         "present_length_Francis", "present_length_Obama", "present_length_Dalai", "present_length_Naruhito",
+                         "present_length_Benedict", "present_length_Carter", "present_length_Clinton", "present_length_Bush", 
+                         "present_length_Trump", "present_year_Akihito", "upper_length")
 
 
-
-                                   "survival_non_censored",
-                                    "x_1_non_censored",
-                                   "x_2_non_censored",
-                                   "x_3_non_censored",
-                                   "x_4_non_censored",
-                                   "x_5_non_censored",
-                                   "x_6_non_censored",
-                                   "x_7_non_censored",
-                                   "x_8_non_censored",
-                                   "x_9_non_censored",
-                                   "x_10_non_censored",
-"x_1_7_non_censored",
-"x_1_8_non_censored",
-"x_1_9_non_censored",
-"x_1_10_non_censored",
-
-"x_2_7_non_censored",
-"x_2_8_non_censored",
-"x_2_9_non_censored",
-"x_2_10_non_censored",
-
-"x_3_7_non_censored",
-"x_3_8_non_censored",
-"x_3_9_non_censored",
-"x_3_10_non_censored",
-
-"x_4_7_non_censored",
-"x_4_8_non_censored",
-"x_4_9_non_censored",
-"x_4_10_non_censored",
-
-"x_5_7_non_censored",
-"x_5_8_non_censored",
-"x_5_9_non_censored",
-"x_5_10_non_censored",
-
-"x_6_7_non_censored",
-"x_6_8_non_censored",
-"x_6_9_non_censored",
-"x_6_10_non_censored",
-                                   #"year_Francis",
-                                   # "year_Obama", 
-                                   #"year_Dalai",
-                                   #"year_Naruhito",
-                                   "present_length_Francis", 
-                                   "present_length_Obama",
-                                   "present_length_Dalai",
-                                   "present_length_Naruhito",
-                                   "upper_length")
 
 model_output <- jags(data = data_build_model,  
-                                      parameters.to.save = c("beta_0",
-                                                             "beta_1",
-                                                             "beta_2", 
-                                                             "beta_3", 
-                                                             "beta_4", 
-                                                             "beta_5",
-                                                             "beta_6",
-                                                             "beta_7", 
-                                                             "beta_8",
-                                                             "beta_9",
-                                                             "beta_10",
-                                                             
-
-                                                             "r", 
-                                                             # "alpha_0",
-                                                             # "alpha_1",
-                                                             # "alpha_2",
-                                                             # "alpha_3",
-                                                             # "alpha_4",
-                                                             # "alpha_5",
-                                                             # "alpha_6",
-                                                             # "alpha_7",
-                                                             # "alpha_8",
-                                                             # "alpha_9",
-                                                          #    "percentage_increase_year",
-                                                          #    "percentage_increase_UsPres",
-                                                          #    "percentage_increase_ChinaEmp",
-                                                          #    "percentage_increase_DalaiLama",
-                                                          #    "percentage_increase_JapanEmp", 
-                                                          #    "percentage_increase_BYUsPres",
-                                                          #   "percentage_increase_BYChinaEmp",
-                                                          # "percentage_increase_BYDalaiLama",
-                                                            # "percentage_increase_BYJapanEmp",
-                                                            "age_Francis_predictive",
-                                                             "age_Obama_predictive",#,
-                                                             "age_Dalai_predictive",
-                                                              "age_Naruhito_predictive"                                                             ), 
+                                      parameters.to.save = c("beta_0", "beta_1", "beta_2", "beta_3", "beta_4", "beta_5",
+                                                             "beta_6", "beta_7", "beta_8", "beta_9", "beta_10",
+                                                             "beta_1_7", "beta_1_8", "beta_1_9", "beta_1_10",
+                                                             "beta_2_7", "beta_2_8", "beta_2_9", "beta_2_10",
+                                                             "beta_3_7", "beta_3_8", "beta_3_9", "beta_3_10",
+                                                             "beta_4_7", "beta_4_8", "beta_4_9", "beta_4_10",
+                                                             "beta_5_7", "beta_5_8", "beta_5_9", "beta_5_10",
+                                                             "beta_6_7", "beta_6_8", "beta_6_9", "beta_6_10", "r",
+                                                             "alpha_0", "alpha_1", "alpha_2", "alpha_3", "alpha_4", "alpha_5",
+                                                             "alpha_6", "alpha_7", "alpha_8", "alpha_9", "alpha_10",
+                                                             "alpha_1_7", "alpha_1_8", "alpha_1_9", "alpha_1_10",
+                                                             "alpha_2_7", "alpha_2_8", "alpha_2_9", "alpha_2_10",
+                                                             "alpha_3_7", "alpha_3_8", "alpha_3_9", "alpha_3_10",
+                                                             "alpha_4_7", "alpha_4_8", "alpha_4_9", "alpha_4_10",
+                                                             "alpha_5_7", "alpha_5_8", "alpha_5_9", "alpha_5_10",
+                                                             "alpha_6_7", "alpha_6_8", "alpha_6_9", "alpha_6_10",
+                                                             "p_i_Yr15", "p_i_Yr16", "p_i_Yr17", 
+                                                             "p_i_Yr18", "p_i_Yr19", "p_i_Yr20", 
+                                                             "p_i_UsPres", "p_i_ChinaEmp", "p_i_DalaiLama", "p_i_JapanEmp",
+                                                             "p_i_Yr15_UsPres", "p_i_Yr15_ChinaEmp", 
+                                                             "p_i_Yr15_DalaiLama", "p_i_Yr15_JapanEmp",
+                                                             "p_i_Yr16_UsPres", "p_i_Yr16_ChinaEmp", 
+                                                             "p_i_Yr16_DalaiLama", "p_i_Yr16_JapanEmp",
+                                                             "p_i_Yr17_UsPres", "p_i_Yr17_ChinaEmp", 
+                                                             "p_i_Yr17_DalaiLama", "p_i_Yr17_JapanEmp",
+                                                             "p_i_Yr18_UsPres", "p_i_Yr18_ChinaEmp", 
+                                                             "p_i_Yr18_DalaiLama", "p_i_Yr18_JapanEmp",
+                                                             "p_i_Yr19_UsPres", "p_i_Yr19_ChinaEmp", 
+                                                             "p_i_Yr19_DalaiLama", "p_i_Yr19_JapanEmp",
+                                                             "p_i_Yr20_UsPres", "p_i_Yr20_ChinaEmp", 
+                                                             "p_i_Yr20_DalaiLama", "p_i_Yr20_JapanEmp",
+                                                             "age_Francis_predictive","age_Obama_predictive",
+                                                             "age_Dalai_predictive", "age_Naruhito_predictive",
+                                                             "age_Benedict_predictive","age_Carter_predictive",
+                                                             "age_Clinton_predictive", "age_Bush_predictive",
+                                                             "age_Trump_predictive","age_Akihito_predictive"
+                                                             ), 
 
                                       n.iter = 100000, 
                                       n.chains = 3,
@@ -702,7 +738,7 @@ For example, while keeping all others constant, if a Pope is born one year later
 # kable(coef)
 ```
 
-While we may expect leaders who were born earlier to live a shorter life, $\hat{\beta_1}$ which correpsond to the leaders' year of birth appears to be an insignificant parameter as it is very close to 0 (-0.0016) although statistically significant. $\hat{\beta_6}$ to $\hat{\beta_9}$ which correspond to the interaction effects are very weak and mostly insignificant as well. Types of leadership ($\hat{\beta_2}$ to $\hat{\beta_5}$) do seem to be significant. As explained in Section IV, the model is easier to understand if we interprate the output in terms of $\alpha_j$, defined as $\alpha_j = -\beta_j/r$, $j = 1,2,...,9$. Some examples of the interpretation are provided below.
+While we may expect leaders who were born earlier to live a shorter life, $\hat{\beta_1}$ which correpsond to the leaders' year of birth appears to be an insignificant parameter as it is very close to 0 (-0.0016) although statistically significant. $\hat{\beta_6}$ to $\hat{\beta_9}$ which correspond to the interaction effects are very weak and mostly insignificant as well. Types of leadership ($\hat{\beta_2}$ to $\hat{\beta_5}$) do seem to be significant. As explained in Section IV, the model is easier to understand if we interpret the output in terms of $\alpha_j$, defined as $\alpha_j = -\beta_j/r$, $j = 1,2,...,9$. Some examples of the interpretation are provided below.
 
 ```{r tidy-model-table-alpha, echo = F}
 # vars1 = c("alpha_0", "alpha_1", "alpha_2", "alpha_3", "alpha_4", "alpha_5", "alpha_6", 
