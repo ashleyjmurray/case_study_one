@@ -1637,7 +1637,8 @@ ggplot(data = monarchs, aes(x = Ts, y = resid/sd)) + geom_point() +
 ggplot(data = monarchs, aes(x = V2, y = resid/sd)) + geom_point() +
   labs(x = "Birth Year", y = "Standardized Residual")
 ```
-*write about how external cross validation looks bad*
+
+We sought to perform external cross-validation on our model. The data that we used for the cross-validation was from all of England's monarchs, accessed from Wikipedia. This dataset only included one person that was still alive. As shown in the standardized residuals plot, there is an upward trend, as the birth year of the monarchs increases. Additionally, in the plot showing Predicted Lifespan and the standardized residuals, there is a downward trend, underpredicting a lot of the leaders' lifespans. 
 
 
 # VI. Conclusion and Further Discussion
