@@ -63,7 +63,7 @@ leaders_data$Birth.Year <- year(leaders_data$Birth.Date)
 ## II b. Exploratory Data Analysis
 
 ```{r, fig.height = 2, fig.wdith=5, echo=F}
-ggplot(data=leaders_data, aes(x=Birth.Year, y = Age.Event, color = Type)) +geom_point() + geom_smooth(method="lm", se = F)
+ggplot(data=leaders_data, aes(x=Birth.Year, y = Age.Event, color = Type)) +geom_point() + geom_smooth(method="lm", se = F) + ggtitle("Birth Year vs. Age") + labs(subtitle = "by leadership type", x = "Birth Year", y = "Age of Death/Censorship")
 ```
 
 Based on this scatterplot, it appears that birth year's association with lifespan does depends on type of leadership.
@@ -71,12 +71,12 @@ Based on this scatterplot, it appears that birth year's association with lifespa
 ```{r, fig.height=2, fig.width=5,echo=F}
 # create EDA plots
 ggplot(data = leaders_data) +
-  geom_boxplot(aes(x = Type, y = Age.Event)) + ggtitle("Distribution of Leader Type and Their Age") + labs(x = "Type of Leader", y = "Age")
+  geom_boxplot(aes(x = Type, y = Age.Event)) + ggtitle("Distribution of Leader Type and Their Age") + labs(x = "Type of Leader", y = "Age of Death/Censorship")
 ```
 
 ```{r, fig.height=2, fig.width=5,echo=F}
 ggplot(data = leaders_data) +
-  geom_histogram(aes(x = Age.Event), binwidth = 5) + ggtitle("Distribution of Leaders Age") + labs(x = "Age")
+  geom_histogram(aes(x = Age.Event), binwidth = 5) + ggtitle("Distribution of Leaders Age") + labs(x = "Age of Death Censorship")
 ```
 
 From the boxplot, the distribution of the lifespans of Popes and US Presidents is centered higher, which makes intuitive sense given that these leaders are elected later in life, while Dalai Lamas and Emperors can be elected at much younger ages. For instance, if a person is a toddler and dies at age five, that person can never be president (and therefore would not have their age be part of the dataset). However, that person can become a Dalai Lama as a toddler and have their age at death influence the distribution plotted. Lastly, the distribution of lifespans as seen in the histogram is unimodal and slightly left skewed. However, this skewing does not seem extreme so there is no need for a transformation. 
