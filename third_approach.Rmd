@@ -106,10 +106,7 @@ For example, for Pope Francis who was born in 1963, his birth year century is th
 
 Note that the first U.S. President, George Washington, was born in 1732 (18th century, $j = 4$) and hence the interactions between $Birth \ Century_i= 1,2,3$ (born in the 15th century, 16th century or 17th century) and $Leadership_7$ (being a U.S. President) are meaningless. As such, we didn't include those interaction terms in our model. 
 
-Prior to using this model, we considered a model that used leaders' birth years as a continuous variable instead of binning them into centuries. However, that model resulted in a less desirable model predictive ability as we ran model diagnostic. The residual plot showed a clear trend between residuals and predicted lifespans. Using a quadratic polynomial improved the residuals, but our current model is still superior. Residual plots of models with continuous birth year variable can be found in the Appendix. *make sure we include them in the Appendix*
-
-
-We chose to bin the birth year of leaders instead of using brith year as a continuous variable because this approach yields a better model for prediction, as seen from the residual plot in section V c. MCMC and Model Diagnostic. 
+Prior to using this model, we considered a model that used leaders' birth years as a continuous variable instead of binning them into centuries. However, that model resulted in a less desirable model predictive ability as we ran model diagnostic. The residual plot showed a clear trend between residuals and predicted lifespans. Using a quadratic polynomial improved the residuals, but our current model is still superior. Model diagnostic of the current model can be found in section V.c and residual plots of previous models with continuous birth year variable can be found in the Appendix. *make sure we include them in the Appendix*
 
 ## III b. Addressing Censored Data
 
