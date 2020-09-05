@@ -20,8 +20,7 @@ The rest of the paper is structured as follows. First, we will describe the data
 
 ## II a. Description of the Data
 
-The data used in this analysis contains entries for 177 different world leaders. The types of world leaders present in the data include Popes, US Presidents, Dalai Lamas, Chinese Emperors, and Japanese Emperors. Each individuals's birth date and their leadership position is recorded. For some of these groups, we have data dating all the way back to the 14th century. Additionally, leaders who have passed away also have their death date and age of death recorded. For leaders that are still living, these columns instead contain the date the dataset was created (July 31, 2020) and their current age on that date. In order to further clarify who is dead or alive, there is a column titled "Censored," which takes a value of 0 if the person is dead and a value of 1 if that person is still alive. Related to this, there is another column called "Fail," which takes on a value of 1 if the person is dead and a value of 0 if the person is alive. The problem with censored data is that we don't know exactly when a person will die. Thus, we have to come up with a way to model a censored person's death date if we use them in building our model. In total, there are 10 living leaders in our dataset, 4 of whose age of death we are trying to predict. 
-
+The data used in this analysis contains entries for 177 different world leaders. The types of world leaders present in the data include Popes, US Presidents, Dalai Lamas, Chinese Emperors, and Japanese Emperors. Each individuals's birth date and their leadership position is recorded. We calculated each leader's birth year from the birth date column. For some of these groups, we have data dating all the way back to the 14th century. Additionally, leaders who have passed away also have their death date and age of death recorded. For leaders that are still living, these columns instead contain the date the dataset was created (August 31, 2020) and their current age on that date. In order to further clarify who is dead or alive, there is a column titled "Censored," which takes a value of 0 if the person is dead and a value of 1 if that person is still alive. Related to this, there is another column called "Fail," which takes on a value of 1 if the person is dead and a value of 0 if the person is alive. The problem with censored data is that we don't know exactly when a person will die. Thus, we have to come up with a way to model a censored person's death date if we use them in building our model. In total, there are 10 living leaders in our dataset, 4 of whose age of death we are trying to predict. 
 
 ```{r, message=F, include=F}
 # import libraries
@@ -1659,7 +1658,7 @@ We use the Poisson "zeros trick," where a set of 0's are created and the likelih
 
 # # A.2 Code for Traceplots, Lag-1 Scatterplots, and Acf Plots
 
-```{r, echo = FALSE}
+```{r, fig.width = 5, fig.height = 5, echo = FALSE}
 # run traceplots
 parameters = c(all_betas, "r")
 
@@ -1684,27 +1683,38 @@ do.call(grid.arrange, p2)
 do.call(grid.arrange, p3)
 ```
 
-```{r, include = FALSE}
+All of the traceplots and code for plotting is above.
+
+```{r, fig.width = 5, fig.height = 5, include = FALSE}
 # run lag-1 scatterplots
-library(ggplot2)
-res_lag1 = lapply(seq(1:length(res)), function(i) {
-  lres = lag(res[,i],1)
-  plot(y=res[,i], x= lres, 
+lag1_df = lapply(seq(1:length(res)), function(i) { lag(res[,i],1) })
+
+res_lag1 = function(i) { # plot for all parameters
+  plot(y=res[,i], x= lag1_df[[i]], 
        xlab = paste0(colnames(res)[i], "-1"),
        ylab = paste0(colnames(res)[i]),
        main = paste("Lag-1 Scatter Plot of", colnames(res)[i]))
-})
+}
 
-
+plot(y=res[,2], x= lag1_df[[2]], 
+       xlab = paste0(colnames(res)[2], "-1"),
+       ylab = paste0(colnames(res)[2]),
+       main = paste("Lag-1 Scatter Plot of", colnames(res)[2]))
 ```
 
-```{r, include = FALSE}
+```{r, fig.width = 5, fig.height = 5, include = FALSE}
 # run acf plots
-lapply(seq(1,length(res)), function(i) { 
+acfs = lapply(seq(1,length(res)), function(i) { # plot for all parameters
   acf(res[,i], xlab = "Lag", ylab = "ACF", 
             main = paste("ACF Plot of ", colnames(res)[i]))
 })
+
+acf(res[,2], xlab = "Lag", ylab = "ACF", 
+    main = paste("ACF Plot of ", colnames(res)[2]))
+
 ```
+
+Display of lag-1 scatterplot and acf plot for $\beta_1$ is shown above, code provided allows generations of plots for all parameters.
 
 *add old model and resid code here*
 
@@ -1748,3 +1758,6 @@ ggplot(sa_df_plot) + geom_density(aes(x = sa_df_plot[,1])) +
   labs(x = expression(beta[6]), caption = paste("Fig. 8 The above plots show sensitivity analysis for different priors on r and the coefficients. The blue line indicates the estimate of the", "coefficient from the propsed model. It appears that the analysis is generally not sensitive to different priors."), size = 3) + # change beta[6] to beta being analyzed
   theme(plot.caption = element_text(hjust = 0.5, vjust = -0.5, size = 4))
 ```
+
+
+
