@@ -11,16 +11,16 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # I. Introduction
 
-World leaders are influential people that have the power to impact millions of people's lives. Some leaders are elected for terms while others serve for life, so their expected survival is of great interest. In this paper, we seek to examine Popes, US Presidents, Dalai Lamas, Chinese Emperors, and Japanese Emperors to see how their lifespans compare. Additionally, we want to analyze the impact of a leader's birth year on survival, and whether or not this impact might vary depending on the type of leadership. After we build a model to analyze the effects, we also wish to look at some specific cases and determine the probability that the current 14th Dalai Lama will outlive Pope Francis and the probability that President Obama will outlive Emperor Naruhito. We will accomplish this by using survival analysis. We use Bayesian Inference to estimate the model parameters with the help of the JAGS program. 
+World leaders are influential people that have the power to impact millions of people's lives. Some leaders are elected for terms while others serve for life, so their expected survival is of great interest. In this paper, we seek to examine Popes, US Presidents, Dalai Lamas, Chinese Emperors, and Japanese Emperors to see how their lifespans compare. Additionally, we want to analyze the impact of a leader's birth year on survival, and whether or not this impact might vary depending on the type of leadership. After we build a model to analyze the effects, we also wish to obtain predictions for the lifespans of leaders that are currently alive, as well as make comparative statements about the survival times of these leaders. We will accomplish this by using survival analysis. We use Bayesian Inference to estimate the model parameters with the help of the JAGS program. 
 
-The rest of the paper is structured as follows. First, we will describe the data used to carry out our analysis. Next, we will describe the methods used in our analysis plan. Then, we will show how we carried out our analysis plan and recount our results. After that, we discuss our conclusions and areas for further research. Finally, our code and some additional information can be found in the Appendix. 
+The rest of the paper is structured as follows. First, we will describe the data used to carry out our analysis. Then, we will discuss the Weibull model and Bayesian framework used for analysis to ground our analysis plan. Then, we will show how we carried out our analysis plan and recount our results. After that, we discuss our conclusions and areas for further research. Finally, our code and some additional information can be found in the Appendix. 
 
 
 # II. Data
 
 ## II a. Description of the Data
 
-The data used in this analysis contains entries for 177 different world leaders. The types of world leaders present in the data include Popes, US Presidents, Dalai Lamas, Chinese Emperors, and Japanese Emperors. Each leader's birth date and their type of leadership is recorded. For some of these groups, we have data dating all the way back to the 14th century. Additionally, leaders who have passed away also have their death date and age of death recorded. For leaders that are still living, these columns instead contain the date the dataset was created (July 31, 2020) and their current age on that date. In order to further clarify who is dead or alive, there is a column titled "Censored," which takes a value of 0 if the person is dead and a value of 1 if that person is still alive. Related to this, there is another column called "Fail," which takes on a value of 1 if the person is dead and a value of 0 if the person is alive. In total, there are 10 living leaders in our dataset, 4 of whose age of death we are trying to predict. 
+The data used in this analysis contains entries for 177 different world leaders. The types of world leaders present in the data include Popes, US Presidents, Dalai Lamas, Chinese Emperors, and Japanese Emperors. Each individuals's birth date and their leadership position is recorded. We calculated each leader's birth year from the birth date column. For some of these groups, we have data dating all the way back to the 14th century. Additionally, leaders who have passed away also have their death date and age of death recorded. For leaders that are still living, these columns instead contain the date the dataset was created (August 31, 2020) and their current age on that date. In order to further clarify who is dead or alive, there is a column titled "Censored," which takes a value of 0 if the person is dead and a value of 1 if that person is still alive. Related to this, there is another column called "Fail," which takes on a value of 1 if the person is dead and a value of 0 if the person is alive. The problem with censored data is that we don't know exactly when a person will die. Thus, we have to come up with a way to model a censored person's death date if we use them in building our model. In total, there are 10 living leaders in our dataset, 4 of whose age of death we are trying to predict. 
 
 ```{r, message=F, include=F}
 # import libraries
@@ -66,7 +66,7 @@ leaders_data$Birth.Year <- year(leaders_data$Birth.Date)
 ## II b. Exploratory Data Analysis
 
 ```{r, fig.height = 2, fig.wdith=5, echo=F}
-ggplot(data=leaders_data, aes(x=Birth.Year, y = Age.Event, color = Type)) +geom_point() + geom_smooth(method="lm", se = F)
+ggplot(data=leaders_data, aes(x=Birth.Year, y = Age.Event, color = Type)) +geom_point() + geom_smooth(method="lm", se = F) + ggtitle("Birth Year vs. Age") + labs(subtitle = "by leadership type", x = "Birth Year", y = "Age of Death/Censorship")
 ```
 
 Based on this scatterplot, it appears that birth year's association with lifespan does depends on type of leadership.
@@ -74,15 +74,15 @@ Based on this scatterplot, it appears that birth year's association with lifespa
 ```{r, fig.height=2, fig.width=5,echo=F}
 # create EDA plots
 ggplot(data = leaders_data) +
-  geom_boxplot(aes(x = Type, y = Age.Event)) + ggtitle("Distribution of Leader Type and Their Age") + labs(x = "Type of Leader", y = "Age")
+  geom_boxplot(aes(x = Type, y = Age.Event)) + ggtitle("Distribution of Leader Survival Time") + labs(x = "Type of Leader", y = "Age of Death/Censorship")
 ```
 
-```{r, fig.height=2, fig.width=5,echo=F}
+```{r, fig.height=2, fig.width=2,echo=F}
 ggplot(data = leaders_data) +
-  geom_histogram(aes(x = Age.Event), binwidth = 5) + ggtitle("Distribution of Leaders Age") + labs(x = "Age")
+  geom_histogram(aes(x = Age.Event), binwidth = 5) + ggtitle("Distribution of Leaders Age") + labs(x = "Age of Death Censorship") + facet_wrap(~ Type, ncol = 3)
 ```
 
-From the boxplot, the distribution of the lifespans of Popes and US Presidents is centered higher, which makes intuitive sense given that these leaders are elected later in life, while Dalai Lamas and Emperors can be elected at much younger ages. For instance, if a person is a toddler and dies at age five, that person can never be president (and therefore would not have their age be part of the dataset). However, that person can become a Dalai Lama as a toddler and have their age at death influence the distribution plotted. Lastly, the distribution of lifespans as seen in the histogram is unimodal and slightly left skewed. However, this skewing does not seem extreme so there is no need for a transformation. 
+From the boxplot, the distribution of the lifespans of Popes and US Presidents is centered higher, which makes intuitive sense given that these leaders are elected later in life, while Dalai Lamas and Emperors can be elected at much younger ages. For instance, if a person is a toddler and dies at age five, that person can never be president (and therefore would not have their age be part of the dataset). However, that person can become a Dalai Lama as a toddler and have their age at death influence the distribution plotted. These same patterns can also be observed in the histograms. Also, in the histograms, there is no extreme skewing, so it does not appear tha log transformations are needed. 
 
 # III. Methods
 
@@ -1651,8 +1651,9 @@ ggplot(data = monarchs, aes(x = V2, y = resid/sd)) + geom_point() +
 # VI. Conclusion and Further Discussion
 
 We sought to compare Popes, US Presidents, Dalai Lamas, Chinese Emperors, and Japanese Emperors to see how their lifespans compare. Our model has found that the impact of birth year on lifespan does not change based on leadership type. Additionally, our model has found that lifespan does depend on year of birth, but the association is not strong. 
+One limitation worth noting is that our data does not include election year, so we have no way to control for the fact that Presidents and Popes must have a minimum lifespan. On the other hand, Dalai Lamas can be chosen close to birth and thus have a younger death date. 
 
-This model could be improved by including more predictors; for ezample, health varies widely among people, and could lead to a better model for prediction. For further implementations of this research question, it would be valuable to interpret economic or quality of life data as it concerns the different countries that the leaders grew up in, as the conditions that a person live in lead to changes in a person's lifespan. 
+This model could be improved by including more predictors; for example, health varies widely among people, and could lead to a better model for prediction. For further implementations of this research question, it would be valuable to interpret economic or quality of life data as it concerns the different countries that the leaders grew up in, as the conditions that a person live in lead to changes in a person's lifespan. 
 
 # VII. References
 
@@ -1666,7 +1667,7 @@ We use the Poisson "zeros trick," where a set of 0's are created and the likelih
 
 # # A.2 Code for Traceplots, Lag-1 Scatterplots, and Acf Plots
 
-```{r, echo = FALSE}
+```{r, fig.width = 5, fig.height = 5, echo = FALSE}
 # run traceplots
 parameters = c(all_betas, "r")
 
@@ -1691,27 +1692,38 @@ do.call(grid.arrange, p2)
 do.call(grid.arrange, p3)
 ```
 
-```{r, include = FALSE}
+All of the traceplots and code for plotting is above.
+
+```{r, fig.width = 5, fig.height = 5, include = FALSE}
 # run lag-1 scatterplots
-library(ggplot2)
-res_lag1 = lapply(seq(1:length(res)), function(i) {
-  lres = lag(res[,i],1)
-  plot(y=res[,i], x= lres, 
+lag1_df = lapply(seq(1:length(res)), function(i) { lag(res[,i],1) })
+
+res_lag1 = function(i) { # plot for all parameters
+  plot(y=res[,i], x= lag1_df[[i]], 
        xlab = paste0(colnames(res)[i], "-1"),
        ylab = paste0(colnames(res)[i]),
        main = paste("Lag-1 Scatter Plot of", colnames(res)[i]))
-})
+}
 
-
+plot(y=res[,2], x= lag1_df[[2]], 
+       xlab = paste0(colnames(res)[2], "-1"),
+       ylab = paste0(colnames(res)[2]),
+       main = paste("Lag-1 Scatter Plot of", colnames(res)[2]))
 ```
 
-```{r, include = FALSE}
+```{r, fig.width = 5, fig.height = 5, include = FALSE}
 # run acf plots
-lapply(seq(1,length(res)), function(i) { 
+acfs = lapply(seq(1,length(res)), function(i) { # plot for all parameters
   acf(res[,i], xlab = "Lag", ylab = "ACF", 
             main = paste("ACF Plot of ", colnames(res)[i]))
 })
+
+acf(res[,2], xlab = "Lag", ylab = "ACF", 
+    main = paste("ACF Plot of ", colnames(res)[2]))
+
 ```
+
+Display of lag-1 scatterplot and acf plot for $\beta_1$ is shown above, code provided allows generations of plots for all parameters.
 
 *add old model and resid code here*
 
@@ -1755,3 +1767,6 @@ ggplot(sa_df_plot) + geom_density(aes(x = sa_df_plot[,1])) +
   labs(x = expression(beta[6]), caption = paste("Fig. 8 The above plots show sensitivity analysis for different priors on r and the coefficients. The blue line indicates the estimate of the", "coefficient from the propsed model. It appears that the analysis is generally not sensitive to different priors."), size = 3) + # change beta[6] to beta being analyzed
   theme(plot.caption = element_text(hjust = 0.5, vjust = -0.5, size = 4))
 ```
+
+
+
