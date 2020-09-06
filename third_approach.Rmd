@@ -56,6 +56,9 @@ leaders_data$Age.Event <- as.numeric(leaders_data$Age.Event)
 
 summary(leaders_data)
 
+# 10 censored data
+leaders_data$Name[leaders_data$Censored == "1"]
+
 # create birth year
 leaders_data$Birth.Year <- year(leaders_data$Birth.Date)
 ```
@@ -71,15 +74,15 @@ Based on this scatterplot, it appears that birth year's association with lifespa
 ```{r, fig.height=2, fig.width=5,echo=F}
 # create EDA plots
 ggplot(data = leaders_data) +
-  geom_boxplot(aes(x = Type, y = Age.Event)) + ggtitle("Distribution of Leader Type and Their Age") + labs(x = "Type of Leader", y = "Age of Death/Censorship")
+  geom_boxplot(aes(x = Type, y = Age.Event)) + ggtitle("Distribution of Leader Survival Time") + labs(x = "Type of Leader", y = "Age of Death/Censorship")
 ```
 
-```{r, fig.height=2, fig.width=5,echo=F}
+```{r, fig.height=2, fig.width=2,echo=F}
 ggplot(data = leaders_data) +
-  geom_histogram(aes(x = Age.Event), binwidth = 5) + ggtitle("Distribution of Leaders Age") + labs(x = "Age of Death Censorship")
+  geom_histogram(aes(x = Age.Event), binwidth = 5) + ggtitle("Distribution of Leaders Age") + labs(x = "Age of Death Censorship") + facet_wrap(~ Type, ncol = 3)
 ```
 
-From the boxplot, the distribution of the lifespans of Popes and US Presidents is centered higher, which makes intuitive sense given that these leaders are elected later in life, while Dalai Lamas and Emperors can be elected at much younger ages. For instance, if a person is a toddler and dies at age five, that person can never be president (and therefore would not have their age be part of the dataset). However, that person can become a Dalai Lama as a toddler and have their age at death influence the distribution plotted. Lastly, the distribution of lifespans as seen in the histogram is unimodal and slightly left skewed. However, this skewing does not seem extreme so there is no need for a transformation. 
+From the boxplot, the distribution of the lifespans of Popes and US Presidents is centered higher, which makes intuitive sense given that these leaders are elected later in life, while Dalai Lamas and Emperors can be elected at much younger ages. For instance, if a person is a toddler and dies at age five, that person can never be president (and therefore would not have their age be part of the dataset). However, that person can become a Dalai Lama as a toddler and have their age at death influence the distribution plotted. These same patterns can also be observed in the histograms. Also, in the histograms, there is no extreme skewing, so it does not appear tha log transformations are needed. 
 
 # III. Methods
 
@@ -87,17 +90,23 @@ From the boxplot, the distribution of the lifespans of Popes and US Presidents i
 
 We use survival analysis as a way to model $T_i$, the lifespan of a given leader i depending on their year of birth and type of leadership. Survival analysis is useful in that it allows the consideration of "censored" data. This means that we do not always observe the outcome for each data point. For example, we do not know the death date of leaders that are still alive. Thus, we do not know their lifespan, we just know that their survival time $T_i$ will be greater than their current age. 
 
-We model the lifespan $T_i$ of an individual i after the Weibull distribution specified below. We choose to use the Weibull distribution because it is often utilized in survival analysis and allows the user to specify a flexible shape parameter for the distribution. The first parameter $r$, also known as the shape parameter, is a positive scalar, and the second parameter $\mu$, the scale parameter, is a linear function of the covariates (in this case, birth year centered at mean 1667 and types of leadership as well as their interactions). 
+We model the lifespan $T_i$ of an individual i after the Weibull distribution specified below. We choose to use the Weibull distribution because it is often utilized in survival analysis and allows the user to specify a flexible shape parameter for the distribution. The first parameter $r$, also known as the shape parameter, is a positive scalar, and the second parameter $\mu$, the scale parameter, is a linear function of the covariates (in this case, the century of the birth year and types of leadership as well as their interactions). 
 
 
-$$ T_i \sim Weibull(r, \mu_i) $$
-$$\log(\mu_i) = \beta_0+\beta_1 (Year \ of \ Birth_i)+\beta_2 (Leadership_i = UsPres) + \beta_3 (Leadership_i = ChinaEmp) $$
-$$+ \beta_4 (Leadership_i = DalaiLama) +\beta_5 (Leadership_i = JapanEmp) \\$$
-$$+ \beta_6 (Year \ of \ Birth_i * (Leadership_i = UsPres)) \\$$
-$$+ \beta_7 (Year \ of \ Birth_i * (Leadership_i = ChinaEmp)) \\$$
-$$+ \beta_8 (Year \ of \ Birth_i * (Leadership_i = DalaiLama)) \\$$
-$$+ \beta_9 (Year \ of \ Birth_i * (Leadership_i = JapanEmp))$$
-where Leadership_i = Popes is the baseline for comparison.
+$$ 
+T_i \sim Weibull(r, \mu_i) \\
+
+\log(\mu_i) = \beta_0+ \sum_{j = 1, \cdots, 6} \beta_j I(Birth \ Century_i = j)+ \sum_{k = 7, \cdots, 10}\beta_k I(Leadership_i = k) \\
++ \sum_{j = 1, \cdots, 6,\ k = 7, \cdots, 10}\beta_{j,k} I(Birth \ Century_i = j)*I(Leadership_i = k) 
+$$
+
+where the indicator functions $Birth \ Century_i = 1, \cdots, 6$ corresponds to a leader $i$ born in the 15th, 16th, 17th, 18th, 19th and 20th century respectively. The 14th century is the baseline for comparison. $Leadership_i = 7, \cdots, 10$ corresponds to a leader $i$ being a U.S. President, a Chinese Emperor, a Dalai Lamai and a Japanese Emperor respectively. $Leadership_i$ uses Pope the baseline for comparison. $\beta_{j,k}$ is the parameter for the interaction effect between brith year century $j$ and leadership type $k$. 
+
+For example, for Pope Francis who was born in 1963, his birth year century is the 20th century and his leadership type is Pope. $I(Birth \ Century_{Francis} = j)$ will all be 0 except for $j = 6$ (which indicates he was born in the 20th century) and $I(Leadership_i = k)$ will all be 0 since Pope is the baseline for comparison for leadership types. We can write $\log(\mu_{Francis}) = \beta_0 + \beta_6$ for Pope Francis. 
+
+Note that the first U.S. President, George Washington, was born in 1732 (18th century, $j = 4$) and hence the interactions between $Birth \ Century_i= 1,2,3$ (born in the 15th century, 16th century or 17th century) and $Leadership_7$ (being a U.S. President) are meaningless. As such, we didn't include those interaction terms in our model. 
+
+Prior to using this model, we considered a model that used leaders' birth years as a continuous variable instead of binning them into centuries. However, that model resulted in a less desirable model predictive ability as we ran model diagnostic. The residual plot showed a clear trend between residuals and predicted lifespans. Using a quadratic polynomial improved the residuals, but our current model is still superior. Model diagnostic of the current model can be found in section V.c and residual plots of previous models with continuous birth year variable can be found in the Appendix. *make sure we include them in the Appendix*
 
 ## III b. Addressing Censored Data
 
@@ -108,9 +117,6 @@ To handle censored observations, we specify their contribution to the likelihood
 We assume that our priors are independent because intuitively a given observation could not be two types of leaders. Additionally, we do not have sufficiently strong prior knowledge about the relationship between birth year and type of leadership to specify an informative prior. Therefore, we use uninformative priors for the betas in our model. For our prior for r, we chose a prior of $exp(1)$, as we believe the hazard of death increases with time. 
 
 ```{r, include=F}
-# 10 censored data
-leaders_data$Name[leaders_data$Censored == "1"]
-
 # create dummy variables
 leaders_data <- leaders_data %>%
   mutate(TypeChinaEmp = as.factor(case_when(Type == "ChinaEmp" ~ 1,
@@ -194,7 +200,7 @@ x_6_9 <- x_6*x_9
 x_6_10 <- x_6*x_10
 ```
 
-*write based on residual plots, choose binning for time*
+
 
 ```{r, og-model-text, include=F}
 # mcmc sampler function
@@ -204,10 +210,7 @@ build_model <- function() {
     z_censored[i] ~ dpois(phi_censored[i])
     phi_censored[i] <- mu_censored[i] * pow(t_censored[i], r)
     mu_censored[i] <- exp(beta_censored[i])
-    beta_censored[i] <- beta_0 + beta_1*x_1_censored[i] +
-      beta_2*x_2_censored[i] + beta_3*x_3_censored[i] + beta_4*x_4_censored[i] + beta_5*x_5_censored[i] + beta_6*x_6_censored[i] + beta_7*x_7_censored[i] + beta_8*x_8_censored[i] + beta_9*x_9_censored[i] + beta_10*x_10_censored[i] +
-
-     beta_1_8*x_1_8_censored[i] +  beta_1_9*x_1_9_censored[i] + beta_1_10*x_1_10_censored[i] +
+    beta_censored[i] <- beta_0 + beta_1*x_1_censored[i] + beta_2*x_2_censored[i] + beta_3*x_3_censored[i] + beta_4*x_4_censored[i] + beta_5*x_5_censored[i] + beta_6*x_6_censored[i] + beta_7*x_7_censored[i] + beta_8*x_8_censored[i] + beta_9*x_9_censored[i] + beta_10*x_10_censored[i] + beta_1_8*x_1_8_censored[i] +  beta_1_9*x_1_9_censored[i] + beta_1_10*x_1_10_censored[i] +
 
           beta_2_8*x_2_8_censored[i] +
           beta_2_9*x_2_9_censored[i] +
@@ -239,9 +242,7 @@ build_model <- function() {
     survival_non_censored[j] ~ dweib(r, mu[j])
     mu[j] <- exp(beta[j])
     beta[j] <- beta_0 + beta_1*x_1_non_censored[j] +
-      beta_2*x_2_non_censored[j] + beta_3*x_3_non_censored[j] + beta_4*x_4_non_censored[j] + beta_5*x_5_non_censored[j] + beta_6*x_6_non_censored[j] + beta_7*x_7_non_censored[j] + beta_8*x_8_non_censored[j] + beta_9*x_9_non_censored[j] + beta_10*x_10_non_censored[j] +
-
-    beta_1_8*x_1_8_non_censored[j] +  beta_1_9*x_1_9_non_censored[j] + beta_1_10*x_1_10_non_censored[j] +
+      beta_2*x_2_non_censored[j] + beta_3*x_3_non_censored[j] + beta_4*x_4_non_censored[j] + beta_5*x_5_non_censored[j] + beta_6*x_6_non_censored[j] + beta_7*x_7_non_censored[j] + beta_8*x_8_non_censored[j] + beta_9*x_9_non_censored[j] + beta_10*x_10_non_censored[j] + beta_1_8*x_1_8_non_censored[j] +  beta_1_9*x_1_9_non_censored[j] + beta_1_10*x_1_10_non_censored[j] +
 
           beta_2_8*x_2_8_non_censored[j] +
           beta_2_9*x_2_9_non_censored[j] +
@@ -270,39 +271,39 @@ build_model <- function() {
 
 
 
-  beta_0 ~ dnorm(0.0, 1.0E-3) # Prior on beta_0 is normal with low precision
-  beta_1 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_2 ~ dnorm(0.0, 1.0E-3) # Prior on beta_2 is normal with low precision
-  beta_3 ~ dnorm(0.0, 1.0E-3) # Prior on beta_3 is normal with low precision
-  beta_4 ~ dnorm(0.0, 1.0E-3) # Prior on beta_4 is normal with low precision
-  beta_5 ~ dnorm(0.0, 1.0E-3) # Prior on beta_5 is normal with low precision
-  beta_6 ~ dnorm(0.0, 1.0E-3) # Prior on beta_6 is normal with low precision
-  beta_7 ~ dnorm(0.0, 1.0E-3) # Prior on beta_7 is normal with low precision
-  beta_8 ~ dnorm(0.0, 1.0E-3) # Prior on beta_8 is normal with low precision
-  beta_9 ~ dnorm(0.0, 1.0E-3) # Prior on beta_9 is normal with low precision
-  beta_10 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_1_8 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_1_9 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_1_10 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_2_8 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_2_9 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_2_10 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
+  beta_0 ~ dnorm(0.0, 1.0E-3) # Priors on betas are all normal with low precision
+  beta_1 ~ dnorm(0.0, 1.0E-3) 
+  beta_2 ~ dnorm(0.0, 1.0E-3) 
+  beta_3 ~ dnorm(0.0, 1.0E-3) 
+  beta_4 ~ dnorm(0.0, 1.0E-3) 
+  beta_5 ~ dnorm(0.0, 1.0E-3) 
+  beta_6 ~ dnorm(0.0, 1.0E-3) 
+  beta_7 ~ dnorm(0.0, 1.0E-3) 
+  beta_8 ~ dnorm(0.0, 1.0E-3) 
+  beta_9 ~ dnorm(0.0, 1.0E-3) 
+  beta_10 ~ dnorm(0.0, 1.0E-3) 
+  beta_1_8 ~ dnorm(0.0, 1.0E-3) 
+  beta_1_9 ~ dnorm(0.0, 1.0E-3) 
+  beta_1_10 ~ dnorm(0.0, 1.0E-3) 
+  beta_2_8 ~ dnorm(0.0, 1.0E-3) 
+  beta_2_9 ~ dnorm(0.0, 1.0E-3) 
+  beta_2_10 ~ dnorm(0.0, 1.0E-3) 
 
-  beta_3_8 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_3_9 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_3_10 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_4_7 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_4_8 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_4_9 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_4_10 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_5_7 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_5_8 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_5_9 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_5_10 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_6_7 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_6_8 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_6_9 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_6_10 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
+  beta_3_8 ~ dnorm(0.0, 1.0E-3) 
+  beta_3_9 ~ dnorm(0.0, 1.0E-3) 
+  beta_3_10 ~ dnorm(0.0, 1.0E-3) 
+  beta_4_7 ~ dnorm(0.0, 1.0E-3) 
+  beta_4_8 ~ dnorm(0.0, 1.0E-3) 
+  beta_4_9 ~ dnorm(0.0, 1.0E-3)
+  beta_4_10 ~ dnorm(0.0, 1.0E-3) 
+  beta_5_7 ~ dnorm(0.0, 1.0E-3) 
+  beta_5_8 ~ dnorm(0.0, 1.0E-3) 
+  beta_5_9 ~ dnorm(0.0, 1.0E-3) 
+  beta_5_10 ~ dnorm(0.0, 1.0E-3) 
+  beta_6_7 ~ dnorm(0.0, 1.0E-3) 
+  beta_6_8 ~ dnorm(0.0, 1.0E-3) 
+  beta_6_9 ~ dnorm(0.0, 1.0E-3) 
+  beta_6_10 ~ dnorm(0.0, 1.0E-3) 
 
   r ~ dexp(0.1) # Prior on r
 
@@ -312,7 +313,7 @@ build_model <- function() {
    alpha_1 <- - beta_1 / r
    alpha_2 <- - beta_2 / r
    alpha_3 <- - beta_3 / r
-  alpha_4 <- - beta_4 / r
+   alpha_4 <- - beta_4 / r
    alpha_5 <- - beta_5 / r
    alpha_6 <- - beta_6 / r
    alpha_7 <- - beta_7 / r
@@ -386,10 +387,10 @@ build_model <- function() {
    p_i_Yr20UsPres <- 100*(exp(alpha_6_7) - 1)
    p_i_Yr20ChinaEmp <- 100*(exp(alpha_6_8) - 1)
    p_i_Yr20DalaiLama <- 100*(exp(alpha_6_9) - 1)
-  p_i_Yr20JapanEmp <- 100*(exp(alpha_6_10) - 1)
+   p_i_Yr20JapanEmp <- 100*(exp(alpha_6_10) - 1)
 
 
-  # Predictive distribution of age at the new values
+  # Predictive distribution of age at the new values (i.e. 10 alive leaders)
   beta_Francis <- beta_0 + beta_6
   mu_Francis <- exp(beta_Francis)
   survival_Francis ~ dweib(r, mu_Francis) %_% T(present_length_Francis, upper_length)
@@ -533,7 +534,7 @@ x_6_10_non_censored <- x_6_10[-censored_dex]
 
 n_non_censored <- length(survival_non_censored)
 
-# find attributes for the four leaders
+# find attributes for the 10 alive leaders
 birth_year_Francis <- leaders_data$Birth.Year[leaders_data$Name == "Francis"]
 year_Francis <- birth_year_Francis - mean(leaders_nopred$Birth.Year)
 present_length_Francis <- leaders_data$Age.Event[leaders_data$Name =="Francis"]
@@ -579,7 +580,7 @@ upper_length <- 100
 # build model inputs and run model
 data_build_model <- list("n_censored", "n_non_censored", "z_censored", "t_censored",
 "x_1_censored", "x_2_censored", "x_3_censored", "x_4_censored", "x_5_censored", "x_6_censored", "x_7_censored", "x_8_censored", "x_9_censored", "x_10_censored", "x_1_8_censored", "x_1_9_censored", "x_1_10_censored", "x_2_8_censored", "x_2_9_censored", "x_2_10_censored",    "x_3_8_censored", "x_3_9_censored", "x_3_10_censored",  "x_4_7_censored", "x_4_8_censored", "x_4_9_censored", "x_4_10_censored",
-"x_5_7_censored", "x_5_8_censored", "x_5_9_censored", "x_5_10_censored","x_6_7_censored", "x_6_8_censored", "x_6_9_censored", "x_6_10_censored","survival_non_censored", "x_1_non_censored", "x_2_non_censored", "x_3_non_censored", "x_4_non_censored", "x_5_non_censored", "x_6_non_censored", "x_7_non_censored", "x_8_non_censored", "x_9_non_censored", "x_10_non_censored", "x_1_8_non_censored", "x_1_9_non_censored", "x_1_10_non_censored",  "x_2_8_non_censored", "x_2_9_non_censored", "x_2_10_non_censored",    "x_3_8_non_censored", "x_3_9_non_censored", "x_3_10_non_censored",  "x_4_7_non_censored", "x_4_8_non_censored", "x_4_9_non_censored", "x_4_10_non_censored",   "x_5_7_non_censored", "x_5_8_non_censored", "x_5_9_non_censored", "x_5_10_non_censored",  "x_6_7_non_censored", "x_6_8_non_censored", "x_6_9_non_censored", "x_6_10_non_censored",  "present_length_Francis", "present_length_Obama", "present_length_Dalai", "present_length_Naruhito","present_length_Benedict", "present_length_Carter", "present_length_Clinton", "present_length_Bush", "present_length_Trump", "present_length_Akihito", "upper_length")
+"x_5_7_censored", "x_5_8_censored", "x_5_9_censored", "x_5_10_censored","x_6_7_censored", "x_6_8_censored", "x_6_9_censored", "x_6_10_censored","survival_non_censored", "x_1_non_censored", "x_2_non_censored", "x_3_non_censored", "x_4_non_censored", "x_5_non_censored", "x_6_non_censored", "x_7_non_censored", "x_8_non_censored", "x_9_non_censored", "x_10_non_censored", "x_1_8_non_censored", "x_1_9_non_censored", "x_1_10_non_censored",  "x_2_8_non_censored", "x_2_9_non_censored", "x_2_10_non_censored",  "x_3_8_non_censored", "x_3_9_non_censored", "x_3_10_non_censored",  "x_4_7_non_censored", "x_4_8_non_censored", "x_4_9_non_censored", "x_4_10_non_censored",   "x_5_7_non_censored", "x_5_8_non_censored", "x_5_9_non_censored", "x_5_10_non_censored",  "x_6_7_non_censored", "x_6_8_non_censored", "x_6_9_non_censored", "x_6_10_non_censored",  "present_length_Francis", "present_length_Obama", "present_length_Dalai", "present_length_Naruhito","present_length_Benedict", "present_length_Carter", "present_length_Clinton", "present_length_Bush", "present_length_Trump", "present_length_Akihito", "upper_length")
 ```
 
 ```{r, output-list}
@@ -588,40 +589,40 @@ params_to_output = c("beta_0", "beta_1", "beta_2", "beta_3", "beta_4", "beta_5",
 
 ```{r, model-priors}
 priors = "
-  beta_0 ~ dnorm(0.0, 1.0E-3) # Prior on beta_0 is normal with low precision
-  beta_1 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_2 ~ dnorm(0.0, 1.0E-3) # Prior on beta_2 is normal with low precision
-  beta_3 ~ dnorm(0.0, 1.0E-3) # Prior on beta_3 is normal with low precision
-  beta_4 ~ dnorm(0.0, 1.0E-3) # Prior on beta_4 is normal with low precision
-  beta_5 ~ dnorm(0.0, 1.0E-3) # Prior on beta_5 is normal with low precision
-  beta_6 ~ dnorm(0.0, 1.0E-3) # Prior on beta_6 is normal with low precision
-  beta_7 ~ dnorm(0.0, 1.0E-3) # Prior on beta_7 is normal with low precision
-  beta_8 ~ dnorm(0.0, 1.0E-3) # Prior on beta_8 is normal with low precision
-  beta_9 ~ dnorm(0.0, 1.0E-3) # Prior on beta_9 is normal with low precision
-  beta_10 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_1_8 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_1_9 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_1_10 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
+  beta_0 ~ dnorm(0.0, 1.0E-3) # priors on betas are all normal w/ low precision
+  beta_1 ~ dnorm(0.0, 1.0E-3) 
+  beta_2 ~ dnorm(0.0, 1.0E-3) 
+  beta_3 ~ dnorm(0.0, 1.0E-3) 
+  beta_4 ~ dnorm(0.0, 1.0E-3) 
+  beta_5 ~ dnorm(0.0, 1.0E-3) 
+  beta_6 ~ dnorm(0.0, 1.0E-3) 
+  beta_7 ~ dnorm(0.0, 1.0E-3) 
+  beta_8 ~ dnorm(0.0, 1.0E-3) 
+  beta_9 ~ dnorm(0.0, 1.0E-3) 
+  beta_10 ~ dnorm(0.0, 1.0E-3) 
+  beta_1_8 ~ dnorm(0.0, 1.0E-3) 
+  beta_1_9 ~ dnorm(0.0, 1.0E-3) 
+  beta_1_10 ~ dnorm(0.0, 1.0E-3) 
 
-  beta_2_8 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_2_9 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_2_10 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
+  beta_2_8 ~ dnorm(0.0, 1.0E-3) 
+  beta_2_9 ~ dnorm(0.0, 1.0E-3) 
+  beta_2_10 ~ dnorm(0.0, 1.0E-3) 
   
-  beta_3_8 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_3_9 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_3_10 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_4_7 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_4_8 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_4_9 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_4_10 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_5_7 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_5_8 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_5_9 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_5_10 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_6_7 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_6_8 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_6_9 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
-  beta_6_10 ~ dnorm(0.0, 1.0E-3) # Prior on beta_1 is normal with low precision
+  beta_3_8 ~ dnorm(0.0, 1.0E-3) 
+  beta_3_9 ~ dnorm(0.0, 1.0E-3) 
+  beta_3_10 ~ dnorm(0.0, 1.0E-3) 
+  beta_4_7 ~ dnorm(0.0, 1.0E-3) 
+  beta_4_8 ~ dnorm(0.0, 1.0E-3) 
+  beta_4_9 ~ dnorm(0.0, 1.0E-3) 
+  beta_4_10 ~ dnorm(0.0, 1.0E-3) 
+  beta_5_7 ~ dnorm(0.0, 1.0E-3) 
+  beta_5_8 ~ dnorm(0.0, 1.0E-3) 
+  beta_5_9 ~ dnorm(0.0, 1.0E-3) 
+  beta_5_10 ~ dnorm(0.0, 1.0E-3) 
+  beta_6_7 ~ dnorm(0.0, 1.0E-3) 
+  beta_6_8 ~ dnorm(0.0, 1.0E-3) 
+  beta_6_9 ~ dnorm(0.0, 1.0E-3) 
+  beta_6_10 ~ dnorm(0.0, 1.0E-3) 
 
   r ~ dexp(0.1) # Prior on r
   "
@@ -870,7 +871,7 @@ model_output
 
 # IV. Analysis
 
-As Stander et al (2018) pointed out, following this Weibull distribution, $log(T_i)$ is equal in distribution to $\frac{1}{r} (\beta_0 + \beta_1x_{i1}+\beta_2x_{i2}+...+\beta_9x_{i1}x_{i5}) + \frac{1}{r}\log(\epsilon)$ where $\epsilon \sim exp(1)$. $\alpha_j = -\beta_j/r$, $j = 1,2,...,9$. The interpretation of coefficients depends on the interaction terms (i.e. both year of birth and the type of leadership). 
+As Stander et al (2018) pointed out, following this Weibull distribution, $log(T_i)$ is equal in distribution to $\frac{1}{r} (\beta_0 + \beta_1x_{i1}+\beta_2x_{i2}+...+\beta_9x_{i1}x_{i5}) + \frac{1}{r}\log(\epsilon)$ where $\epsilon \sim exp(1)$. $\alpha_j = -\beta_j/r$, $j = 1,2,...,9$. The interpretation of coefficients depends on the interaction terms (i.e. both year of birth year century and the types of leadership). 
 
 For example, while keeping all others constant, if a Pope is born one year later, he is expected to live longer by a multiplicative factor of $exp(\alpha_1)$, or his lifespan is expected to increase by a percentage of $100*exp(\alpha_1-1)$. If a U.S. President is born one year later, he is expected to live longer by a multiplicative factor of $exp(\alpha_1 + \alpha_6)$. If a U.S. President and a Chinese Emperor are born in the same year, $y$ after 1677, the Chinese emperor is expected to live longer by a multiplicative factor of $exp(\alpha_3 - \alpha_2 + (\alpha_7-\alpha_6)*y)$ and so on. 
 
@@ -956,7 +957,7 @@ The table above shows the estimate and 95% credible interval (the bounds are the
 *this part below is now extraneous*
 <!-- Our model also predicts that the 85-year-old 14th Dalai Lama is expected to live 92.4 years (95% credible interval: 85.4 - 99.6 years), the 84-year-old Pope Francis is expected to live 92.4 years (95% credible interval: 84.2 - 99.4 years), the 60-year-old Japanese Emperior Naruhito is expected to live 85.3 years (95% credible interval: 66.4 - 99.5 years) and the 60-year-old former President Barack Obama is expected to live 84.8 years (95% credible interval: 61.5 - 99.4 years).  -->
 
-## V b. Posterior Inference for the 4 Leaders of Interest
+## V b. Posterior Inference for the 10 Alive Leaders
 
 ```{r, francis-dalai, message = F, fig.height=5, fig.width=10, echo = FALSE}
 people = c("age_Francis_predictive", "age_Obama_predictive", "age_Dalai_predictive",
@@ -1179,13 +1180,23 @@ The standardized residuals when plotted against Birth Year show random scatterin
  non_censored_prediction <- filter(leaders_data, Censored == 0) #get all of the leaders that are non-censored, as these are the only people that you are able to do posterior predictive checks on, intuitively
  K <- 10 # set the total number of iterations
  ysims <- matrix(nrow = nrow(non_censored_prediction), ncol = K) #create a matrix of the resulting simulations
+ parameters = c(all_betas, "r")
+ res = data.frame(model_output$BUGSoutput$sims.matrix)[,parameters]
  
  for(k in 1:K){ #for each iteration
    for(i in 1:nrow(non_censored_prediction)){ #for each row of the non-censored data
      w <- sample(nrow(res), 1) #sample from the model's simulations
      samp <- res[w,] #get the resulting values from the model's random sample
      val <- non_censored_prediction[i, ] #get the resulting values from the specific row
-     beta_temp <- samp$beta_0 + samp$beta_1*val$Birth.Year + samp$beta_2*as.integer(val$TypeUsPres) + samp$beta_3*as.integer(val$TypeChinaEmp) + samp$beta_4*as.integer(val$TypeDalaiLama) + samp$beta_5*as.integer(val$TypeJapanEmp) + samp$beta_6*val$Birth.Year*as.integer(val$TypeUsPres) + samp$beta_7*val$Birth.Year*as.integer(val$TypeChinaEmp) + samp$beta_8*val$Birth.Year*as.integer(val$TypeDalaiLama) + samp$beta_9*val$Birth.Year*as.integer(val$TypeJapanEmp) #calculate the beta values as defined by our model
+     
+     beta_temp <- samp$beta_0 + as.integer(val$Yr15)*samp$beta_1 + as.integer(val$Yr16)*samp$beta_2 + as.integer(val$Yr17)*samp$beta_3 + as.integer(val$Yr18)*samp$beta_4 +as.integer(val$Yr19)*samp$beta_5 + as.integer(val$Yr20)*samp$beta_6 + as.integer(val$TypeUsPres)*samp$beta_7 + as.integer(val$TypeChinaEmp)*samp$beta_8 + as.integer(val$TypeDalaiLama)*samp$beta_9 + as.integer(val$TypeJapanEmp)*samp$beta_10 + 
+       
+       as.integer(val$Yr15)*as.integer(val$TypeChinaEmp)*samp$beta_1_8 + as.integer(val$Yr15)*as.integer(val$TypeDalaiLama)*samp$beta_1_9 + as.integer(val$Yr15)*as.integer(val$TypeJapanEmp)*samp$beta_1_10 + 
+       as.integer(val$Yr16)*as.integer(val$TypeChinaEmp)*samp$beta_2_8 + as.integer(val$Yr16)*as.integer(val$TypeDalaiLama)*samp$beta_2_9 + as.integer(val$Yr16)*as.integer(val$TypeJapanEmp)*samp$beta_2_10 + 
+       as.integer(val$Yr17)*as.integer(val$TypeChinaEmp)*samp$beta_3_8 + as.integer(val$Yr17)*as.integer(val$TypeDalaiLama)*samp$beta_3_9 + as.integer(val$Yr17)*as.integer(val$TypeJapanEmp)*samp$beta_3_10 + 
+       as.integer(val$Yr18)*as.integer(val$TypeUsPres)*samp$beta_4_7 + as.integer(val$Yr18)*as.integer(val$TypeChinaEmp)*samp$beta_4_8 + as.integer(val$Yr18)*as.integer(val$TypeDalaiLama)*samp$beta_4_9 + as.integer(val$Yr18)*as.integer(val$TypeJapanEmp)*samp$beta_4_10 + 
+       as.integer(val$Yr19)*as.integer(val$TypeUsPres)*samp$beta_5_7 + as.integer(val$Yr19)*as.integer(val$TypeChinaEmp)*samp$beta_5_8 + as.integer(val$Yr19)*as.integer(val$TypeDalaiLama)*samp$beta_5_9 + as.integer(val$Yr19)*as.integer(val$TypeJapanEmp)*samp$beta_5_10 + 
+       as.integer(val$Yr20)*as.integer(val$TypeUsPres)*samp$beta_6_7 + as.integer(val$Yr20)*as.integer(val$TypeChinaEmp)*samp$beta_6_8 + as.integer(val$Yr20)*as.integer(val$TypeDalaiLama)*samp$beta_6_9 + as.integer(val$Yr20)*as.integer(val$TypeJapanEmp)*samp$beta_6_10 #calculate the beta values as defined by our model
      mu <- exp(beta_temp) #calculate mu from the betas
      t <- rtweibull(1, samp$r, (1/mu)^(1/samp$r), 50, 100) #put the mu and the sample's r value into the weibull equation
      ysims[i, k] <- t #put the resulting value into the ysims matrix
@@ -1210,7 +1221,7 @@ hist(d[,1], main = "Histogram of Distribution of One Simulated Dataset", xlab = 
 abline(v=non_censored_prediction$Age.Event[r], col = "red")  #get the ages defined in the data
 ```
 
-For the posterior predictive checks, it appears that our model returns values that are more concentrated around the upper truncation limit, which is why the dataframe's Inf values are encoded as 100 (the upper truncation limit defined in our function). This follows what the standardized residuals found, where most of the values from the model are left-skewed. 
+For the posterior predictive checks, it appears that our model returns values that are more concentrated around the upper truncation limit, which is why the dataframe's Inf values are encoded as 100 (the upper truncation limit defined in our function). This follows what the standardized residuals found, where most of the values from the model are left-skewed. Additionally, the red lines on our model are defined as the ages from two randomly sampled leaders that are non-censored. 
 
 # VI. Sensitivity Analysis
 
@@ -1654,7 +1665,8 @@ ggplot(data = monarchs, aes(x = Ts, y = resid/sd)) + geom_point() +
 ggplot(data = monarchs, aes(x = V2, y = resid/sd)) + geom_point() +
   labs(x = "Birth Year", y = "Standardized Residual")
 ```
-*write about how external cross validation looks bad*
+
+We sought to perform external cross-validation on our model. The data that we used for the cross-validation was from all of England's monarchs, accessed from Wikipedia. This dataset only included one person that was still alive. As shown in the standardized residuals plot, there is an upward trend, as the birth year of the monarchs increases. Additionally, in the plot showing Predicted Lifespan and the standardized residuals, there is a downward trend, underpredicting a lot of the leaders' lifespans. 
 
 
 # VI. Conclusion and Further Discussion
