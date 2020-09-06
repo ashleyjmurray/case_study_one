@@ -5,7 +5,7 @@ date: "8-30-20"
 output: pdf_document
 ---
 
-```{r setup, include=FALSE}
+```{r, setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
@@ -20,7 +20,7 @@ The rest of the paper is structured as follows. First, we will describe the data
 
 ## II a. Description of the Data
 
-The data used in this analysis contains entries for 177 different world leaders. The types of world leaders present in the data include Popes, US Presidents, Dalai Lamas, Chinese Emperors, and Japanese Emperors. Each individuals's birth date and their leadership position is recorded. We calculated each leader's birth year from the birth date column. For some of these groups, we have data dating all the way back to the 14th century. Additionally, leaders who have passed away also have their death date and age of death recorded. For leaders that are still living, these columns instead contain the date the dataset was created (August 31, 2020) and their current age on that date. In order to further clarify who is dead or alive, there is a column titled "Censored," which takes a value of 0 if the person is dead and a value of 1 if that person is still alive. Related to this, there is another column called "Fail," which takes on a value of 1 if the person is dead and a value of 0 if the person is alive. The problem with censored data is that we don't know exactly when a person will die. Thus, we have to come up with a way to model a censored person's death date if we use them in building our model. In total, there are 10 living leaders in our dataset, 4 of whose age of death we are trying to predict. 
+The data used in this analysis contains entries for 177 different world leaders. The types of world leaders present in the data include Popes, US Presidents, Dalai Lamas, Chinese Emperors, and Japanese Emperors. Each individuals's birth date and their leadership position is recorded. We calculated each leader's birth year from the birth date column. For some of these groups, we have data dating all the way back to the 14th century. Additionally, leaders who have passed away also have their death date and age of death recorded. For leaders that are still living, these columns instead contain the date the dataset was created (July 31, 2020) and their current age on that date. We updated that date to the due date of the report, August 31, 2020. In order to further clarify who is dead or alive, there is a column titled "Censored," which takes a value of 0 if the person is dead and a value of 1 if that person is still alive. Related to this, there is another column called "Fail," which takes on a value of 1 if the person is dead and a value of 0 if the person is alive. The problem with censored data is that we don't know exactly when a person will die. Thus, we have to come up with a way to model a censored person's death date if we use them in building our model. In total, there are 10 living leaders in our dataset, 4 of whose age of death we are trying to predict. 
 
 ```{r, message=F, include=F}
 # import libraries
@@ -443,7 +443,7 @@ build_model <- function() {
  }
 ```
 
-```{r, input-list include = FALSE}
+```{r, input-list, include = FALSE}
 censored_dex = which(censored==1) # index of ppl who are censored
 
 # set numeric vectors for censored ppl
@@ -855,7 +855,7 @@ run_model = function(priors, name) {
   # } else {
     model_output <- jags(data = data_build_model,
                          parameters.to.save =  params_to_output,
-                         n.iter = 5000,
+                         n.iter = 50000,
                          n.chains = 3,
                          model.file = file)
     save(model_output, file = name)
@@ -916,8 +916,8 @@ kable(coef, digits = 3)
 
 
 ```{r tidy-model-predicted-increase-table, echo = F}
-vars2 = c("p_i_Yr15", "p_i_Yr16", "p_i_Yr17", "p_i_Yr18", "p_i_Yr19", "p_i_Yr20",  "p_i_UsPres", "p_i_ChinaEmp", "p_i_DalaiLama", "p_i_JapanEmp", "p_i_Yr15ChinaEmp", "p_i_Yr15DalaiLama", "p_i_Yr15JapanEmp",  "p_i_Yr16ChinaEmp", "p_i_Yr16DalaiLama", "p_i_Yr16JapanEmp",  "p_i_Yr17ChinaEmp",   "p_i_Yr17DalaiLama", "p_i_Yr17JapanEmp", "p_i_Yr18UsPres", "p_i_Yr18ChinaEmp",  "p_i_Yr18DalaiLama", "p_i_Yr18JapanEmp", "p_i_Yr19UsPres", "p_i_Yr19ChinaEmp", "p_i_Yr19DalaiLama", "p_i_Yr19JapanEmp", "p_i_Yr20UsPres", "p_i_Yr20ChinaEmp", "p_i_Yr20DalaiLama", "p_i_Yr20JapanEmp", "age_Francis_predictive", "age_Obama_predictive","age_Dalai_predictive", "age_Naruhito_predictive", "age_Benedict_predictive","age_Carter_predictive", "age_Clinton_predictive", "age_Bush_predictive","age_Trump_predictive","age_Akihito_predictive"
-         )
+vars2 = c("p_i_Yr15", "p_i_Yr16", "p_i_Yr17", "p_i_Yr18", "p_i_Yr19", "p_i_Yr20",  "p_i_UsPres", "p_i_ChinaEmp", "p_i_DalaiLama", "p_i_JapanEmp", "p_i_Yr15ChinaEmp", "p_i_Yr15DalaiLama", "p_i_Yr15JapanEmp",  "p_i_Yr16ChinaEmp", "p_i_Yr16DalaiLama", "p_i_Yr16JapanEmp",  "p_i_Yr17ChinaEmp",   "p_i_Yr17DalaiLama", "p_i_Yr17JapanEmp", "p_i_Yr18UsPres", "p_i_Yr18ChinaEmp",  "p_i_Yr18DalaiLama", "p_i_Yr18JapanEmp", "p_i_Yr19UsPres", "p_i_Yr19ChinaEmp", "p_i_Yr19DalaiLama", "p_i_Yr19JapanEmp", "p_i_Yr20UsPres", "p_i_Yr20ChinaEmp", "p_i_Yr20DalaiLama", "p_i_Yr20JapanEmp", "age_Francis_predictive", "age_Obama_predictive","age_Dalai_predictive", "age_Naruhito_predictive", "age_Benedict_predictive","age_Carter_predictive", "age_Clinton_predictive", "age_Bush_predictive","age_Trump_predictive","age_Akihito_predictive")
+
 output <- data.frame(model_output$BUGSoutput$summary)
 output <- output[row.names(output) %in% vars2, ]
 coef <- output %>%
@@ -936,7 +936,25 @@ kable(coef, digits = 3)
 - If a U.S. President and a Chinese Emperor were born in the same year 1700, 33 years after the average birth year 1667, the Chinese emperor is expected to live longer by a multiplicative factor of $exp(\alpha_3 - \alpha_2 + (\alpha_7-\alpha_6)*y)$ = exp(-0.31925+0.1449877 + 33*(-0.0001094-0.0004852) = 0.82. That's to say, the Chinese emperor's life expectancy is 18% shorter. 
 - If a Japanese Emperor is born 100 years later, he is expected to live longer by a multiplicative factor of $exp(\alpha_9) = exp(100*-0.0000595) = 0.994$, which means the lifespan decreases by 0.6%, whereas for Dalai Lama, the lifespan is expected to increase by a factor of exp(100*-0.0016203) = 0.85, or decrease by 15%. 
 
-Our model also predicts that the 85-year-old 14th Dalai Lama is expected to live 92.4 years (95% credible interval: 85.4 - 99.6 years), the 84-year-old Pope Francis is expected to live 92.4 years (95% credible interval: 84.2 - 99.4 years), the 60-year-old Japanese Emperior Naruhito is expected to live 85.3 years (95% credible interval: 66.4 - 99.5 years) and the 60-year-old former President Barack Obama is expected to live 84.8 years (95% credible interval: 61.5 - 99.4 years). 
+```{r, ci-table-all-living-leaders}
+vars3 = c("age_Francis_predictive", "age_Obama_predictive","age_Dalai_predictive", "age_Naruhito_predictive", "age_Benedict_predictive","age_Carter_predictive", "age_Clinton_predictive", "age_Bush_predictive","age_Trump_predictive","age_Akihito_predictive")
+output <- data.frame(model_output$BUGSoutput$summary)
+output <- output[row.names(output) %in% vars3, ]
+coef <- output %>%
+  mutate("Variable" = vars3,
+         "Mean" = output$mean,
+         "Standard Deviation" = output$sd,
+         "2.5% Quantile" = output$X2.5.,
+         "Median" = output$X50.,
+         "97.5% Quantile" = output$X97.5.
+         ) %>%
+  select("Variable", "Mean", "Standard Deviation", "2.5% Quantile","Median", "97.5% Quantile") 
+kable(coef, digits = 3)
+```
+The table above shows the estimate and 95% credible interval (the bounds are the 2.5% quantile and 97.5% quantile) for all 10 living leaders in the dataset.
+
+*this part below is now extraneous*
+<!-- Our model also predicts that the 85-year-old 14th Dalai Lama is expected to live 92.4 years (95% credible interval: 85.4 - 99.6 years), the 84-year-old Pope Francis is expected to live 92.4 years (95% credible interval: 84.2 - 99.4 years), the 60-year-old Japanese Emperior Naruhito is expected to live 85.3 years (95% credible interval: 66.4 - 99.5 years) and the 60-year-old former President Barack Obama is expected to live 84.8 years (95% credible interval: 61.5 - 99.4 years).  -->
 
 ## V b. Posterior Inference for the 4 Leaders of Interest
 
@@ -1626,13 +1644,13 @@ diff = Ts - meanTs
 sd = sqrt((1/n)*(sum((diff)^2)) * (1+ (1/n) + (diff)^2/sum((diff)^2)))
 ```
 
-```{r resid-v-predictor, fig.height=2, fig.width=5, echo = FALSE}
+```{r resid-v-predictorcv, fig.height=2, fig.width=5, echo = FALSE}
 ggplot(data = monarchs, aes(x = Ts, y = resid/sd)) + geom_point() + 
   labs(x = "Predicted Lifespan", y = "Standardized Residual")
 ```
 
 
-```{r resid-v-year, fig.height=2, fig.width=5, echo = FALSE}
+```{r resid-v-yearcv, fig.height=2, fig.width=5, echo = FALSE}
 ggplot(data = monarchs, aes(x = V2, y = resid/sd)) + geom_point() +
   labs(x = "Birth Year", y = "Standardized Residual")
 ```
