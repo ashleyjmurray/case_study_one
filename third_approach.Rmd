@@ -97,7 +97,8 @@ $$
 T_i \sim Weibull(r, \mu_i) \\
 
 \log(\mu_i) = \beta_0+ \sum_{j = 1, \cdots, 6} \beta_j I(Birth \ Century_i = j)+ \sum_{k = 7, \cdots, 10}\beta_k I(Leadership_i = k) \\
-+ \sum_{j = 1, \cdots, 6,\ k = 7, \cdots, 10}\beta_{j,k} I(Birth \ Century_i = j)*I(Leadership_i = k) 
++ \sum_{j = 4, \cdots, 6,\ k = 7}\beta_{j,k} I(Birth \ Century_i = j)*I(Leadership_i = k)  \\
++ \sum_{j = 1, \cdots, 6,\ k = 8, \cdots, 10}\beta_{j,k} I(Birth \ Century_i = j)*I(Leadership_i = k) 
 $$
 
 where the indicator functions $Birth \ Century_i = 1, \cdots, 6$ corresponds to a leader $i$ born in the 15th, 16th, 17th, 18th, 19th and 20th century respectively. The 14th century is the baseline for comparison. $Leadership_i = 7, \cdots, 10$ corresponds to a leader $i$ being a U.S. President, a Chinese Emperor, a Dalai Lamai and a Japanese Emperor respectively. $Leadership_i$ uses Pope the baseline for comparison. $\beta_{j,k}$ is the parameter for the interaction effect between brith year century $j$ and leadership type $k$. 
