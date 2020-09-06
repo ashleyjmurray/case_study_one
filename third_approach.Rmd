@@ -940,6 +940,8 @@ coef_alpha <- output %>%
          ) %>%
   arrange(num) %>%
   select("Coefficient", "Coefficient Name", "Mean", "Standard Deviation", "2.5% Quantile", "Median", "97.5% Quantile")
+
+write.csv(coef_alpha,"~/Desktop/2020 Fall/STA440/Case 1/case_study_one/alphas.csv", row.names = FALSE)
 kable(coef_alpha, digits = 3)
 ```
 *double check variable significance after knitting the whole document*
@@ -947,15 +949,55 @@ Since the baseline for comparison is a Pope born in the 14th century, it's meani
 
 While $\alpha_1, \cdots,\alpha_5$ have 95% credible intervals containing 0 (an indication that these coefficients are statistically insignificant), $\alpha_6$ has a positive credible interval. Hence birth year overall is an significant predictor in this model. If we only look at the main effect of leadership types ($\alpha_7, \cdots,\alpha_10$), these parameters' 95% credible intervals all contain 0. However, some of their interactions with birth year are statistically significant, for example, $\alpha_{1,8}$'s CI is always negative. Due to model hierachy, we need to keep main effects of leadership types in the model as well. 
 
-The specific interpretation of these parameters depends on inputs from birth year and type of leadership. The below provides some examples. 
+The specific interpretation of these parameters depends on inputs from birth year and type of leadership. Below are some examples. 
 
-- A Japanese Emperor born in different centuries
-```{r JapanEmp-diff-century}
+- A Japanese emperor born in different centuries
+    + 14th century: $\log(T_{14th,JapanEmp}) = \alpha_0+\alpha_{10}+\frac{1}{r}\log(\epsilon)$
+    + 15th century: $\log(T_{15th,JapanEmp}) = \alpha_0+\alpha_1+\alpha_{10}+\alpha_{1,10}+\frac{1}{r}\log(\epsilon)$
+    + 16th century: $\log(T_{16th,JapanEmp}) = \alpha_0+\alpha_2+\alpha_{10}+\alpha_{2,10}+\frac{1}{r}\log(\epsilon)$
+    + 17th century: $\log(T_{17th,JapanEmp}) = \alpha_0+\alpha_3+\alpha_{10}+\alpha_{3,10}+\frac{1}{r}\log(\epsilon)$
+    + 18th century: $\log(T_{18th,JapanEmp}) = \alpha_0+\alpha_4+\alpha_{10}+\alpha_{4,10}+\frac{1}{r}\log(\epsilon)$
+    + 19th century: $\log(T_{19th,JapanEmp}) = \alpha_0+\alpha_5+\alpha_{10}+\alpha_{5,10}+\frac{1}{r}\log(\epsilon)$
+    + 20th century: $\log(T_{20th,JapanEmp}) = \alpha_0+\alpha_6+\alpha_{10}+\alpha_{6,10}+\frac{1}{r}\log(\epsilon)$
 
+The summary table is shown below if we comapre the expected lifespans of later Japanese emperors with that of a Japanese emperor born in the 14th century. 
+```{r, echo=F}
+leader_vec <- c("Born in 15th Century", "Born in 16th Century", "Born in 17th Century", "Born in 18th Century", "Born in 19th Century", "Born in 20th Century")
+alpha_vals<- c(coef_alpha[2,3] + coef_alpha[14,3], coef_alpha[3,3]+coef_alpha[17,3], coef_alpha[4,3]+coef_alpha[20,3], coef_alpha[5,3]+coef_alpha[24,3], coef_alpha[6,3]+coef_alpha[28,3],coef_alpha[7,3]+coef_alpha[32,3])
+multiplicative_factor <- round(exp(alpha_vals),3)
+perc_increase <- round(100*(multiplicative_factor-1),1)
+
+JapanEmp_diff_time <- data.frame(leader_vec) %>%
+  mutate("Japanese Emperor" = leader_vec,
+         "Multiplicative Factor" = multiplicative_factor,
+         "Percentage Increase / Decrease in Lifespan" = perc_increase) %>%
+  select("Japanese Emperor","Multiplicative Factor","Percentage Increase / Decrease in Lifespan")
+kable(JapanEmp_diff_time)
 ```
+Surprisingly, the model suggests that longevity doesn't always increase with calendar time. The biggest increase in lifespan is in the 20th century, where the expected lifespan of a Japanese emperor increases by `r JapanEmp_diff_time[6,3]`% compared to a Japanese emperor born 6 centuries ago. This might make sense, given the last century saw the biggest technological breakthroughs and improvement in healthcare.   
 
+- Dalai Lamai born in different centuries
+    + 14th century: $\log(T_{14th,JapanEmp}) = \alpha_0+\alpha_{10}+\frac{1}{r}\log(\epsilon)$
+    + 15th century: $\log(T_{15th,JapanEmp}) = \alpha_0+\alpha_1+\alpha_{10}+\alpha_{1,10}+\frac{1}{r}\log(\epsilon)$
+    + 16th century: $\log(T_{16th,JapanEmp}) = \alpha_0+\alpha_2+\alpha_{10}+\alpha_{2,10}+\frac{1}{r}\log(\epsilon)$
+    + 17th century: $\log(T_{17th,JapanEmp}) = \alpha_0+\alpha_3+\alpha_{10}+\alpha_{3,10}+\frac{1}{r}\log(\epsilon)$
+    + 18th century: $\log(T_{18th,JapanEmp}) = \alpha_0+\alpha_4+\alpha_{10}+\alpha_{4,10}+\frac{1}{r}\log(\epsilon)$
+    + 19th century: $\log(T_{19th,JapanEmp}) = \alpha_0+\alpha_5+\alpha_{10}+\alpha_{5,10}+\frac{1}{r}\log(\epsilon)$
+    + 20th century: $\log(T_{20th,JapanEmp}) = \alpha_0+\alpha_6+\alpha_{10}+\alpha_{6,10}+\frac{1}{r}\log(\epsilon)$
 
+- Leaders born in the 18th century
+   + Pope: $\log(T_{15th,Pope}) = \alpha_0+\alpha_4+\frac{1}{r}\log(\epsilon)$
+   + U.S. President: $\log(T_{15th,UsPres}) = \alpha_0+\alpha_4+\alpha_7+\alpha_{4,7}+\frac{1}{r}\log(\epsilon)$
+   + Chinese Emperor: $\log(T_{15th,ChinaEmp}) = \alpha_0+\alpha_4+\alpha_8+\alpha_{4,8}+\frac{1}{r}\log(\epsilon)$
+   + Dalai Lama: $\log(T_{15th,Dalai}) = \alpha_0+\alpha_4+\alpha_9+\alpha_{4,9}+\frac{1}{r}\log(\epsilon)$
+   + Japanese Emperor: $\log(T_{15th,JapanEmp}) = \alpha_0+\alpha_4+\alpha_10+\alpha_{4,10}+\frac{1}{r}\log(\epsilon)$
 
+- Leaders born in the 20th century
+   + Pope: $\log(T_{20th,Pope}) = \alpha_0+\alpha_6+\frac{1}{r}\log(\epsilon)$
+   + U.S. President: $\log(T_{20th,UsPres}) = \alpha_0+\alpha_6+\alpha_7+\alpha_{6,7}+\frac{1}{r}\log(\epsilon)$
+   + Chinese Emperor: $\log(T_{20th,ChinaEmp}) = \alpha_0+\alpha_6+\alpha_8+\alpha_{6,8}+\frac{1}{r}\log(\epsilon)$
+   + Dalai Lama: $\log(T_{20th,Dalai}) = \alpha_0+\alpha_6+\alpha_9+\alpha_{6,9}+\frac{1}{r}\log(\epsilon)$
+   + Japanese Emperor: $\log(T_{20th,JapanEmp}) = \alpha_0+\alpha_6+\alpha_10+\alpha_{6,10}+\frac{1}{r}\log(\epsilon)$
 
 
 
