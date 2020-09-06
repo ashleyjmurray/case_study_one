@@ -1022,7 +1022,7 @@ coef <- output %>%
 kable(coef, digits = 3)
 ```
 
-
+The table below shows the estimate and 95% credible interval (the bounds are the 2.5% quantile and 97.5% quantile) for all 10 living leaders in the dataset.
 ```{r, ci-table-all-living-leaders}
 # predicted lifespans for all 10 alive leaders
 vars3 = c("age_Francis_predictive", "age_Obama_predictive","age_Dalai_predictive", "age_Naruhito_predictive", "age_Benedict_predictive","age_Carter_predictive", "age_Clinton_predictive", "age_Bush_predictive","age_Trump_predictive","age_Akihito_predictive")
@@ -1039,7 +1039,7 @@ coef <- output %>%
   select("Variable", "Mean", "Standard Deviation", "2.5% Quantile","Median", "97.5% Quantile") 
 kable(coef, digits = 3)
 ```
-The table above shows the estimate and 95% credible interval (the bounds are the 2.5% quantile and 97.5% quantile) for all 10 living leaders in the dataset.
+
 
 ## V b. Posterior Inference for Selected Leaders
 
