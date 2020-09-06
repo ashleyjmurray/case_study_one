@@ -69,7 +69,7 @@ leaders_data$Birth.Year <- year(leaders_data$Birth.Date)
 ggplot(data=leaders_data, aes(x=Birth.Year, y = Age.Event, color = Type)) +geom_point() + geom_smooth(method="lm", se = F) + ggtitle("Birth Year vs. Age") + labs(subtitle = "by leadership type", x = "Birth Year", y = "Age of Death/Censorship")
 ```
 
-Based on this scatterplot, it appears that birth year's association with lifespan does depends on type of leadership.
+Based on this scatterplot, it appears that birth year's association with lifespan does depends on type of leadership. In particular, Dalai Lama's lifespans are negatively correlated with birth year, whereas the rest of the leader types have positive correlations with birth year. 
 
 ```{r, fig.height=2, fig.width=5,echo=F}
 # create EDA plots
@@ -79,7 +79,9 @@ ggplot(data = leaders_data) +
 
 ```{r, fig.height=2, fig.width=2,echo=F}
 ggplot(data = leaders_data) +
-  geom_histogram(aes(x = Age.Event), binwidth = 5) + ggtitle("Distribution of Leaders Age") + labs(x = "Age of Death Censorship") + facet_wrap(~ Type, ncol = 3)
+  geom_histogram(aes(x = Age.Event), binwidth = 5) + 
+  ggtitle("Distribution of Age of Death/Censorshiop \nby Leadership Types") + 
+  labs(x = "Age of Death / Censorship") + facet_wrap(~ Type, ncol = 3)
 ```
 
 From the boxplot, the distribution of the lifespans of Popes and US Presidents is centered higher, which makes intuitive sense given that these leaders are elected later in life, while Dalai Lamas and Emperors can be elected at much younger ages. For instance, if a person is a toddler and dies at age five, that person can never be president (and therefore would not have their age be part of the dataset). However, that person can become a Dalai Lama as a toddler and have their age at death influence the distribution plotted. These same patterns can also be observed in the histograms. Also, in the histograms, there is no extreme skewing, so it does not appear tha log transformations are needed. 
@@ -111,7 +113,7 @@ Prior to using this model, we considered a model that used leaders' birth years 
 
 ## III b. Addressing Censored Data
 
-To handle censored observations, we specify their contribution to the likelihood function using the Poisson "zeros trick." Details on this method and how to implement it can be found in Appendix A.1. 
+To handle censored observations, we specify their contribution to the likelihood function using the Poisson "zeros trick" and set the upper limit of age of death to 100. Details on this method and how to implement it can be found in Appendix A.1. 
 
 ## III c. Prior Choice
 
@@ -875,10 +877,10 @@ model_output
 As Stander et al (2018) pointed out, following this Weibull distribution, $\log(T)$ is equal in distribution to $\frac{1}{r}(\mu_i)+\frac{1}{r}(\epsilon)$, or
 
 $$
-\log(T) \sim \frac{1}{r} (\beta_0 + \beta_1x_1+\cdots+\beta_6x_6+\beta_7x_7+\cdots\beta_{10}x_{10}+\beta_{1,8}x_1x_8+\cdots+\beta_{6,10}x_6x_{10}) +\frac{1}{r}\log(\epsilon) \\
-\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ = \alpha_0 + \alpha_1x_1+\cdots+\alpha_6x_6+\alpha_7x_7+\cdots\alpha_{10}x_{10}+\alpha_{1,8}x_1x_8+\cdots+\alpha_{6,10}x_6x_{10}) +\frac{1}{r}\log(\epsilon)
+\log(T) \sim -\frac{1}{r} (\beta_0 + \beta_1x_1+\cdots+\beta_6x_6+\beta_7x_7+\cdots\beta_{10}x_{10}+\beta_{1,8}x_1x_8+\cdots+\beta_{6,10}x_6x_{10}) +\frac{1}{r}\log(\epsilon) \\
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ = \alpha_0 + \alpha_1x_1+\cdots+\alpha_6x_6+\alpha_7x_7+\cdots\alpha_{10}x_{10}+\alpha_{1,8}x_1x_8+\cdots+\alpha_{6,10}x_6x_{10}) +\frac{1}{r}\log(\epsilon)
 $$
-where $\epsilon \sim exp(1)$, $\alpha = -\beta/r$, $x_1,\cdots,x_6$ are indicator values (i.e., 0s and 1s) corresponding to birth year's century, and $x_7,\cdots,x_{10}$ are indicator values corresponding to types of leadership.
+where $\epsilon \sim exp(1)$ and $\epsilon > 0$. $\alpha = -\beta/r$ is thus a monotone transformation of $\beta}. $x_1,\cdots,x_6$ are indicator values (i.e., 0s and 1s) corresponding to birth year's century, and $x_7,\cdots,x_{10}$ are indicator values corresponding to types of leadership.
 
 The interpretation of coefficients depends on the interaction terms (i.e. both birth year century and the types of leadership). For example, while keeping all others constant, if a Pope was born in the 20th century, he is expected to live longer by a multiplicative factor of $exp(\alpha_6)$ compared to a Pope born in the 14th century, or his lifespan is expected to increase by a percentage of $100*exp(\alpha_6-1)$. If a U.S. President was born in the 18th century, he is expected to live $exp(\alpha_0+\alpha_4+\alpha_7+\alpha_{4,7})$ years; if the president were born in the 20th century instead, he is expected to live $exp(\alpha_0+\alpha_6+\alpha_7+\alpha_{6,7})$. In other words, his lifespan is expected to increase by a multiplicative factor of $exp(\alpha_6-\alpha_4+\alpha_{6,7}-\alpha_{4,7})$. If a Chinese Emperor and a Dalai Lama were both born in the 19th century, the Chinese emperor is expected to live longer by a multiplicative factor of $exp(\alpha_8 - \alpha_9 + \alpha_{5,8}-\alpha_{5,9})$ and so on. 
 
@@ -886,12 +888,13 @@ The interpretation of coefficients depends on the interaction terms (i.e. both b
 
 ## V a. Output and Interpretation of the Model
 
-```{r tidy-model-table-beta, echo = F}
+```{r tidy-model-table-beta, include = F}
 # output beta results
+## *THE BETA VALUES ARE NOT MATCHED TO THE BETA VALUES IN THE OUTPUT BECAUSE ORDER IS DIFFERENT*
 vars = c("beta_0", "beta_1", "beta_2", "beta_3", "beta_4", "beta_5", "beta_6", "beta_7", "beta_8", "beta_9", "beta_10", "beta_1_8", "beta_1_9", "beta_1_10",  "beta_2_8", "beta_2_9", "beta_2_10",   "beta_3_8", "beta_3_9", "beta_3_10", "beta_4_7", "beta_4_8", "beta_4_9", "beta_4_10",  "beta_5_7", "beta_5_8", "beta_5_9", "beta_5_10",  "beta_6_7", "beta_6_8", "beta_6_9", "beta_6_10", "r")
 output <- data.frame(model_output$BUGSoutput$summary)
 output <- output[row.names(output) %in% vars, ]
-coef <- output %>%
+coef_beta <- output %>%
   mutate("Variable" = vars,
          "Mean" = output$mean,
          "Standard Deviation" = output$sd,
@@ -900,30 +903,66 @@ coef <- output %>%
          "97.5% Quantile" = output$X97.5.
          ) %>%
   select("Variable", "Mean", "Standard Deviation", "2.5% Quantile", "Median", "97.5% Quantile")
-kable(coef, digits = 3)
+kable(coef_beta, digits = 3)
 ```
 
-While we may expect leaders who were born earlier to live a shorter life, $\hat{\beta_1}$ which correpsond to the leaders' year of birth appears to be an insignificant parameter as it is very close to 0 (-0.0016) although statistically significant. $\hat{\beta_6}$ to $\hat{\beta_9}$ which correspond to the interaction effects are very weak and mostly insignificant as well. Types of leadership ($\hat{\beta_2}$ to $\hat{\beta_5}$) do seem to be significant. As explained in Section IV, the model is easier to understand if we interpret the output in terms of $\alpha_j$, defined as $\alpha_j = -\beta_j/r$, $j = 1,2,...,9$. Some examples of the interpretation are provided below.
+The table below shows the model output of the multiplicative factors, $\alpha$s. Note that since $\alpha = -\beta/r$ is a monotone transformation, if $\beta$ is statistically significant (i.e. 95% credible interval doesn't contain 0), it should be the same for the corresponding $\alpha$. 
 
 ```{r tidy-model-table-alpha, echo = F}
-vars1 = c("alpha_0", "alpha_1", "alpha_2", "alpha_3", "alpha_4", "alpha_5", "alpha_6", "alpha_7", "alpha_8", "alpha_9", "alpha_10", "alpha_1_8", "alpha_1_9", "alpha_1_10",  "alpha_2_8", "alpha_2_9", "alpha_2_10",  "alpha_3_8", "alpha_3_9", "alpha_3_10", "alpha_4_7", "alpha_4_8", "alpha_4_9", "alpha_4_10", "alpha_5_7", "alpha_5_8", "alpha_5_9", "alpha_5_10", "alpha_6_7", "alpha_6_8", "alpha_6_9", "alpha_6_10"
-         )
+# table of multiplicative factor (alphas)
+vars1 = c("alpha_0", "alpha_1", "alpha_10", "alpha_1_10", "alpha_1_8", "alpha_1_9", 
+          "alpha_2", "alpha_2_10", "alpha_2_8", "alpha_2_9", 
+          "alpha_3", "alpha_3_10", "alpha_3_8", "alpha_3_9", 
+          "alpha_4", "alpha_4_10", "alpha_4_7", "alpha_4_8", "alpha_4_9", 
+          "alpha_5", "alpha_5_10", "alpha_5_7", "alpha_5_8", "alpha_5_9", 
+          "alpha_6", "alpha_6_10", "alpha_6_7", "alpha_6_8", "alpha_6_9", 
+          "alpha_7", "alpha_8", "alpha_9")
+vars1name = c("Intercept", "Born in 15th Century", "Japanese Emperor", "15th Century*Japanese Emperor", "15th Century*Chinese Emperor", "15th Century*Dalai Lama", 
+          "Born in 16th Century", "16th Century*Japanese Emperor", "16th Century*Chinese Emperor", "16th Century*Dalai Lama",
+          "Born in 17th Century", "17th Century*Japanese Emperor", "17th Century*Chinese Emperor", "17th Century*Dalai Lama",
+          "Born in 18th Century", "18th Century*Japanese Emperor", "18th Century*U.S. President", "18th Century*Chinese Emperor", "18th Century*Dalai Lama", 
+          "Born in 19th Century", "19th Century*Japanese Emperor", "19th Century*U.S. President", "19th Century*Chinese Emperor", "19th Century*Dalai Lama", 
+          "Born in 20th Century", "20th Century*Japanese Emperor", "20th Century*U.S. President", "20th Century*Chinese Emperor", "20th Century*Dalai Lama",
+          "U.S. President", "Chinese Emperor","Dalai Lama")
+num = c(1,2,11,14,12,13,3,17,15,16,4,20,18,19,5,24,21,22,23,6,28,25,26,27,7,32,29,30,31,8,9,10)
+
 output <- data.frame(model_output$BUGSoutput$summary)
 output <- output[row.names(output) %in% vars1, ]
-coef <- output %>%
-  mutate("Variable" = vars1,
+coef_alpha <- output %>%
+  mutate("Coefficient" = vars1,
+         "Coefficient Name" = vars1name,
          "Mean" = output$mean,
          "Standard Deviation" = output$sd,
          "2.5% Quantile" = output$X2.5.,
          "Median" = output$X50.,
-         "97.5% Quantile" = output$X97.5.
+         "97.5% Quantile" = output$X97.5.,
+         num = num
          ) %>%
-  select("Variable", "Mean", "Standard Deviation", "2.5% Quantile", "Median", "97.5% Quantile")
-kable(coef, digits = 3)
+  arrange(num) %>%
+  select("Coefficient", "Coefficient Name", "Mean", "Standard Deviation", "2.5% Quantile", "Median", "97.5% Quantile")
+kable(coef_alpha, digits = 3)
+```
+*double check variable significance after knitting the whole document*
+Since the baseline for comparison is a Pope born in the 14th century, it's meaningful to interpret the intercept in this case. The intercept shows that we expect a Pope born in the 14th century to live exp($\alpha_0$) = exp(`r coef_alpha[1,3]`) = `r exp(coef_alpha[1,3])` years. 
+
+While $\alpha_1, \cdots,\alpha_5$ have 95% credible intervals containing 0 (an indication that these coefficients are statistically insignificant), $\alpha_6$ has a positive credible interval. Hence birth year overall is an significant predictor in this model. If we only look at the main effect of leadership types ($\alpha_7, \cdots,\alpha_10$), these parameters' 95% credible intervals all contain 0. However, some of their interactions with birth year are statistically significant, for example, $\alpha_{1,8}$'s CI is always negative. Due to model hierachy, we need to keep main effects of leadership types in the model as well. 
+
+The specific interpretation of these parameters depends on inputs from birth year and type of leadership. The below provides some examples. 
+
+- A Japanese Emperor born in different centuries
+```{r JapanEmp-diff-century}
+
 ```
 
 
-```{r tidy-model-predicted-increase-table, echo = F}
+
+
+
+
+
+```{r tidy-model-predicted-increase-table, include = F}
+# MISMATCHED PERCENTAGE INCREASE VALUES
+
 vars2 = c("p_i_Yr15", "p_i_Yr16", "p_i_Yr17", "p_i_Yr18", "p_i_Yr19", "p_i_Yr20",  "p_i_UsPres", "p_i_ChinaEmp", "p_i_DalaiLama", "p_i_JapanEmp", "p_i_Yr15ChinaEmp", "p_i_Yr15DalaiLama", "p_i_Yr15JapanEmp",  "p_i_Yr16ChinaEmp", "p_i_Yr16DalaiLama", "p_i_Yr16JapanEmp",  "p_i_Yr17ChinaEmp",   "p_i_Yr17DalaiLama", "p_i_Yr17JapanEmp", "p_i_Yr18UsPres", "p_i_Yr18ChinaEmp",  "p_i_Yr18DalaiLama", "p_i_Yr18JapanEmp", "p_i_Yr19UsPres", "p_i_Yr19ChinaEmp", "p_i_Yr19DalaiLama", "p_i_Yr19JapanEmp", "p_i_Yr20UsPres", "p_i_Yr20ChinaEmp", "p_i_Yr20DalaiLama", "p_i_Yr20JapanEmp", "age_Francis_predictive", "age_Obama_predictive","age_Dalai_predictive", "age_Naruhito_predictive", "age_Benedict_predictive","age_Carter_predictive", "age_Clinton_predictive", "age_Bush_predictive","age_Trump_predictive","age_Akihito_predictive")
 
 output <- data.frame(model_output$BUGSoutput$summary)
@@ -939,12 +978,16 @@ coef <- output %>%
   select("Variable", "Mean", "Standard Deviation", "2.5% Quantile", "Median", "97.5% Quantile")
 kable(coef, digits = 3)
 ```
-- If a Pope is born one year later, he is expected to live longer by a multiplicative factor of $exp(\alpha_1) = exp(0.0003931) = 1$. This basically means the expected lifespan would hardly change. 
+
+*While we may expect leaders who were born earlier to live a shorter life, $\hat{\beta_1}$ which correpsond to the leaders' year of birth appears to be an insignificant parameter as it is very close to 0 (-0.0016) although statistically significant. $\hat{\beta_6}$ to $\hat{\beta_9}$ which correspond to the interaction effects are very weak and mostly insignificant as well. Types of leadership ($\hat{\beta_2}$ to $\hat{\beta_5}$) do seem to be significant. As explained in Section IV, the model is easier to understand if we interpret the output in terms of $\alpha_j$, defined as $\alpha_j = -\beta_j/r$, $j = 1,2,...,9$. Some examples of the interpretation are provided below.*
+
+*- If a Pope is born one year later, he is expected to live longer by a multiplicative factor of $exp(\alpha_1) = exp(0.0003931) = 1$. This basically means the expected lifespan would hardly change. 
 - If a U.S. President is born one year later, he is expected to live longer by a multiplicative factor of $exp(\alpha_1 + \alpha_6) = exp(0.0003931+0.0004852) = 1$. 
 - If a U.S. President and a Chinese Emperor were born in the same year 1700, 33 years after the average birth year 1667, the Chinese emperor is expected to live longer by a multiplicative factor of $exp(\alpha_3 - \alpha_2 + (\alpha_7-\alpha_6)*y)$ = exp(-0.31925+0.1449877 + 33*(-0.0001094-0.0004852) = 0.82. That's to say, the Chinese emperor's life expectancy is 18% shorter. 
 - If a Japanese Emperor is born 100 years later, he is expected to live longer by a multiplicative factor of $exp(\alpha_9) = exp(100*-0.0000595) = 0.994$, which means the lifespan decreases by 0.6%, whereas for Dalai Lama, the lifespan is expected to increase by a factor of exp(100*-0.0016203) = 0.85, or decrease by 15%. 
 
 ```{r, ci-table-all-living-leaders}
+# predicted lifespans for all 10 alive leaders
 vars3 = c("age_Francis_predictive", "age_Obama_predictive","age_Dalai_predictive", "age_Naruhito_predictive", "age_Benedict_predictive","age_Carter_predictive", "age_Clinton_predictive", "age_Bush_predictive","age_Trump_predictive","age_Akihito_predictive")
 output <- data.frame(model_output$BUGSoutput$summary)
 output <- output[row.names(output) %in% vars3, ]
@@ -960,9 +1003,6 @@ coef <- output %>%
 kable(coef, digits = 3)
 ```
 The table above shows the estimate and 95% credible interval (the bounds are the 2.5% quantile and 97.5% quantile) for all 10 living leaders in the dataset.
-
-*this part below is now extraneous*
-<!-- Our model also predicts that the 85-year-old 14th Dalai Lama is expected to live 92.4 years (95% credible interval: 85.4 - 99.6 years), the 84-year-old Pope Francis is expected to live 92.4 years (95% credible interval: 84.2 - 99.4 years), the 60-year-old Japanese Emperior Naruhito is expected to live 85.3 years (95% credible interval: 66.4 - 99.5 years) and the 60-year-old former President Barack Obama is expected to live 84.8 years (95% credible interval: 61.5 - 99.4 years).  -->
 
 ## V b. Posterior Inference for the 10 Alive Leaders
 
@@ -1123,30 +1163,12 @@ no_living <- leaders_data %>%
 
 
 data.mat = as.matrix(cbind(x_1, x_2, x_3, x_4, x_5, x_6, x_7, x_8, x_9, x_10, 
-                         
-                           x_1_8,
-                           x_1_9,
-                           x_1_10,
-                   
-                           x_2_8,
-                           x_2_9,
-                           x_2_10,
-                        
-                           x_3_8,
-                           x_3_9,
-                           x_3_10,
-                             x_4_7,
-                           x_4_8,
-                           x_4_9,
-                           x_4_10,
-                             x_5_7,
-                           x_5_8,
-                           x_5_9,
-                           x_5_10,
-                             x_6_7,
-                           x_6_8,
-                           x_6_9,
-                           x_6_10))
+                           x_1_8, x_1_9, x_1_10,
+                           x_2_8, x_2_9, x_2_10,
+                           x_3_8, x_3_9, x_3_10,
+                           x_4_7, x_4_8, x_4_9, x_4_10,
+                           x_5_7, x_5_8, x_5_9, x_5_10,
+                           x_6_7, x_6_8, x_6_9, x_6_10))
 
 pred_res = data.frame(t(model_output$BUGSoutput$summary))
 r = pred_res$r[1]
