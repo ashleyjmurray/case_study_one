@@ -878,7 +878,7 @@ $$
 \log(T) \sim -\frac{1}{r} (\beta_0 + \beta_1x_1+\cdots+\beta_6x_6+\beta_7x_7+\cdots\beta_{10}x_{10}+\beta_{1,8}x_1x_8+\cdots+\beta_{6,10}x_6x_{10}) +\frac{1}{r}\log(\epsilon) \\
 \ \ \ \ \ \ \ \ \ \ \ \ \ \ = \alpha_0 + \alpha_1x_1+\cdots+\alpha_6x_6+\alpha_7x_7+\cdots\alpha_{10}x_{10}+\alpha_{1,8}x_1x_8+\cdots+\alpha_{6,10}x_6x_{10}) +\frac{1}{r}\log(\epsilon)
 $$
-where $\epsilon \sim exp(1)$ and $\epsilon > 0$. $\alpha = -\beta/r$ is thus a monotone transformation of $\beta}. $x_1,\cdots,x_6$ are indicator values (i.e., 0s and 1s) corresponding to birth year's century, and $x_7,\cdots,x_{10}$ are indicator values corresponding to types of leadership.
+where $\epsilon \sim exp(1)$ and $\epsilon > 0$. $\alpha = -\beta/r$ is thus a monotone transformation of $\beta$. $x_1,\cdots,x_6$ are indicator values (i.e., 0s and 1s) corresponding to birth year's century, and $x_7,\cdots,x_{10}$ are indicator values corresponding to types of leadership.
 
 The interpretation of coefficients depends on the interaction terms (i.e. both birth year century and the types of leadership). For example, while keeping all others constant, if a Pope was born in the 20th century, he is expected to live longer by a multiplicative factor of $exp(\alpha_6)$ compared to a Pope born in the 14th century, or his lifespan is expected to increase by a percentage of $100*exp(\alpha_6-1)$. If a U.S. President was born in the 18th century, he is expected to live $exp(\alpha_0+\alpha_4+\alpha_7+\alpha_{4,7})$ years; if the president were born in the 20th century instead, he is expected to live $exp(\alpha_0+\alpha_6+\alpha_7+\alpha_{6,7})$. In other words, his lifespan is expected to increase by a multiplicative factor of $exp(\alpha_6-\alpha_4+\alpha_{6,7}-\alpha_{4,7})$. If a Chinese Emperor and a Dalai Lama were both born in the 19th century, the Chinese emperor is expected to live longer by a multiplicative factor of $exp(\alpha_8 - \alpha_9 + \alpha_{5,8}-\alpha_{5,9})$ and so on. 
 
@@ -940,7 +940,7 @@ coef_alpha <- output %>%
   select("Coefficient", "Coefficient Name", "Mean", "Standard Deviation", "2.5% Quantile", "Median", "97.5% Quantile")
 
 ##can delete this line later##
-write.csv(coef_alpha,"~/Desktop/2020 Fall/STA440/Case 1/case_study_one/alphas.csv", row.names = FALSE) 
+#write.csv(coef_alpha,"~/Desktop/2020 Fall/STA440/Case #1/case_study_one/alphas.csv", row.names = FALSE) 
 
 kable(coef_alpha, digits = 3)
 ```
