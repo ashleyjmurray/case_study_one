@@ -852,16 +852,16 @@ model_text = function(priors=""){
 ```{r, run-model-function}
 run_model = function(priors, name) {
   file <- model_text(priors)
-  # if (file.exists(name)) {
-  #   load(file = name)
-  # } else {
+  if (file.exists(name)) {
+    load(file = name)
+  } else {
     model_output <- jags(data = data_build_model,
                          parameters.to.save =  params_to_output,
                          n.iter = 50000,
                          n.chains = 3,
                          model.file = file)
     save(model_output, file = name)
-  #}
+  }
   return(model_output)
 }
 
@@ -940,7 +940,7 @@ coef_alpha <- output %>%
   select("Coefficient", "Coefficient Name", "Mean", "Standard Deviation", "2.5% Quantile", "Median", "97.5% Quantile")
 
 ##can delete this line later##
-write.csv(coef_alpha,"~/Desktop/2020 Fall/STA440/Case 1/case_study_one/alphas.csv", row.names = FALSE) 
+# write.csv(coef_alpha,"~/Desktop/2020 Fall/STA440/Case 1/case_study_one/alphas.csv", row.names = FALSE) 
 
 kable(coef_alpha, digits = 3)
 ```
@@ -1133,7 +1133,7 @@ p2=ggplot(dalai, aes(x=plifespans)) +
   theme(plot.title = element_text(hjust = 0.5), axis.title.y = element_blank()) +
   geom_text(mapping = aes(x = 89, y = 0.09, label = dlab), size = 3)
 
-cap = paste("Fig. 3a The posterior predictive probability density function of the lifespan for hypothetical leaders with the same attributes as Pope Francis (right) and the 14th Dalai Lama (left).", "The black vertical line marks current age the blue marks posterior median, and the red marks the posterior 95% quantile.", sep = "\n")
+cap = paste("Fig. 4a The posterior predictive probability density function of the lifespan for hypothetical leaders with the same attributes as Pope Francis (right) and the 14th Dalai Lama (left).", "The black vertical line marks current age the blue marks posterior median, and the red marks the posterior 95% quantile.", sep = "\n")
 
 grid.arrange(p1,p2, bottom = textGrob(cap, x =0, just = "left", gp = gpar(fontsize = 9) ),
                     left = "Predictive Posterior density", ncol=2)
@@ -1160,7 +1160,7 @@ p1=ggplot(obama, aes(x=plifespans)) +
   geom_vline(aes(xintercept = median(plifespans)), color = "blue")+
   geom_vline(aes(xintercept = quantile(plifespans, 0.95)), color = "red")+
   geom_hline(aes(yintercept = 0), colour = "black") +
-  ylim(c(0, 0.1)) + 
+  ylim(c(0, 0.07)) + 
   xlab("Lifespan (yrs)") + 
   ggtitle("President Obama") +
   theme(plot.title = element_text(hjust = 0.5), axis.title.y = element_blank()) + 
@@ -1178,7 +1178,7 @@ p2=ggplot(naru, aes(x=plifespans)) +
   theme(plot.title = element_text(hjust = 0.5), axis.title.y = element_blank()) +
   geom_text(mapping = aes(x = 73, y = 0.06, label = nlab), size = 3)
 
-cap = paste("Fig. 3b The posterior predictive probability density function of the lifespan for hypothetical leaders with the same attributes as Obama (right) and Emperor Naruhito (left).", "The black vertical line marks current age, the blue marks posterior median, and the red marks the posterior 95% quantile.", sep = "\n")
+cap = paste("Fig. 4b The posterior predictive probability density function of the lifespan for hypothetical leaders with the same attributes as Obama (right) and Emperor Naruhito (left).", "The black vertical line marks current age, the blue marks posterior median, and the red marks the posterior 95% quantile.", sep = "\n")
 
 grid.arrange(p1,p2, bottom = textGrob(cap, x =0, just = "left", gp = gpar(fontsize = 9)),
                     left = "Predictive Posterior density", ncol=2)
@@ -1283,32 +1283,32 @@ colnames(ObamavNaruhito) = "pdp"
 ```{r, plot-post-dist-prob, fig.height = 5, fig.width = 10, echo = F}
 meandf = mean(DalaivFrancis$pdp)
 p1 = ggplot(DalaivFrancis) + 
-  geom_histogram(aes(x=pdp, y = ..density..), breaks=seq(0, 1, by = 0.01)) +
+  geom_density(aes(x=pdp, y = ..scaled..), breaks=seq(0, 1, by = 0.01)) +
    geom_vline(xintercept = c(meandf),color="blue") +
       xlab("Probability") +
       theme(axis.title.y = element_blank()) + 
-  annotate("text", x = meandf+0.04, y = 0.5, label = paste("mean =", round(meandf,2)), size=3.5, color = "blue") + 
-  labs(caption = paste("Figure 4a. This histogram shows the posterior distribution of the", "probability that the 14th Dalai Lama outlives Pope Francis.", sep = "\n")) +
+  annotate("text", x = meandf+0.02, y = 0.5, label = paste("mean =", round(meandf,2)), size=3.5, color = "blue") + 
+  labs(caption = paste("Figure 5a. This density plot shows the posterior distribution of the", "probability that the 14th Dalai Lama outlives Pope Francis.", sep = "\n")) +
     theme(plot.caption = element_text(hjust = 0))
 
 meandf = mean(ObamavNaruhito$pdp)
 p2 = ggplot(ObamavNaruhito) + 
-  geom_histogram(aes(x=pdp, y = ..density..), breaks=seq(0, 1, by = 0.01)) +
+  geom_density(aes(x=pdp, y = ..scaled..), breaks=seq(0, 1, by = 0.01)) +
    geom_vline(xintercept = c(meandf),color="blue")+
       xlab("Probability") +
       theme(axis.title.y = element_blank()) + 
-  annotate("text", x = meandf+0.04, y = 0.5, label = paste("mean =", round(meandf,2)), size=3.5, color = "blue") + 
-  labs(caption = paste("Figure 4a. This histogram shows the posterior distribution of the", "probability that Obama outlives Emperor Naruhito.", sep = "\n")) +
+  annotate("text", x = meandf+0.02, y = 0.5, label = paste("mean =", round(meandf,2)), size=3.5, color = "blue") + 
+  labs(caption = paste("Figure 5b. This density plot shows the posterior distribution of the", "probability that Obama outlives Emperor Naruhito.", sep = "\n")) +
     theme(plot.caption = element_text(hjust = 0))
 
 grid.arrange(p1, p2, left = "Density", ncol=2)
 ```
 
-Figure 4 depicts the distribution of the difference in posterior predictive lifespans between the two sets of leaders this paper focuses on. The probability that the 14th Dalai Lama will have a longer lifespan than Pope Francis is `r round(mean(DalaivFrancis$pdp),3)` with a 95% confidence interval of (`r round(quantile(DalaivFrancis$pdp, 0.025),3)`, `r round(quantile(DalaivFrancis$pdp, 0.975),3)` ). The probability that President Obama will have a longer lifespan than Emperor Naruhito is `r round(mean(ObamavNaruhito$pdp),3)` with a 95% confidence interval of (`r round(quantile(ObamavNaruhito$pdp, 0.025),3)`, `r round(quantile(ObamavNaruhito$pdp, 0.975),3)`.
+Figure 4 depicts the distribution of the difference in posterior predictive lifespans between the two sets of leaders this paper focuses on. The probability that the 14th Dalai Lama will have a longer lifespan than Pope Francis is `r round(mean(DalaivFrancis$pdp),3)` with a 95% confidence interval of (`r round(quantile(DalaivFrancis$pdp, 0.025),3)`, `r round(quantile(DalaivFrancis$pdp, 0.975),3)` ). The probability that President Obama will have a longer lifespan than Emperor Naruhito is `r round(mean(ObamavNaruhito$pdp),3)` with a 95% confidence interval of (`r round(quantile(ObamavNaruhito$pdp, 0.025),3)`, `r round(quantile(ObamavNaruhito$pdp, 0.975),3)`).
 
 ## V c. MCMC and Model Diagnostics 
 
-The combination of traceplots, lag-1 scatterplots, and acf plots suggest the chain for each parameters converges. Code for those plots are included in appendix A.2. The Rhat's are all close to 1, which is another indicator of converge. Most of the effective sample sizes are greater than 1000 (the effective sample size of 170 is notably low, so more iterations may be needed.)
+The combination of traceplots, lag-1 scatterplots, and acf plots suggest the chain for each parameters converges. Code for those plots are included in appendix A.2. The Rhat's are all close to 1, which is another indicator of converge. Most of the effective sample sizes are greater than 1000 (the effective sample size of 400 for r is lower, but the number of iterations was kept at 50,000 for computational efficiency).
 
 ```{r standardized-resid, include = F}
 # calculate and create graphs for standardized residuals
@@ -1719,7 +1719,7 @@ sampled_beta = sampled_vals["mean"]
 ggplot(sa_df_plot) + geom_density(aes(x = beta_6)) + 
   facet_wrap(~type,  scales = "free_y", nrow = 2) + 
   geom_vline(xintercept = sampled_beta, color = "blue") +
-  labs(x = expression(beta[6]), caption = paste("Fig. 8 The above plots show sensitivity analysis for different priors on r and the coefficients. The blue line indicates the estimate of the", "coefficient from the propsed model. It appears that the analysis is generally not sensitive to different priors."), size = 3) +
+  labs(x = expression(beta[6]), caption = paste("Fig. 9 The above plots show sensitivity analysis for different priors on r and the coefficients. The blue line indicates the estimate of the", "coefficient from the propsed model. It appears that the analysis is generally not sensitive to different priors."), size = 3) +
   theme(plot.caption = element_text(hjust = 0.5, vjust = -0.5, size = 4))
 ``` 
 
