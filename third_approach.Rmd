@@ -584,11 +584,11 @@ data_build_model <- list("n_censored", "n_non_censored", "z_censored", "t_censor
 "x_5_7_censored", "x_5_8_censored", "x_5_9_censored", "x_5_10_censored","x_6_7_censored", "x_6_8_censored", "x_6_9_censored", "x_6_10_censored","survival_non_censored", "x_1_non_censored", "x_2_non_censored", "x_3_non_censored", "x_4_non_censored", "x_5_non_censored", "x_6_non_censored", "x_7_non_censored", "x_8_non_censored", "x_9_non_censored", "x_10_non_censored", "x_1_8_non_censored", "x_1_9_non_censored", "x_1_10_non_censored",  "x_2_8_non_censored", "x_2_9_non_censored", "x_2_10_non_censored",  "x_3_8_non_censored", "x_3_9_non_censored", "x_3_10_non_censored",  "x_4_7_non_censored", "x_4_8_non_censored", "x_4_9_non_censored", "x_4_10_non_censored",   "x_5_7_non_censored", "x_5_8_non_censored", "x_5_9_non_censored", "x_5_10_non_censored",  "x_6_7_non_censored", "x_6_8_non_censored", "x_6_9_non_censored", "x_6_10_non_censored",  "present_length_Francis", "present_length_Obama", "present_length_Dalai", "present_length_Naruhito","present_length_Benedict", "present_length_Carter", "present_length_Clinton", "present_length_Bush", "present_length_Trump", "present_length_Akihito", "upper_length")
 ```
 
-```{r, output-list}
+```{r, output-list, include = F}
 params_to_output = c("beta_0", "beta_1", "beta_2", "beta_3", "beta_4", "beta_5", "beta_6", "beta_7", "beta_8", "beta_9", "beta_10",  "beta_1_8", "beta_1_9", "beta_1_10",  "beta_2_8", "beta_2_9", "beta_2_10",  "beta_3_8", "beta_3_9", "beta_3_10", "beta_4_7", "beta_4_8", "beta_4_9", "beta_4_10",  "beta_5_7", "beta_5_8", "beta_5_9", "beta_5_10",  "beta_6_7", "beta_6_8", "beta_6_9", "beta_6_10", "r", "alpha_0", "alpha_1", "alpha_2", "alpha_3", "alpha_4", "alpha_5", "alpha_6", "alpha_7", "alpha_8", "alpha_9", "alpha_10",  "alpha_1_8", "alpha_1_9", "alpha_1_10",  "alpha_2_8", "alpha_2_9", "alpha_2_10",  "alpha_3_8", "alpha_3_9", "alpha_3_10", "alpha_4_7", "alpha_4_8", "alpha_4_9", "alpha_4_10", "alpha_5_7", "alpha_5_8", "alpha_5_9", "alpha_5_10", "alpha_6_7", "alpha_6_8", "alpha_6_9", "alpha_6_10",  "p_i_Yr15", "p_i_Yr16", "p_i_Yr17", "p_i_Yr18", "p_i_Yr19", "p_i_Yr20",  "p_i_UsPres", "p_i_ChinaEmp", "p_i_DalaiLama", "p_i_JapanEmp", "p_i_Yr15ChinaEmp", "p_i_Yr15DalaiLama", "p_i_Yr15JapanEmp",  "p_i_Yr16ChinaEmp", "p_i_Yr16DalaiLama", "p_i_Yr16JapanEmp",  "p_i_Yr17ChinaEmp",   "p_i_Yr17DalaiLama", "p_i_Yr17JapanEmp", "p_i_Yr18UsPres", "p_i_Yr18ChinaEmp",  "p_i_Yr18DalaiLama", "p_i_Yr18JapanEmp", "p_i_Yr19UsPres", "p_i_Yr19ChinaEmp", "p_i_Yr19DalaiLama", "p_i_Yr19JapanEmp", "p_i_Yr20UsPres", "p_i_Yr20ChinaEmp", "p_i_Yr20DalaiLama", "p_i_Yr20JapanEmp", "age_Francis_predictive", "age_Obama_predictive","age_Dalai_predictive", "age_Naruhito_predictive", "age_Benedict_predictive","age_Carter_predictive", "age_Clinton_predictive", "age_Bush_predictive","age_Trump_predictive","age_Akihito_predictive")
 ```
 
-```{r, model-priors}
+```{r, model-priors, include = F}
 priors = "
   beta_0 ~ dnorm(0.0, 1.0E-3) # priors on betas are all normal w/ low precision
   beta_1 ~ dnorm(0.0, 1.0E-3) 
@@ -629,7 +629,7 @@ priors = "
   "
 ```
 
-```{r, write-model-text}
+```{r, write-model-text, include = F}
 model_text = function(priors=""){
   file <- tempfile()
   
@@ -849,7 +849,7 @@ model_text = function(priors=""){
 }
 ```
 
-```{r, run-model-function}
+```{r, run-model-function, include = F}
 run_model = function(priors, name) {
   file <- model_text(priors)
   if (file.exists(name)) {
@@ -878,7 +878,7 @@ $$
 \log(T) \sim -\frac{1}{r} (\beta_0 + \beta_1x_1+\cdots+\beta_6x_6+\beta_7x_7+\cdots\beta_{10}x_{10}+\beta_{1,8}x_1x_8+\cdots+\beta_{6,10}x_6x_{10}) +\frac{1}{r}\log(\epsilon) \\
 \ \ \ \ \ \ \ \ \ \ \ \ \ \ = \alpha_0 + \alpha_1x_1+\cdots+\alpha_6x_6+\alpha_7x_7+\cdots\alpha_{10}x_{10}+\alpha_{1,8}x_1x_8+\cdots+\alpha_{6,10}x_6x_{10}) +\frac{1}{r}\log(\epsilon)
 $$
-where $\epsilon \sim exp(1)$ and $\epsilon > 0$. $\alpha = -\beta/r$ is thus a monotone transformation of $\beta}. $x_1,\cdots,x_6$ are indicator values (i.e., 0s and 1s) corresponding to birth year's century, and $x_7,\cdots,x_{10}$ are indicator values corresponding to types of leadership.
+where $\epsilon \sim exp(1)$ and $\epsilon > 0$. $\alpha = -\beta/r$ is thus a monotone transformation of $\beta$. $x_1,\cdots,x_6$ are indicator values (i.e., 0s and 1s) corresponding to birth year's century, and $x_7,\cdots,x_{10}$ are indicator values corresponding to types of leadership.
 
 The interpretation of coefficients depends on the interaction terms (i.e. both birth year century and the types of leadership). For example, while keeping all others constant, if a Pope was born in the 20th century, he is expected to live longer by a multiplicative factor of $exp(\alpha_6)$ compared to a Pope born in the 14th century, or his lifespan is expected to increase by a percentage of $100*exp(\alpha_6-1)$. If a U.S. President was born in the 18th century, he is expected to live $exp(\alpha_0+\alpha_4+\alpha_7+\alpha_{4,7})$ years; if the president were born in the 20th century instead, he is expected to live $exp(\alpha_0+\alpha_6+\alpha_7+\alpha_{6,7})$. In other words, his lifespan is expected to increase by a multiplicative factor of $exp(\alpha_6-\alpha_4+\alpha_{6,7}-\alpha_{4,7})$. If a Chinese Emperor and a Dalai Lama were both born in the 19th century, the Chinese emperor is expected to live longer by a multiplicative factor of $exp(\alpha_8 - \alpha_9 + \alpha_{5,8}-\alpha_{5,9})$ and so on. 
 
@@ -1164,7 +1164,7 @@ p1=ggplot(obama, aes(x=plifespans)) +
   xlab("Lifespan (yrs)") + 
   ggtitle("President Obama") +
   theme(plot.title = element_text(hjust = 0.5), axis.title.y = element_blank()) + 
-  geom_text(mapping = aes(x = 72, y = 0.09, label = olab), size = 3)
+  geom_text(mapping = aes(x = 72, y = 0.06, label = olab), size = 3)
 
 p2=ggplot(naru, aes(x=plifespans)) + 
   geom_histogram(aes(y=..density..), binwidth = 0.8, boundary=min(naru$plifespans)) +
@@ -1180,11 +1180,11 @@ p2=ggplot(naru, aes(x=plifespans)) +
 
 cap = paste("Fig. 4b The posterior predictive probability density function of the lifespan for hypothetical leaders with the same attributes as Obama (right) and Emperor Naruhito (left).", "The black vertical line marks current age, the blue marks posterior median, and the red marks the posterior 95% quantile.", sep = "\n")
 
-grid.arrange(p1,p2, bottom = textGrob(cap, x =0, just = "left", gp = gpar(fontsize = 9)),
+grid.arrange(p1,p2, bottom = textGrob(cap, x =0, just = "left", gp = gpar(fontsize = 10)),
                     left = "Predictive Posterior density", ncol=2)
 ```
 
-The histogram of the posterior predictive distributions of the lifespans for a leader with the same birth year and leadership type as Pope Francis and that of a leader with the same above attributes as the 14th Dalai Lama are more uniform. The histogram for a leader with the same birth year and leadership type as President Obama and that of a leader with the same above attributes as Emperor Naruhito are both left skewed, with the modes in the late 90s.
+The histogram of the posterior predictive distributions of the lifespans for a leader with the same birth year and leadership type as Pope Francis and that of a leader with the same above attributes as the 14th Dalai Lama are more uniform. The histogram for a leader with the same birth year and leadership type as President Obama and that of a leader with the same above attributes as Emperor Naruhito are both left skewed, with modes around the 90s.
 
 <!-- # comparison values -->
 <!-- DalaivFrancis = data.frame(as.numeric(four_pred$age_Dalai_predictive-four_pred$age_Francis_predictive)) -->
@@ -1218,7 +1218,7 @@ The histogram of the posterior predictive distributions of the lifespans for a l
 <!-- grid.arrange(p1, p2, left = "Density", ncol=2) -->
 
 
-```{r posterior-pred-dist-prob-francisvdalai}
+```{r posterior-pred-dist-prob-francisvdalai, echo = F}
 all_betas = c("beta_0", "beta_1", "beta_2", "beta_3", "beta_4", "beta_5", "beta_6",
               "beta_7", "beta_8", "beta_9", "beta_10",  "beta_1_8", "beta_1_9",
               "beta_1_10",  "beta_2_8", "beta_2_9", "beta_2_10", "beta_3_8",
@@ -1280,15 +1280,15 @@ ObamavNaruhito = data.frame(as.numeric(sapply(seq(1:nrow(ppres)), function(i) {
 colnames(ObamavNaruhito) = "pdp"
 ```
 
-```{r, plot-post-dist-prob, fig.height = 5, fig.width = 10, echo = F}
+```{r, plot-post-dist-prob, warning = F, fig.height = 4, fig.width = 10, echo = F}
 meandf = mean(DalaivFrancis$pdp)
 p1 = ggplot(DalaivFrancis) + 
   geom_density(aes(x=pdp, y = ..scaled..), breaks=seq(0, 1, by = 0.01)) +
    geom_vline(xintercept = c(meandf),color="blue") +
       xlab("Probability") +
       theme(axis.title.y = element_blank()) + 
-  annotate("text", x = meandf+0.02, y = 0.5, label = paste("mean =", round(meandf,2)), size=3.5, color = "blue") + 
-  labs(caption = paste("Figure 5a. This density plot shows the posterior distribution of the", "probability that the 14th Dalai Lama outlives Pope Francis.", sep = "\n")) +
+  annotate("text", x = meandf+0.06, y = 0.5, label = paste("mean =", round(meandf,2)), size=3.5, color = "blue") + 
+  labs(caption = paste("Figure 5a. This density plot shows the posterior distribution of the", "probability that the 14th Dalai Lama outlives Pope Francis.", sep = "\n"), size = 4) +
     theme(plot.caption = element_text(hjust = 0))
 
 meandf = mean(ObamavNaruhito$pdp)
@@ -1297,14 +1297,14 @@ p2 = ggplot(ObamavNaruhito) +
    geom_vline(xintercept = c(meandf),color="blue")+
       xlab("Probability") +
       theme(axis.title.y = element_blank()) + 
-  annotate("text", x = meandf+0.02, y = 0.5, label = paste("mean =", round(meandf,2)), size=3.5, color = "blue") + 
-  labs(caption = paste("Figure 5b. This density plot shows the posterior distribution of the", "probability that Obama outlives Emperor Naruhito.", sep = "\n")) +
+  annotate("text", x = meandf+0.06, y = 0.5, label = paste("mean =", round(meandf,2)), size=3.5, color = "blue") + 
+  labs(caption = paste("Figure 5b. This density plot shows the posterior distribution of the", "probability that Obama outlives Emperor Naruhito.", sep = "\n"), size = 4) +
     theme(plot.caption = element_text(hjust = 0))
 
 grid.arrange(p1, p2, left = "Density", ncol=2)
 ```
 
-Figure 4 depicts the distribution of the difference in posterior predictive lifespans between the two sets of leaders this paper focuses on. The probability that the 14th Dalai Lama will have a longer lifespan than Pope Francis is `r round(mean(DalaivFrancis$pdp),3)` with a 95% confidence interval of (`r round(quantile(DalaivFrancis$pdp, 0.025),3)`, `r round(quantile(DalaivFrancis$pdp, 0.975),3)` ). The probability that President Obama will have a longer lifespan than Emperor Naruhito is `r round(mean(ObamavNaruhito$pdp),3)` with a 95% confidence interval of (`r round(quantile(ObamavNaruhito$pdp, 0.025),3)`, `r round(quantile(ObamavNaruhito$pdp, 0.975),3)`).
+Figure 5 depicts the posterior distribution of the probability that Dalai Lama outlives Pope Francis, and that Obama outlives Emperor Naruhito. The probability that the 14th Dalai Lama will have a longer lifespan than Pope Francis is `r round(mean(DalaivFrancis$pdp),3)` with a 95% confidence interval of (`r round(quantile(DalaivFrancis$pdp, 0.025),3)`, `r round(quantile(DalaivFrancis$pdp, 0.975),3)`). The probability that President Obama will have a longer lifespan than Emperor Naruhito is `r round(mean(ObamavNaruhito$pdp),3)` with a 95% confidence interval of (`r round(quantile(ObamavNaruhito$pdp, 0.025),3)`, `r round(quantile(ObamavNaruhito$pdp, 0.975),3)`).
 
 ## V c. MCMC and Model Diagnostics 
 
@@ -1421,7 +1421,7 @@ For the posterior predictive checks, it appears that our model returns values th
 
 # VI. Sensitivity Analysis
 
-```{r, sensitivity-1}
+```{r, sensitivity-1, include = F}
 priors1 = "
   beta_0 ~ dnorm(0.0, 1) # Prior on beta_0 is normal with low precision
   beta_1 ~ dnorm(0.0, 1) # Prior on beta_1 is normal with low precision
@@ -1465,7 +1465,7 @@ priors1 = "
 sensitivity_1 <- run_model(priors1, "sensitivity1")
 ```
 
-```{r, sensitivity-2}
+```{r, sensitivity-2, include = F}
 priors2 = "
   beta_0 ~ dnorm(0.0, 1) # Prior on beta_0 is normal with low precision
   beta_1 ~ dnorm(0.0, 1) # Prior on beta_1 is normal with low precision
@@ -1509,7 +1509,7 @@ priors2 = "
 sensitivity_2 <- run_model(priors2, "sensitivity2")
 ```
 
-```{r, sensitivity-3}
+```{r, sensitivity-3, include = F}
 priors3 = "
   beta_0 ~ dnorm(0.0, 1) # Prior on beta_0 is normal with low precision
   beta_1 ~ dnorm(0.0, 1) # Prior on beta_1 is normal with low precision
@@ -1553,7 +1553,7 @@ priors3 = "
 sensitivity_3 <- run_model(priors3, "sensitivity3")
 ```
 
-```{r, sensitivity-4}
+```{r, sensitivity-4, include = F}
 priors4 = "
   beta_0 ~ dnorm(0.0, 1/10000) # Prior on beta_0 is normal with low precision
   beta_1 ~ dnorm(0.0, 1/10000) # Prior on beta_1 is normal with low precision
@@ -1597,7 +1597,7 @@ priors4 = "
 sensitivity_4 <- run_model(priors4, "sensitivity4")
 ```
 
-```{r, sensitivity-5}
+```{r, sensitivity-5, include = F}
 priors5 = "
   beta_0 ~ dnorm(0.0, 1/10000) # Prior on beta_0 is normal with low precision
   beta_1 ~ dnorm(0.0, 1/10000) # Prior on beta_1 is normal with low precision
@@ -1641,7 +1641,7 @@ priors5 = "
 sensitivity_5 <- run_model(priors5, "sensitivity5")
 ```
 
-```{r, sensitivity-6}
+```{r, sensitivity-6, include = F}
 priors6 = "
   beta_0 ~ dnorm(0.0, 1/10000) # Prior on beta_0 is normal with low precision
   beta_1 ~ dnorm(0.0, 1/10000) # Prior on beta_1 is normal with low precision
@@ -1685,7 +1685,7 @@ priors6 = "
 sensitivity_6 <- run_model(priors6, "sensitivity6")
 ```
 
-```{r, sensitivity-analysis, fig.width=10, fig.height = 5}
+```{r, sensitivity-analysis, fig.width=10, fig.height = 5, echo = F}
 parameter = "beta_6"
 sa1 = data.frame(sensitivity_1$BUGSoutput$sims.matrix) %>%
   select(parameter)
@@ -1719,11 +1719,11 @@ sampled_beta = sampled_vals["mean"]
 ggplot(sa_df_plot) + geom_density(aes(x = beta_6)) + 
   facet_wrap(~type,  scales = "free_y", nrow = 2) + 
   geom_vline(xintercept = sampled_beta, color = "blue") +
-  labs(x = expression(beta[6]), caption = paste("Fig. 9 The above plots show sensitivity analysis for different priors on r and the coefficients. The blue line indicates the estimate of the", "coefficient from the propsed model. It appears that the analysis is generally not sensitive to different priors."), size = 3) +
+  labs(x = expression(beta[6]), caption = paste("Fig. 9 The above plots show sensitivity analysis for different priors on r and the coefficients. The blue line indicates the estimate of the", "coefficient from the propsed model. It appears that the analysis is generally not sensitive to different priors."), size = 4) +
   theme(plot.caption = element_text(hjust = 0.5, vjust = -0.5, size = 4))
 ``` 
 
-We tested $N(0,1) and N(0,10000)$ priors for the $\beta$'s and $Exp(0.001)$ (Stander et al prior), $Gamma(10,10)$ (mean = 1), and $Gamma(10,100)$ (mean = 0.1) priors for $r$. Distribution of $\beta_6$ was approximated using those different priors and plotted above.The blue line, which is estimate from our model crosses, or is close to the mode of all but one of the distributions, so our analysis is mostly robust against changes in prior. However, it is somewhat sensitive to the prior combination $r \sim Gamma(10,1000)$ and $\beta_6 ~ N(0,1)$ Code to conduct ensitivity analysis for the remaining betas can be found in appendix A.3.
+We tested $N(0,1)$ and $N(0,10000)$ priors for the $\beta$'s and $Exp(0.001)$ (Stander et al prior), $Gamma(10,10)$ (mean = 1), and $Gamma(10,100)$ (mean = 0.1) priors for $r$. Distribution of $\beta_6$ was approximated using those different priors and plotted above.The blue line, which is estimate from our model crosses, or is close to the mode of all but one of the distributions, so our analysis is mostly robust against changes in prior. However, it is somewhat sensitive to the prior combination $r \sim Gamma(10,1000)$ and $\beta_6 ~ N(0,1)$ Code to conduct sensitivity analysis for the remaining betas can be found in appendix A.3.
 
 # VII. Cross Validation
 
@@ -1889,7 +1889,7 @@ We use the Poisson "zeros trick," where a set of 0's are created and the likelih
 
 # # A.2 Code for Traceplots, Lag-1 Scatterplots, and Acf Plots
 
-```{r, fig.width = 5, fig.height = 5, echo = FALSE}
+```{r, fig.width = 5, fig.height = 5, include = FALSE}
 # run traceplots
 parameters = c(all_betas, "r")
 
@@ -1908,15 +1908,23 @@ all_trace = lapply(names(res), tps)
 p1 = all_trace[1:11]
 p2 = all_trace[12:22]
 p3 = all_trace[23:33]
+```
 
+```{r, fig.width = 5, fig.height = 5, echo = FALSE}
 do.call(grid.arrange, p1)
+```
+
+```{r, fig.width = 5, fig.height = 5, echo = FALSE}
 do.call(grid.arrange, p2)
+```
+
+```{r, fig.width = 5, fig.height = 5, echo = FALSE}
 do.call(grid.arrange, p3)
 ```
 
 All of the traceplots and code for plotting is above.
 
-```{r, fig.width = 5, fig.height = 5, include = FALSE}
+```{r, fig.width = 5, fig.height = 5, echo = FALSE}
 # run lag-1 scatterplots
 lag1_df = lapply(seq(1:length(res)), function(i) { lag(res[,i],1) })
 
@@ -1933,7 +1941,7 @@ plot(y=res[,2], x= lag1_df[[2]],
        main = paste("Lag-1 Scatter Plot of", colnames(res)[2]))
 ```
 
-```{r, fig.width = 5, fig.height = 5, include = FALSE}
+```{r, fig.width = 5, fig.height = 5, echo= FALSE}
 # run acf plots
 acfs = lapply(seq(1,length(res)), function(i) { # plot for all parameters
   acf(res[,i], xlab = "Lag", ylab = "ACF", 
@@ -1949,9 +1957,9 @@ Display of lag-1 scatterplot and acf plot for $\beta_1$ is shown above, code pro
 
 *add old model and resid code here*
 
-# # A.3 Code for Sensitivity Analysis
+## A.3 Code for Sensitivity Analysis
 
-```{r}
+```{r, include= F}
 parameter = "beta_6" # change parameter here to run for different betas
 
 sa1 = data.frame(sensitivity_1$BUGSoutput$sims.matrix) %>%
