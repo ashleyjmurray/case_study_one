@@ -93,13 +93,9 @@ We use survival analysis as a way to model $T_i$, the lifespan of a given leader
 We model the lifespan $T_i$ of an individual i after the Weibull distribution specified below. We choose to use the Weibull distribution because it is often utilized in survival analysis and allows the user to specify a flexible shape parameter for the distribution. The first parameter $r$, also known as the shape parameter, is a positive scalar, and the second parameter $\mu$, the scale parameter, is a linear function of the covariates (in this case, the century of the birth year and types of leadership as well as their interactions). 
 
 
-$$ 
-T_i \sim Weibull(r, \mu_i) \\
+$T_i \sim Weibull(r, \mu_i) \\$
 
-\log(\mu_i) = \beta_0+ \sum_{j = 1, \cdots, 6} \beta_j I(Birth \ Century_i = j)+ \sum_{k = 7, \cdots, 10}\beta_k I(Leadership_i = k) \\
-+ \sum_{j = 4, \cdots, 6,\ k = 7}\beta_{j,k} I(Birth \ Century_i = j)*I(Leadership_i = k)  \\
-+ \sum_{j = 1, \cdots, 6,\ k = 8, \cdots, 10}\beta_{j,k} I(Birth \ Century_i = j)*I(Leadership_i = k) 
-$$
+$\log(\mu_i) = \beta_0+ \sum_{j = 1, \cdots, 6} \beta_j I(Birth \ Century_i = j)+ \sum_{k = 7, \cdots, 10}\beta_k I(Leadership_i = k) \\ + \sum_{j = 4, \cdots, 6,\ k = 7}\beta_{j,k} I(Birth \ Century_i = j)*I(Leadership_i = k)  \\ + \sum_{j = 1, \cdots, 6,\ k = 8, \cdots, 10}\beta_{j,k} I(Birth \ Century_i = j)*I(Leadership_i = k)$
 
 where the indicator functions $Birth \ Century_i = 1, \cdots, 6$ corresponds to a leader $i$ born in the 15th, 16th, 17th, 18th, 19th and 20th century respectively. The 14th century is the baseline for comparison. $Leadership_i = 7, \cdots, 10$ corresponds to a leader $i$ being a U.S. President, a Chinese Emperor, a Dalai Lamai and a Japanese Emperor respectively. $Leadership_i$ uses Pope the baseline for comparison. $\beta_{j,k}$ is the parameter for the interaction effect between brith year century $j$ and leadership type $k$. 
 
@@ -1059,49 +1055,129 @@ grid.arrange(p1,p2, bottom = textGrob(cap, x =0, just = "left", gp = gpar(fontsi
 
 The histogram of the posterior predictive distributions of the lifespans for a leader with the same birth year and leadership type as Pope Francis and that of a leader with the same above attributes as the 14th Dalai Lama are more uniform. The histogram for a leader with the same birth year and leadership type as President Obama and that of a leader with the same above attributes as Emperor Naruhito are both left skewed, with the modes in the late 90s.
 
-```{r posterior-prob-comparison-plots, fig.height=5, fig.width=10, echo=F}
-# comparison values
-DalaivFrancis = data.frame(as.numeric(four_pred$age_Dalai_predictive-four_pred$age_Francis_predictive))
-ObamavNaruhito = data.frame(as.numeric(four_pred$age_Obama_predictive-four_pred$age_Naruhito_predictive))
+<!-- # comparison values -->
+<!-- DalaivFrancis = data.frame(as.numeric(four_pred$age_Dalai_predictive-four_pred$age_Francis_predictive)) -->
+<!-- ObamavNaruhito = data.frame(as.numeric(four_pred$age_Obama_predictive-four_pred$age_Naruhito_predictive)) -->
 
-colnames(DalaivFrancis) = "diff"
-colnames(ObamavNaruhito) = "diff"
+<!-- colnames(DalaivFrancis) = "diff" -->
+<!-- colnames(ObamavNaruhito) = "diff" -->
 
-meandf = mean(DalaivFrancis$diff)
-p1=ggplot(DalaivFrancis, aes(x=diff)) + 
-  geom_histogram(aes(y = ..density..), binwidth = 1) +
-   geom_vline(xintercept = c(meandf),color="blue")+
-      ylim(c(0,0.08)) +
-      xlab("Difference in Lifespan") +
+<!-- meandf = mean(DalaivFrancis$diff) -->
+<!-- p1=ggplot(DalaivFrancis, aes(x=diff)) +  -->
+<!--   geom_histogram(aes(y = ..density..), binwidth = 1) + -->
+<!--    geom_vline(xintercept = c(meandf),color="blue")+ -->
+<!--       ylim(c(0,0.08)) + -->
+<!--       xlab("Difference in Lifespan") + -->
+<!--       theme(axis.title.y = element_blank()) +  -->
+<!--   annotate("text", x = 2, y = 0.04, label = paste("mean =", round(meandf,2)), size=3.5, color = "blue") +  -->
+<!--   labs(caption = paste("Figure 4a. This histogram shows the posterior predictive distribution of the", "difference in lifespan (14th Dalai Lama - Pope Francis).", sep = "\n")) + -->
+<!--     theme(plot.caption = element_text(hjust = 0)) -->
+
+<!-- meandf = mean(ObamavNaruhito$diff) -->
+<!-- p2=ggplot(ObamavNaruhito, aes(x=diff)) +  -->
+<!--   geom_histogram(aes(y = ..density..), binwidth = 1) + -->
+<!--    geom_vline(xintercept = c(meandf),color="blue")+ -->
+<!--       ylim(c(0,0.04)) + -->
+<!--       xlab("Difference in Lifespan") + -->
+<!--       theme(axis.title.y = element_blank()) +  -->
+<!--   annotate("text", x = 0, y = 0.02, label = paste("mean =", round(meandf,2)), size=3.5, color = "blue") +  -->
+<!--   labs(caption = paste("Figure 4b. This histogram shows the posterior predictive distribution of the", "difference in lifespan (Obama - Emperor Naruhito).", sep = "\n")) + -->
+<!--     theme(plot.caption = element_text(hjust = 0)) -->
+
+<!-- grid.arrange(p1, p2, left = "Density", ncol=2) -->
+
+
+```{r posterior-pred-dist-prob-francisvdalai}
+all_betas = c("beta_0", "beta_1", "beta_2", "beta_3", "beta_4", "beta_5", "beta_6",
+              "beta_7", "beta_8", "beta_9", "beta_10",  "beta_1_8", "beta_1_9",
+              "beta_1_10",  "beta_2_8", "beta_2_9", "beta_2_10", "beta_3_8",
+              "beta_3_9", "beta_3_10", "beta_4_7", "beta_4_8", "beta_4_9", "beta_4_10", 
+              "beta_5_7", "beta_5_8", "beta_5_9", "beta_5_10", "beta_6_7", "beta_6_8", 
+              "beta_6_9", "beta_6_10")
+
+ppres = data.frame(model_output$BUGSoutput$sims.matrix)
+
+data.mat = as.matrix(cbind(x_1, x_2, x_3, x_4, x_5, x_6, x_7, x_8, x_9, x_10, 
+                           x_1_8, x_1_9, x_1_10,
+                           x_2_8, x_2_9, x_2_10,
+                           x_3_8, x_3_9, x_3_10,
+                           x_4_7, x_4_8, x_4_9, x_4_10,
+                           x_5_7, x_5_8, x_5_9, x_5_10,
+                           x_6_7, x_6_8, x_6_9, x_6_10))
+
+obama.mat = data.mat[which(leaders_nopred$Name == "Barack Obama"),]
+naru.mat = data.mat[which(leaders_nopred$Name == "Naruhito (Emperor Reiwa)"),]
+francis.mat = data.mat[which(leaders_nopred$Name == "Francis"),]
+dalai.mat = data.mat[which(leaders_nopred$Name == "14th Dalai Lama (Tenzin Gyatso)"),]
+
+set.seed(123)
+ppset = lapply(seq(1:nrow(ppres)), function(i) {
+  r = ppres$r[i]
+  betas = ppres[,c(all_betas)][i,]
+  beta.mat = as.matrix(betas[2:length(betas)])
+  francis.temp = francis.mat %*% t(beta.mat)
+  dalai.temp = dalai.mat %*% t(beta.mat)
+  obama.temp = obama.mat %*% t(beta.mat)
+  naru.temp = naru.mat %*% t(beta.mat)
+
+  francis_logmus = as.numeric(betas["beta_0"]) + francis.temp
+  dalai_logmus = as.numeric(betas["beta_0"]) + dalai.temp
+  obama_logmus = as.numeric(betas["beta_0"]) + obama.temp
+  naru_logmus = as.numeric(betas["beta_0"]) + naru.temp
+  
+  obama_Ts = rtweibull(10000, r, (1/exp(obama_logmus))^(1/r), 0, 100) 
+  naru_Ts = rtweibull(10000, r, (1/exp(naru_logmus))^(1/r), 0, 100) 
+  francis_Ts = rtweibull(10000, r, (1/exp(francis_logmus))^(1/r), 0, 100) 
+  dalai_Ts = rtweibull(10000, r, (1/exp(dalai_logmus))^(1/r), 0, 100) 
+  return(list(obama_mc = obama_Ts, naru_mc = naru_Ts, francis_mc = francis_Ts, dalai_mc = dalai_Ts))
+})
+
+fvd = NULL
+DalaivFrancis = data.frame(as.numeric(sapply(seq(1:nrow(ppres)), function(i) {
+  iter = ppset[[i]]
+  fvd = c(fvd, mean(iter$dalai_mc>iter$francis_mc))
+  return(fvd)
+})))
+colnames(DalaivFrancis) = "pdp"
+
+ovn = NULL
+ObamavNaruhito = data.frame(as.numeric(sapply(seq(1:nrow(ppres)), function(i) {
+  iter = ppset[[i]]
+  ovn = c(ovn, mean(iter$obama_mc>iter$naru_mc))
+  return(ovn)
+})))
+colnames(ObamavNaruhito) = "pdp"
+```
+
+```{r, plot-post-dist-prob, fig.height = 5, fig.width = 10, echo = F}
+meandf = mean(DalaivFrancis$pdp)
+p1 = ggplot(DalaivFrancis) + 
+  geom_histogram(aes(x=pdp, y = ..density..), breaks=seq(0, 1, by = 0.01)) +
+   geom_vline(xintercept = c(meandf),color="blue") +
+      xlab("Probability") +
       theme(axis.title.y = element_blank()) + 
-  annotate("text", x = 2, y = 0.04, label = paste("mean =", round(meandf,2)), size=3.5, color = "blue") + 
-  labs(caption = paste("Figure 4a. This histogram shows the posterior predictive distribution of the", "difference in lifespan (14th Dalai Lama - Pope Francis).", sep = "\n")) +
+  annotate("text", x = meandf+0.04, y = 0.5, label = paste("mean =", round(meandf,2)), size=3.5, color = "blue") + 
+  labs(caption = paste("Figure 4a. This histogram shows the posterior distribution of the", "probability that the 14th Dalai Lama outlives Pope Francis.", sep = "\n")) +
     theme(plot.caption = element_text(hjust = 0))
 
-meandf = mean(ObamavNaruhito$diff)
-p2=ggplot(ObamavNaruhito, aes(x=diff)) + 
-  geom_histogram(aes(y = ..density..), binwidth = 1) +
+meandf = mean(ObamavNaruhito$pdp)
+p2 = ggplot(ObamavNaruhito) + 
+  geom_histogram(aes(x=pdp, y = ..density..), breaks=seq(0, 1, by = 0.01)) +
    geom_vline(xintercept = c(meandf),color="blue")+
-      ylim(c(0,0.04)) +
-      xlab("Difference in Lifespan") +
+      xlab("Probability") +
       theme(axis.title.y = element_blank()) + 
-  annotate("text", x = 0, y = 0.02, label = paste("mean =", round(meandf,2)), size=3.5, color = "blue") + 
-  labs(caption = paste("Figure 4b. This histogram shows the posterior predictive distribution of the", "difference in lifespan (Obama - Emperor Naruhito).", sep = "\n")) +
+  annotate("text", x = meandf+0.04, y = 0.5, label = paste("mean =", round(meandf,2)), size=3.5, color = "blue") + 
+  labs(caption = paste("Figure 4a. This histogram shows the posterior distribution of the", "probability that Obama outlives Emperor Naruhito.", sep = "\n")) +
     theme(plot.caption = element_text(hjust = 0))
 
 grid.arrange(p1, p2, left = "Density", ncol=2)
 ```
 
-```{r posterior-prob-comparison-means, echo=F}
-pprob1 = mean(four_pred$age_Dalai_predictive>four_pred$age_Francis_predictive)
-pprob2 = mean(four_pred$age_Obama_predictive>four_pred$age_Naruhito_predictive)
-```
-
-Figure 4 depicts the distribution of the difference in posterior predictive lifespans between the two sets of leaders this paper focuses on. The probability that the 14th Dalai Lama will have a longer lifespan than Pope Francis is `r round(pprob1,4)`. The probability that President Obama will have a longer lifespan than Emperor Naruhito is `r round(pprob2,4)`.
+Figure 4 depicts the distribution of the difference in posterior predictive lifespans between the two sets of leaders this paper focuses on. The probability that the 14th Dalai Lama will have a longer lifespan than Pope Francis is `r round(mean(DalaivFrancis$pdp),3)`. The probability that President Obama will have a longer lifespan than Emperor Naruhito is `r round(mean(ObamavNaruhito$pdp),3)`.
 
 ## V c. MCMC and Model Diagnostics 
 
-The combination of traceplots, lag-1 scatterplots, and acf plots suggest the chain for each parameters converges, and that 50000 iterations is sufficient. Code for those plots are included in appendix A.2. The Rhat's are all close to 1, which is another indicator of converge. All of the effective sample sizes are either close to or greater than 200. Sensitivity analysis was done by using a more informative prior and the resulting estimates remained the same.
+The combination of traceplots, lag-1 scatterplots, and acf plots suggest the chain for each parameters converges. Code for those plots are included in appendix A.2. The Rhat's are all close to 1, which is another indicator of converge. Most of the effective sample sizes are greater than 1000 (the effective sample size of 170 is notably low, so more iterations may be needed.)
 
 ```{r standardized-resid, include = F}
 # calculate and create graphs for standardized residuals
