@@ -115,7 +115,7 @@ To handle censored observations, we specify their contribution to the likelihood
 
 We assume that our priors are independent because intuitively a given observation could not be two types of leaders. Additionally, we do not have sufficiently strong prior knowledge about the relationship between birth year and type of leadership to specify an informative prior. Therefore, we use uninformative priors for the betas in our model, in which we chose normal betas with mean 0 and variance 1.0E-3, this includes the coefficents and the intercept in our model.
 
-For our prior for r, we chose a prior of $exp(1)$, as we believe the hazard of death increases with time. This is supported by the fact that, in the European Union in 2016, 82.9% of all deaths happened among people over 65. Within the Appendix A.3, different Weibull distributions are plotted with different values of r in order to showcase the fact that with $r = exp(1)$ gives an increasing rate of hazard. 
+For our prior for r, we chose a prior of $exp(1)$, as we believe the hazard of death increases with time. This is supported by the fact that, in the European Union in 2016, 82.9% of all deaths happened among people over 65. Within the Appendix A.3, different Weibull distributions are plotted with different values of r in order to showcase the fact that with $r = exp(1)$ gives an increasing rate of hazard, as the shape of the Weibull Distribution starts to have an increasing level of density toward the upper x values for $r = exp(1)$, compared to smaller values of r. 
 
 ```{r, include=F}
 # create dummy variables
@@ -940,7 +940,11 @@ coef_alpha <- output %>%
   select("Coefficient", "Coefficient Name", "Mean", "Standard Deviation", "2.5% Quantile", "Median", "97.5% Quantile")
 
 ##can delete this line later##
+<<<<<<< HEAD
 # write.csv(coef_alpha,"~/Desktop/2020 Fall/STA440/Case 1/case_study_one/alphas.csv", row.names = FALSE) 
+=======
+#write.csv(coef_alpha,"~/Desktop/2020 Fall/STA440/Case #1/case_study_one/alphas.csv", row.names = FALSE) 
+>>>>>>> 630e6d5dbbcad696d5eae93909921b56196c2e7a
 
 kable(coef_alpha, digits = 3)
 ```
@@ -977,7 +981,6 @@ kable(JapanEmp_diff_time)
 ```
 Surprisingly, the model suggests that longevity doesn't always increase with calendar time. The biggest increase in lifespan is in the 20th century, where the expected lifespan of a Japanese emperor increases by `r JapanEmp_diff_time[6,3]`% compared to a Japanese emperor born 6 centuries ago. This might make sense, given the last century saw the biggest number of technological breakthroughs and improvement in healthcare.   
 
-*interpretation not done yet*
 - Dalai Lamai born in different centuries
     + 14th century: $\log(T_{14th,Dalai}) = \alpha_0+\alpha_9+\frac{1}{r}\log(\epsilon)$
     + 15th century: $\log(T_{15th,Dalai}) = \alpha_0+\alpha_1+\alpha_9+\alpha_{1,9}+\frac{1}{r}\log(\epsilon)$
