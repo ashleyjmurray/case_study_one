@@ -20,7 +20,7 @@ The rest of the paper is structured as follows. First, we will describe the data
 
 ## II a. Description of the Data
 
-The data used in this analysis contains entries for 177 different world leaders. The types of world leaders present in the data include Popes, US Presidents, Dalai Lamas, Chinese Emperors, and Japanese Emperors. Each individuals's birth date and their leadership position is recorded. We calculated each leader's birth year from the birth date column. For some of these groups, we have data dating all the way back to the 14th century. Additionally, leaders who have passed away also have their death date and age of death recorded. For leaders that are still living, these columns instead contain the date the dataset was created (July 31, 2020) and their current age on that date. We updated that date to the due date of the report, August 31, 2020. In order to further clarify who is dead or alive, there is a column titled "Censored," which takes a value of 0 if the person is dead and a value of 1 if that person is still alive. Related to this, there is another column called "Fail," which takes on a value of 1 if the person is dead and a value of 0 if the person is alive. The problem with censored data is that we don't know exactly when a person will die. Thus, we have to come up with a way to model a censored person's death date if we use them in building our model. In total, there are 10 living leaders in our dataset, 4 of whose age of death we are trying to predict. 
+The data used in this analysis contains entries for 177 different world leaders. The types of world leaders present in the data include Popes, US Presidents, Dalai Lamas, Chinese Emperors, and Japanese Emperors. Each individual's irth date and their leadership position is recorded. We calculated each leader's birth year from the birth date column. For some of these groups, we have data dating all the way back to the 14th century. Additionally, leaders who have passed away also have their death date and age of death recorded. For leaders that are still living, these columns instead contain the date the dataset was created (July 31, 2020) and their current age on that date. We updated that date to the due date of the report, August 31, 2020. In order to further clarify who is dead or alive, there is a column titled "Censored," which takes a value of 0 if the person is dead and a value of 1 if that person is still alive. Related to this, there is another column called "Fail," which takes on a value of 1 if the person is dead and a value of 0 if the person is alive. The problem with censored data is that we don't know exactly when a person will die. Thus, we have to come up with a way to model a censored person's death date if we use them in building our model. In total, there are 10 living leaders in our dataset, 4 of whose age of death we are trying to predict. 
 
 ```{r, message=F, include=F}
 # import libraries
@@ -1319,8 +1319,9 @@ d[sapply(d, is.infinite)] <- 100 #set all of the Inf values to the upper truncat
 
 ```{r, echo=F}
 #Scatterplot showing Birth Year of the Leaders versues their Age
-subset <- filter(leaders_data, Censored == 0)
-ggplot(data = subset, aes(x = Birth.Year, Age.Event)) + geom_point(color="pink") + ggtitle("Distribution of Leaders' Ages") + labs(x = "Birth Year", y = "Age")
+df2 <- data.frame(a = c(d[,1], d[,2], d[,3], d[,4], d[,5], d[,6], d[,7], d[,8], d[,9], d[,10]))
+df2$b <- c(non_censored_prediction[,"Birth.Year"], non_censored_prediction[,"Birth.Year"], non_censored_prediction[,"Birth.Year"], non_censored_prediction[,"Birth.Year"], non_censored_prediction[,"Birth.Year"], non_censored_prediction[,"Birth.Year"], non_censored_prediction[,"Birth.Year"], non_censored_prediction[,"Birth.Year"], non_censored_prediction[,"Birth.Year"], non_censored_prediction[,"Birth.Year"])
+ggplot(data = df2, aes(x = b, a)) + geom_point(color="pink") + ggtitle("Distribution of Leaders' Ages") + labs(x = "Birth Year", y = "Age")
 ```
 
 ```{r, echo = FALSE}
@@ -1329,7 +1330,12 @@ hist(d[,1], main = "Histogram of Distribution of One Simulated Dataset", xlab = 
 abline(v=non_censored_prediction$Age.Event[r], col = "red")  #get the ages defined in the data
 ```
 
-For the posterior predictive checks, it appears that our model returns values that are more concentrated around the upper truncation limit, which is why the dataframe's Inf values are encoded as 100 (the upper truncation limit defined in our function). This follows what the standardized residuals found, where most of the values from the model are left-skewed. Additionally, the red lines on our model are defined as the ages from two randomly sampled leaders that are non-censored. 
+In order to perform posterior predictive checks, a simulated dataset was created by first extracting the leaders that were non-censored. There was ten different iterations that performed the same task: every single row of the non-censored leaders put into our defined Weibull posterior model alongside the random sample from the JAGS model output. These simulations were put into a matrix, and one of the simulated datasets (of which ten were created total) is displayed in the Histogram of Distribution of One Simulated Dataset. 
+
+The Distribution of Leaders' Age and the Birth Year showcases the relationship of the actual birth year and the predicted age from the performed posterior predictive checks. 
+
+For the posterior predictive checks, it appears that our model returns values that are more concentrated around the upper truncation limit, which is why the dataframe's Inf values are encoded as 100 (the upper truncation limit defined in our function). This follows what the standardized residuals found, where most of the values from the model are left-skewed. On the Histogram of Distribution of One Simulated dataset, the red lines on our model are defined as the ages from two randomly sampled leaders that are non-censored. 
+
 
 # VI. Sensitivity Analysis
 
