@@ -941,7 +941,9 @@ coef_alpha <- output %>%
   arrange(num) %>%
   select("Coefficient", "Coefficient Name", "Mean", "Standard Deviation", "2.5% Quantile", "Median", "97.5% Quantile")
 
-write.csv(coef_alpha,"~/Desktop/2020 Fall/STA440/Case 1/case_study_one/alphas.csv", row.names = FALSE)
+##can delete this line later##
+write.csv(coef_alpha,"~/Desktop/2020 Fall/STA440/Case 1/case_study_one/alphas.csv", row.names = FALSE) 
+
 kable(coef_alpha, digits = 3)
 ```
 *double check variable significance after knitting the whole document*
@@ -1023,17 +1025,16 @@ diff_leaders_18 <- data.frame(leader_vec) %>%
 kable(diff_leaders_18)
 ```
 
-*interpretation not done*
-- Leaders born in the 20th century
-   + Pope: $\log(T_{20th,Pope}) = \alpha_0+\alpha_6+\frac{1}{r}\log(\epsilon)$
-   + U.S. President: $\log(T_{20th,UsPres}) = \alpha_0+\alpha_6+\alpha_7+\alpha_{6,7}+\frac{1}{r}\log(\epsilon)$
-   + Chinese Emperor: $\log(T_{20th,ChinaEmp}) = \alpha_0+\alpha_6+\alpha_8+\alpha_{6,8}+\frac{1}{r}\log(\epsilon)$
-   + Dalai Lama: $\log(T_{20th,Dalai}) = \alpha_0+\alpha_6+\alpha_9+\alpha_{6,9}+\frac{1}{r}\log(\epsilon)$
-   + Japanese Emperor: $\log(T_{20th,JapanEmp}) = \alpha_0+\alpha_6+\alpha_{10}+\alpha_{6,10}+\frac{1}{r}\log(\epsilon)$
+- Leaders born in the 19th century
+   + Pope: $\log(T_{20th,Pope}) = \alpha_0+\alpha_5+\frac{1}{r}\log(\epsilon)$
+   + U.S. President: $\log(T_{20th,UsPres}) = \alpha_0+\alpha_5+\alpha_7+\alpha_{5,7}+\frac{1}{r}\log(\epsilon)$
+   + Chinese Emperor: $\log(T_{20th,ChinaEmp}) = \alpha_0+\alpha_5+\alpha_8+\alpha_{5,8}+\frac{1}{r}\log(\epsilon)$
+   + Dalai Lama: $\log(T_{20th,Dalai}) = \alpha_0+\alpha_5+\alpha_9+\alpha_{5,9}+\frac{1}{r}\log(\epsilon)$
+   + Japanese Emperor: $\log(T_{20th,JapanEmp}) = \alpha_0+\alpha_5+\alpha_{10}+\alpha_{5,10}+\frac{1}{r}\log(\epsilon)$
 
 ```{r, echo=F}
 leader_vec <- c("Pope","U.S. President", "Chinese Emperor", "Dalai Lama", "Japanese Emperor")
-alpha_vals<- c(0, coef_alpha[8,3]+coef_alpha[29,3], coef_alpha[9,3]+coef_alpha[30,3], coef_alpha[10,3]+coef_alpha[31,3], coef_alpha[11,3]+coef_alpha[32,3])
+alpha_vals<- c(0, coef_alpha[8,3]+coef_alpha[25,3], coef_alpha[9,3]+coef_alpha[26,3], coef_alpha[10,3]+coef_alpha[27,3], coef_alpha[11,3]+coef_alpha[28,3])
 multiplicative_factor <- round(exp(alpha_vals),2)
 perc_increase <- round(100*(multiplicative_factor-1),1)
 
@@ -1044,6 +1045,9 @@ diff_leaders_20 <- data.frame(leader_vec) %>%
   select("Leaders born in 20th Century","Multiplicative Factor","% Increase / Decrease in Lifespan")
 kable(diff_leaders_20)
 ```
+Popes born in the 18th and 19th century are expected to higher lifespan than other leaders born in the same century. If born in the 18th century, a U.S. president and a Chinese emperor are expected to enjoy the comparable lifespans as a Pope. However, if born in the 19th century instead, the expected lifespans of a U.S. president and a Chinese emperor are significantly shorter than that of a Pope (`r (-1)*diff_leaders_20[2,3]`% and `r (-1)*diff_leaders_20[3,3]`% shorter respectively). 
+
+*do we need more interpretation examples?*
 
 ```{r tidy-model-predicted-increase-table, include = F}
 # MISMATCHED PERCENTAGE INCREASE VALUES
