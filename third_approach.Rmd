@@ -940,11 +940,7 @@ coef_alpha <- output %>%
   select("Coefficient", "Coefficient Name", "Mean", "Standard Deviation", "2.5% Quantile", "Median", "97.5% Quantile")
 
 ##can delete this line later##
-<<<<<<< HEAD
-# write.csv(coef_alpha,"~/Desktop/2020 Fall/STA440/Case 1/case_study_one/alphas.csv", row.names = FALSE) 
-=======
 #write.csv(coef_alpha,"~/Desktop/2020 Fall/STA440/Case #1/case_study_one/alphas.csv", row.names = FALSE) 
->>>>>>> 630e6d5dbbcad696d5eae93909921b56196c2e7a
 
 kable(coef_alpha, digits = 3)
 ```
