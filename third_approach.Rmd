@@ -866,16 +866,16 @@ model_text = function(priors=""){
 ```{r, run-model-function, include = F}
 run_model = function(priors, name) {
   file <- model_text(priors)
-  if (file.exists(name)) {
-    load(file = name)
-  } else {
+  # if (file.exists(name)) {
+  #   load(file = name)
+  # } else {
     model_output <- jags(data = data_build_model,
                          parameters.to.save =  params_to_output,
                          n.iter = 50000,
                          n.chains = 3,
                          model.file = file)
     save(model_output, file = name)
-  }
+  # }
   return(model_output)
 }
 
