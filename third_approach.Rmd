@@ -105,7 +105,7 @@ For example, for Pope Francis who was born in 1963, his birth year century is th
 
 Note that the first U.S. President, George Washington, was born in 1732 (18th century, $j = 4$) and hence the interactions between $Birth \ Century_i= 1,2,3$ (born in the 15th century, 16th century or 17th century) and $Leadership_7$ (being a U.S. President) are meaningless. As such, we didn't include those interaction terms in our model. 
 
-Prior to using this model, we considered a model that used leaders' birth years as a continuous variable instead of binning them into centuries. However, that model resulted in a less desirable model predictive ability as we ran model diagnostic. The residual plot showed a clear trend between residuals and predicted lifespans. Using a quadratic polynomial improved the residuals, but our current model is still superior. Model diagnostic of the current model can be found in section V.c and residual plots of previous models with continuous birth year variable can be found in the Appendix. *make sure we include them in the Appendix*
+Prior to using this model, we considered a model that used leaders' birth years as a continuous variable instead of binning them into centuries. However, that model resulted in a less desirable model predictive ability as we ran model diagnostics. The residual plot showed a clear trend between residuals and predicted lifespans. Using a quadratic polynomial improved the residuals, but our current model is still superior. Model diagnostics of the current model can be found in section V.c and residual plots of previous models with continuous birth year variable can be found in the Appendix. *make sure we include them in the Appendix*
 
 ## III b. Addressing Censored Data
 
@@ -1066,7 +1066,8 @@ kable(coef, digits = 3)
 ```
 
 The table below shows the estimate and 95% credible interval (the bounds are the 2.5% quantile and 97.5% quantile) for all 10 living leaders in the dataset.
-```{r, ci-table-all-living-leaders}
+
+```{r, ci-table-all-living-leaders, echo = F}
 # predicted lifespans for all 10 alive leaders
 vars3 = c("age_Francis_predictive", "age_Obama_predictive","age_Dalai_predictive", "age_Naruhito_predictive", "age_Benedict_predictive","age_Carter_predictive", "age_Clinton_predictive", "age_Bush_predictive","age_Trump_predictive","age_Akihito_predictive")
 output <- data.frame(model_output$BUGSoutput$summary)
@@ -1177,7 +1178,7 @@ p2=ggplot(naru, aes(x=plifespans)) +
   theme(plot.title = element_text(hjust = 0.5), axis.title.y = element_blank()) +
   geom_text(mapping = aes(x = 73, y = 0.06, label = nlab), size = 3)
 
-cap = paste("Fig. 4b The posterior predictive probability density function of the lifespan for hypothetical leaders with the same attributes as Obama (right) and Emperor Naruhito (left).", "The black vertical line marks current age, the blue marks posterior median, and the red marks the posterior 95% quantile.", sep = "\n")
+cap = paste("Fig. 4b The posterior predictive probability density function of the lifespan for hypothetical leaders with the same attributes as Obama (right) and Emperor", "Naruhito (left). The black vertical line marks current age, the blue marks posterior median, and the red marks the posterior 95% quantile.", sep = "\n")
 
 grid.arrange(p1,p2, bottom = textGrob(cap, x =0, just = "left", gp = gpar(fontsize = 10)),
                     left = "Predictive Posterior density", ncol=2)
@@ -1307,7 +1308,7 @@ Figure 5 depicts the posterior distribution of the probability that Dalai Lama o
 
 ## V c. MCMC and Model Diagnostics 
 
-The combination of traceplots, lag-1 scatterplots, and acf plots suggest the chain for each parameters converges. Code for those plots are included in appendix A.2. The Rhat's are all close to 1, which is another indicator of converge. Most of the effective sample sizes are greater than 1000 (the effective sample size of 400 for r is lower, but the number of iterations was kept at 50,000 for computational efficiency).
+The combination of traceplots, lag-1 scatterplots, and acf plots suggest the chain for each parameters converges. Code for those plots are included in Appendix A.2. The Rhat's are all close to 1, which is another indicator of convergence. Most of the effective sample sizes are greater than 1000 (the effective sample size of 400 for r is lower, but the number of iterations was kept at 50,000 for computational efficiency).
 
 ```{r standardized-resid, include = F}
 # calculate and create graphs for standardized residuals
@@ -1684,7 +1685,7 @@ priors6 = "
 sensitivity_6 <- run_model(priors6, "sensitivity6")
 ```
 
-```{r, sensitivity-analysis, fig.width=10, fig.height = 5, echo = F}
+```{r, sensitivity-analysis, warning = F, fig.width=10, fig.height = 5, echo = F}
 parameter = "beta_6"
 sa1 = data.frame(sensitivity_1$BUGSoutput$sims.matrix) %>%
   select(parameter)
@@ -1718,11 +1719,11 @@ sampled_beta = sampled_vals["mean"]
 ggplot(sa_df_plot) + geom_density(aes(x = beta_6)) + 
   facet_wrap(~type,  scales = "free_y", nrow = 2) + 
   geom_vline(xintercept = sampled_beta, color = "blue") +
-  labs(x = expression(beta[6]), caption = paste("Fig. 9 The above plots show sensitivity analysis for different priors on r and the coefficients. The blue line indicates the estimate of the", "coefficient from the propsed model. It appears that the analysis is generally not sensitive to different priors."), size = 4) +
-  theme(plot.caption = element_text(hjust = 0.5, vjust = -0.5, size = 4))
+  labs(x = expression(beta[6]), caption = paste("Fig. 9 The above plots show sensitivity analysis for different priors on r and the coefficients. The blue line indicates the", "estimate of the coefficient from our model. It appears that the analysis is generally not sensitive to different priors.", sep = "\n")) +
+  theme(plot.caption = element_text(hjust = 0.5, vjust = -0.5, size = 12))
 ``` 
 
-We tested $N(0,1)$ and $N(0,10000)$ priors for the $\beta$'s and $Exp(0.001)$ (Stander et al prior), $Gamma(10,10)$ (mean = 1), and $Gamma(10,100)$ (mean = 0.1) priors for $r$. Distribution of $\beta_6$ was approximated using those different priors and plotted above.The blue line, which is estimate from our model crosses, or is close to the mode of all but one of the distributions, so our analysis is mostly robust against changes in prior. However, it is somewhat sensitive to the prior combination $r \sim Gamma(10,1000)$ and $\beta_6 ~ N(0,1)$ Code to conduct sensitivity analysis for the remaining betas can be found in appendix A.3.
+We tested $N(0,1)$ and $N(0,10000)$ priors for the $\beta$s and $Exp(0.001)$ (Stander et al prior), $Gamma(10,10)$ (mean = 1), and $Gamma(10,100)$ (mean = 0.1) priors for $r$. Distribution of $\beta_6$ was approximated using those different priors and plotted above. The blue line, which is the estimate for $\beta_6$ from our model, crosses (or is close to) the mode of all but one of the distributions, so our analysis is mostly robust against changes in prior. However, it is somewhat sensitive to the prior combination of $r \sim Gamma(10,1000)$ and $\beta_6 \sim N(0,1)$ Code to conduct sensitivity analysis for the remaining betas can be found in Appendix A.3.
 
 # VII. Cross Validation
 
@@ -1882,11 +1883,11 @@ Stander, J., Dalla Valle, L., and Cortina-Borja, M. (2018). A Bayesian Survival 
 
 # VIII. Appendix
 
-# # A.1 Details on the Poisson "Zero-Trick" Method
+## A.1 Details on the Poisson "Zero-Trick" Method
 
 We use the Poisson "zeros trick," where a set of 0's are created and the likelihood of observing an 0 follows a $Poisson(\phi_i)$ distribution. The likelihood $L_i$ is $Pr(z_i = 0) = exp(-\phi)$. In other words, $\phi_i$ equals $-log(L_i)$. This mechanism is necessary because we don't know the lifespan of currently living people, so we need a way to model their expected survival times. The censored vector has 0 for dead leaders and 1 for alive leaders. The vector censoring_limits contains 100 (chosen as an upper bound on age) for dead leaders and current age for alive leaders. The non-100 observations in censoring_limits are saved in t_censored, and t_censored is taken to the power of r then multiplied by mu_censored to calculate phi_censored, which is the mean parameter of the Poisson likelihood described above.
 
-# # A.2 Code for Traceplots, Lag-1 Scatterplots, and Acf Plots
+## A.2 Code for Traceplots, Lag-1 Scatterplots, and Acf Plots
 
 ```{r, fig.width = 5, fig.height = 5, include = FALSE}
 # run traceplots
@@ -1923,7 +1924,7 @@ do.call(grid.arrange, p3)
 
 All of the traceplots and code for plotting is above.
 
-```{r, fig.width = 5, fig.height = 5, echo = FALSE}
+```{r,include = FALSE}
 # run lag-1 scatterplots
 lag1_df = lapply(seq(1:length(res)), function(i) { lag(res[,i],1) })
 
@@ -1933,23 +1934,26 @@ res_lag1 = function(i) { # plot for all parameters
        ylab = paste0(colnames(res)[i]),
        main = paste("Lag-1 Scatter Plot of", colnames(res)[i]))
 }
+```
 
+```{r, fig.width = 3, fig.height = 3, echo=F}
 plot(y=res[,2], x= lag1_df[[2]], 
        xlab = paste0(colnames(res)[2], "-1"),
        ylab = paste0(colnames(res)[2]),
        main = paste("Lag-1 Scatter Plot of", colnames(res)[2]))
 ```
 
-```{r, fig.width = 5, fig.height = 5, echo= FALSE}
+```{r, include= FALSE}
 # run acf plots
 acfs = lapply(seq(1,length(res)), function(i) { # plot for all parameters
   acf(res[,i], xlab = "Lag", ylab = "ACF", 
             main = paste("ACF Plot of ", colnames(res)[i]))
 })
+```
 
+```{r, fig.width = 3, fig.height = 3, echo= FALSE}
 acf(res[,2], xlab = "Lag", ylab = "ACF", 
     main = paste("ACF Plot of ", colnames(res)[2]))
-
 ```
 
 Display of lag-1 scatterplot and acf plot for $\beta_1$ is shown above, code provided allows generations of plots for all parameters.
@@ -1998,6 +2002,7 @@ ggplot(sa_df_plot) + geom_density(aes(x = sa_df_plot[,1])) +
 ```
 
 ## A.4 Weibull Distributions with Differing r Values
+
 ```{r}
 par(mfrow=c(2,2))
 curve(dweibull(x, shape=0.3, scale = 1), from=0, to=4, main = 'Weibull Distribution (shape = 0.3, scale = 1)')
