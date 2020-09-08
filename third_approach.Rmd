@@ -970,7 +970,7 @@ kable(JapanEmp_diff_time)
 ```
 Surprisingly, the model suggests that longevity doesn't always increase with calendar time. The biggest increase in lifespan is in the 20th century, where the expected lifespan of a Japanese emperor increases by `r JapanEmp_diff_time[7,3]`% compared to a Japanese emperor born 6 centuries ago. This might make sense, given the last century saw the biggest number of technological breakthroughs and improvement in healthcare.   
 
-```{r, echo=F}
+```{r, include=F}
 
 #    + 14th century: $\log(T_{14th,Dalai}) = \alpha_0+\alpha_9+\frac{1}{r}\log(\epsilon)$
 #    + 15th century: $\log(T_{15th,Dalai}) = \alpha_0+\alpha_1+\alpha_9+\alpha_{1,9}+\frac{1}{r}\log(\epsilon)$
