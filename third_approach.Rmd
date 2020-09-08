@@ -69,16 +69,21 @@ leaders_data$Birth.Year <- year(leaders_data$Birth.Date)
 p1 <- ggplot(data=leaders_data, aes(x=Birth.Year, y = Age.Event, color = Type)) +
   geom_point() + geom_smooth(method="lm", se = F) + 
   ggtitle("Figure 1: Birth Year vs. Lifespan by Leadership Types") + 
-  labs(x = "Birth Year", y = "Age of Death/Censorship")
+  labs(x = "Birth Year", y = "Age of Death/Censorship") + 
+  theme(plot.title = element_text(size = 10),
+        axis.title = element_text(size = 8),
+        legend.title = element_text(size = 7))
 
 #This histogram shows the posterior predictive distribution of the", "difference in lifespan (14th Dalai Lama - Pope Francis).", sep = "\n"))
 
 p2 <- ggplot(data = leaders_data) +
   geom_boxplot(aes(x = Type, y = Age.Event)) + 
   ggtitle("Figure 2: Distribution of Leader Survival Time") + 
-  labs(x = "Type of Leader", y = "Age of Death/Censorship")
+  labs(x = "Type of Leader", y = "Age of Death/Censorship") +
+  theme(plot.title = element_text(size = 10),
+        axis.title = element_text(size = 8))
 
-grid.arrange(p1, p2, ncol=2)
+grid.arrange(p1, p2)
 ```
 
 Based on Figure 1, it appears that birth year's association with lifespan does depend on type of leadership. In particular, Dalai Lamas' lifespans are negatively correlated with birth year, whereas the rest of the leader types have positive correlations with birth year. From the boxplot (Figure 2), we see that the distribution of the lifespans of Popes and US Presidents is centered higher, which makes intuitive sense given that these leaders are elected later in life, while Dalai Lamas and Emperors can be elected at much younger ages. For instance, if a person is a toddler and dies at age five, that person can never be president (and therefore would not have their age be part of the dataset). However, a person can become a Dalai Lama as a toddler and have their age at death be a lot smaller. 
@@ -87,7 +92,9 @@ Based on Figure 1, it appears that birth year's association with lifespan does d
 ggplot(data = leaders_data) +
   geom_histogram(aes(x = Age.Event), binwidth = 5) + 
   ggtitle("Figure 3: Distribution of Age of Death/Censorship by Leadership Types") + 
-  labs(x = "Age of Death / Censorship") + facet_wrap(~ Type)
+  labs(x = "Age of Death / Censorship") + facet_wrap(~ Type) +
+  theme(plot.title = element_text(size = 10),
+        axis.title = element_text(size = 8))
 ```
 
 These same patterns can also be observed in the histograms in Figure 3. Also, in the histograms, there is no extreme skewing, so it does not appear that transformations are needed. 
@@ -122,7 +129,7 @@ For example, for Pope Francis who was born in 1963, his birth year century is th
 
 Note that the first U.S. President, George Washington, was born in 1732 (18th century, $j = 4$) and hence the interactions between $Birth \ Century_i= 1,2,3$ (born in the 15th century, 16th century or 17th century) and $Leadership_7$ (being a U.S. President) are meaningless. As such, we didn't include those interaction terms in our model. 
 
-Prior to using this model, we considered a model that used leaders' birth years as a continuous variable instead of binning them into centuries. However, that model resulted in a less desirable model predictive ability as we ran model diagnostics. The residual plot showed a clear trend between residuals and predicted lifespans. Using a quadratic polynomial improved the residuals, but our current model is still superior. Model diagnostics of the current model can be found in section V.c and residual plots of previous models with continuous birth year variable can be found in the Appendix. *make sure we include them in the Appendix*
+Prior to using this model, we considered a model that used leaders' birth years as a continuous variable instead of binning them into centuries. However, that model resulted in a less desirable model predictive ability as we ran model diagnostics. The residual plot showed a clear trend between residuals and predicted lifespans. Using a quadratic polynomial improved the residuals, but our current model is still superior. Model diagnostics of the current model can be found in section V.c and more details on previous models can be found in the Appendix A.2. *make sure we include them in the Appendix*
 
 ## III b. Addressing Censored Data
 
@@ -941,7 +948,6 @@ coef_alpha <- output %>%
 
 kable(coef_alpha, digits = 2)
 ```
-*double check variable significance after knitting the whole document*
 
 Since the baseline for comparison is a Pope born in the 14th century, it's meaningful to interpret the intercept in this case. The intercept shows that we expect a Pope born in the 14th century to live exp($\alpha_0$) = exp(`r round(coef_alpha[1,3],1)`) = `r round(exp(coef_alpha[1,3]),1)` years. $\alpha_{6,9}$ which corresponds to the interaction between born in the 20th century and being a Dalai Lama has an abnormally large point estimate, largely because there is only one Dalai Lamai born the last century and he is a censored data point. 
 
@@ -1000,8 +1006,6 @@ Dalai_diff_time <- data.frame(leader_vec) %>%
   select("Dalai Lama","Multiplicative Factor","% Increase / Decrease in Lifespan")
 kable(Dalai_diff_time)
 ```
-
-
 
 - Different leaders born in the 18th and 19th centuries
    
@@ -1072,7 +1076,6 @@ coef <- output %>%
   select("Variable", "Mean", "Standard Deviation", "2.5% Quantile","Median", "97.5% Quantile") 
 kable(coef, digits = 1)
 ```
-
 
 ## V b. Posterior Inference for Selected Leaders
 
@@ -1160,7 +1163,7 @@ p2 = ggplot(ObamavNaruhito) +
     theme(plot.caption = element_text(hjust = 0))
 
 grid.arrange(p1, p2, left = "Density", ncol=2,
-             top = "Figure 4: Posterior Distribution Density Plots")
+             top ="Figure 4: Posterior Distribution Density Plots")
 ```
 
 Figure 4 depicts the posterior distribution of the probability that Dalai Lama outlives Pope Francis, and that Obama outlives Emperor Naruhito. The probability that the 14th Dalai Lama will have a longer lifespan than Pope Francis is `r round(mean(DalaivFrancis$pdp),2)` with a 95% confidence interval of (`r round(quantile(DalaivFrancis$pdp, 0.025),2)`, `r round(quantile(DalaivFrancis$pdp, 0.975),2)`). The probability that President Obama will have a longer lifespan than Emperor Naruhito is `r round(mean(ObamavNaruhito$pdp),2)` with a 95% confidence interval of (`r round(quantile(ObamavNaruhito$pdp, 0.025),2)`, `r round(quantile(ObamavNaruhito$pdp, 0.975),2)`). For histograms on the posterior predictive distribution of lifespans for the 4 leaders, see Appendix A.5.
@@ -1267,7 +1270,7 @@ d <- data.frame(ysims) #create a dataframe from the ysims matrix
 d[sapply(d, is.infinite)] <- 100 #set all of the Inf values to the upper truncation value as defined in the previous weibull distribution
 ```
 
-```{r, echo=F, warning = F}
+```{r, echo=F, warning = F, message=F}
 #density distribution of the ten simulations + the actual non-censored data
 data <- non_censored_prediction %>%
   select(Age.Event)
@@ -1283,11 +1286,13 @@ ggplot(aes(x = Age, group = Simulation_Number_or_the_Actual_Data,
            color = Simulation_Number_or_the_Actual_Data), data = fun) + 
   geom_density(alpha = .2) + xlab("Age of Death") + 
   guides(color = guide_legend(title = 'Simulation Number or the Actual Data')) + 
-  ggtitle("Figure 6: Posterior Predictive Checks Density Plot")
+  ggtitle("Figure 6: Posterior Predictive Checks Density Plot") +
+  theme(plot.title = element_text(size = 10),
+        axis.title = element_text(size = 8),
+        legend.title = element_text(size = 7))
 ```
 
 Figure 6 showcases the curvatures of the ten different simulations done in the posterior predictive checks and how they relate to the actual age of the non-censored individuals. There appears to be a peak within the non-censored individuals at around 70, but most of the simulations are seeing a peak at near 100. For the posterior predictive checks, it appears that our model returns values that are more concentrated around the upper truncation limit, which is why the dataframe's Inf values are encoded as 100 (the upper truncation limit defined in our function). This follows what the standardized residuals found, where some of the values from the model are left-skewed, and the posterior predictive checks is showing that a lot of the leaders are being predicted to having a larger lifespan.
-
 
 # VI. Sensitivity Analysis
 
@@ -1603,7 +1608,7 @@ ggplot(sa_df_plot) + geom_density(aes(x = beta_6)) +
   geom_vline(xintercept = sampled_beta, color = "blue") +
   labs(x = expression(beta[6]), 
        title = "Figure 7: Sensitivity Analysis for Different Priors",
-       caption = paste("The above plots show sensitivity analysis for different priors on r and the coefficients. The blue line indicates the", "estimate of the coefficient from our model. It appears that the analysis is generally not sensitive to different priors.", sep = "\n")) +
+       caption = paste("The blue line indicates the estimate of the coefficient from our model. It appears that the analysis is generally not sensitive to different priors.")) +
   theme(plot.caption = element_text(hjust = 0.5, vjust = -0.5, size = 12))
 ``` 
 
@@ -1839,7 +1844,30 @@ acf(res[,2], xlab = "Lag", ylab = "ACF",
 
 Display of lag-1 scatterplot and acf plot for $\beta_1$ is shown above, code provided allows generations of plots for all parameters.
 
-*add old model and resid code here*
+Prior to arriving at our current model, we explored to other models for $\log(\mu_i)$:
+
+1. Birth year as a continuous variable.
+
+$$\log(\mu_i) = \beta_0+\beta_1 (Year \ of \ Birth_i)+\beta_2 (Leadership_i = UsPres) + \beta_3 (Leadership_i = ChinaEmp) $$
+$$+ \beta_4 (Leadership_i = DalaiLama) +\beta_5 (Leadership_i = JapanEmp) \\$$
+$$+ \beta_6 (Year \ of \ Birth_i * (Leadership_i = UsPres)) \\$$
+$$+ \beta_7 (Year \ of \ Birth_i * (Leadership_i = ChinaEmp)) \\$$
+$$+ \beta_8 (Year \ of \ Birth_i * (Leadership_i = DalaiLama)) \\$$
+$$+ \beta_9 (Year \ of \ Birth_i * (Leadership_i = JapanEmp))$$
+
+where $Leadership_i$ = $Pope$ is the baseline for comparison. 
+
+2. Birth year as a continuous variable and quadratic polynomial model.
+
+$$\log(\mu_i) = \beta_0+\beta_1 (Year \ of \ Birth_i)+\beta_2 (Year \ of \ Birth_i)^2 + \beta_3(Leadership_i = UsPres) \\$$
+$$+ \beta_4 (Leadership_i = ChinaEmp) + \beta_5 (Leadership_i = DalaiLama) +\beta_6 (Leadership_i = JapanEmp) \\$$
+$$+ \beta_7 (Year \ of \ Birth_i * (Leadership_i = UsPres)) + \beta_8 (Year \ of \ Birth_i * (Leadership_i = ChinaEmp)) \\$$
+$$+ \beta_9 (Year \ of \ Birth_i * (Leadership_i = DalaiLama)) + \beta_9 (Year \ of \ Birth_i * (Leadership_i = JapanEmp))\\$$
+$$+ \beta_{10} ((Year \ of \ Birth_i)^2 * (Leadership_i = UsPres)) + + \beta_{11} ((Year \ of \ Birth_i)^2 * (Leadership_i = ChinaEmp)) \\$$
+$$+ \beta_{12} ((Year \ of \ Birth_i)^2 * (Leadership_i = DalaiLama)) + + \beta_{13} ((Year \ of \ Birth_i)^2 * (Leadership_i = JapanEmp)) \\$$
+where $Leadership_i$ = $Pope$ is the baseline for comparison. 
+
+*add resid code here*
 
 ## A.3 Code for Sensitivity Analysis
 
