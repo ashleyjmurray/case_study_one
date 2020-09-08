@@ -1093,137 +1093,6 @@ kable(coef, digits = 3)
 
 ## V b. Posterior Inference for Selected Leaders
 
-```{r, francis-dalai, message = F, fig.height=5, fig.width=10, echo = FALSE}
-people = c("age_Francis_predictive", "age_Obama_predictive", "age_Dalai_predictive",
-"age_Naruhito_predictive")
-four_pred = data.frame(model_output$BUGSoutput$sims.matrix)[,people]
-
-francis_dalai = data.frame(plifespans = c(four_pred$age_Francis_predictive, four_pred$age_Dalai_predictive), person = c(rep("Francis", nrow(four_pred)), rep("Dalai", nrow(four_pred))))
-
-
-francis = data.frame(plifespans = four_pred$age_Francis_predictive)
-dalai = data.frame(plifespans = four_pred$age_Dalai_predictive)
-
-
-flab = paste(paste("Current age:", round(min(francis$plifespans),2), "yrs"),
-      paste("Median:", round(median(francis$plifespans),2), "yrs"),
-      paste("95% quantile:", round(quantile(francis$plifespans, 0.95),2), "yrs"),
-      sep = "\n")
-
-dlab = paste(paste("Current age:", round(min(dalai$plifespans),2), "yrs"),
-      paste("Median:", round(median(dalai$plifespans),2),"yrs"),
-      paste("95% quantile:", round(quantile(dalai$plifespans, 0.95),2), "yrs"),
-      sep = "\n")
-
-p1=ggplot(francis, aes(x=plifespans)) + 
-  geom_histogram(aes(y=..density..), binwidth = 0.8, boundary=min(francis$plifespans)) +
-  geom_vline(aes(xintercept = min(plifespans)), color = "black")+
-  geom_vline(aes(xintercept = median(plifespans)), color = "blue")+
-  geom_vline(aes(xintercept = quantile(plifespans, 0.95)), color = "red")+
-  geom_hline(aes(yintercept = 0), colour = "black") +
-  ylim(c(0, 0.1)) + 
-  xlab("Lifespan (yrs)") + 
-  ggtitle("Pope Francis") +
-  theme(plot.title = element_text(hjust = 0.5), axis.title.y = element_blank()) +
-  geom_text(mapping = aes(x = 88.5, y = 0.09, label = flab), size = 3)
-
-p2=ggplot(dalai, aes(x=plifespans)) + 
-  geom_histogram(aes(y=..density..), binwidth = 0.8, boundary=min(dalai$plifespans)) +
-  geom_vline(aes(xintercept = min(plifespans)), color = "black")+
-  geom_vline(aes(xintercept = median(plifespans)), color = "blue")+
-  geom_vline(aes(xintercept = quantile(plifespans, 0.95)), color = "red")+
-  geom_hline(aes(yintercept = 0), colour = "black") +
-  ylim(c(0, 0.1)) +
-  xlab("Lifespan (yrs)") + 
-  ggtitle("Dalai Lama") +
-  theme(plot.title = element_text(hjust = 0.5), axis.title.y = element_blank()) +
-  geom_text(mapping = aes(x = 89, y = 0.09, label = dlab), size = 3)
-
-cap = paste("Fig. 4a The posterior predictive probability density function of the lifespan for hypothetical leaders with the same attributes as Pope Francis (right) and the 14th Dalai Lama (left).", "The black vertical line marks current age the blue marks posterior median, and the red marks the posterior 95% quantile.", sep = "\n")
-
-grid.arrange(p1,p2, bottom = textGrob(cap, x =0, just = "left", gp = gpar(fontsize = 9) ),
-                    left = "Predictive Posterior density", ncol=2)
-```
-
-
-```{r obama-naru-plot, message = F, fig.height=5, fig.width=10, echo = FALSE}
-obama = data.frame(plifespans = four_pred$age_Obama_predictive)
-naru = data.frame(plifespans = four_pred$age_Naruhito_predictive)
-
-olab = paste(paste("Current age:", round(min(obama$plifespans),2), "yrs"),
-      paste("Median:", round(median(obama$plifespans),2),"yrs"),
-      paste("95% quantile:", round(quantile(obama$plifespans, 0.95),2), "yrs"),
-      sep = "\n")
-
-nlab = paste(paste("Current age:", round(min(naru$plifespans),2), "yrs"),
-      paste("Median:", round(median(naru$plifespans),2),"yrs"),
-      paste("95% quantile:", round(quantile(naru$plifespans, 0.95),2), "yrs"),
-      sep = "\n")
-
-p1=ggplot(obama, aes(x=plifespans)) + 
-  geom_histogram(aes(y=..density..), binwidth = 0.8, boundary=min(obama$plifespans)) +
-  geom_vline(aes(xintercept = min(plifespans)), color = "black")+
-  geom_vline(aes(xintercept = median(plifespans)), color = "blue")+
-  geom_vline(aes(xintercept = quantile(plifespans, 0.95)), color = "red")+
-  geom_hline(aes(yintercept = 0), colour = "black") +
-  ylim(c(0, 0.07)) + 
-  xlab("Lifespan (yrs)") + 
-  ggtitle("President Obama") +
-  theme(plot.title = element_text(hjust = 0.5), axis.title.y = element_blank()) + 
-  geom_text(mapping = aes(x = 72, y = 0.06, label = olab), size = 3)
-
-p2=ggplot(naru, aes(x=plifespans)) + 
-  geom_histogram(aes(y=..density..), binwidth = 0.8, boundary=min(naru$plifespans)) +
-  geom_vline(aes(xintercept = min(plifespans)), color = "black")+
-  geom_vline(aes(xintercept = median(plifespans)), color = "blue")+
-  geom_vline(aes(xintercept = quantile(plifespans, 0.95)), color = "red")+
-  geom_hline(aes(yintercept = 0), colour = "black") +
-  ylim(c(0, 0.07)) +
-  xlab("Lifespan (yrs)") + 
-  ggtitle("Emperor Naruhito") +
-  theme(plot.title = element_text(hjust = 0.5), axis.title.y = element_blank()) +
-  geom_text(mapping = aes(x = 73, y = 0.06, label = nlab), size = 3)
-
-cap = paste("Fig. 4b The posterior predictive probability density function of the lifespan for hypothetical leaders with the same attributes as Obama (right) and Emperor", "Naruhito (left). The black vertical line marks current age, the blue marks posterior median, and the red marks the posterior 95% quantile.", sep = "\n")
-
-grid.arrange(p1,p2, bottom = textGrob(cap, x =0, just = "left", gp = gpar(fontsize = 10)),
-                    left = "Predictive Posterior density", ncol=2)
-```
-
-The histogram of the posterior predictive distributions of the lifespans for a leader with the same birth year and leadership type as Pope Francis and that of a leader with the same above attributes as the 14th Dalai Lama are more uniform. The histogram for a leader with the same birth year and leadership type as President Obama and that of a leader with the same above attributes as Emperor Naruhito are both left skewed, with modes around the 90s.
-
-<!-- # comparison values -->
-<!-- DalaivFrancis = data.frame(as.numeric(four_pred$age_Dalai_predictive-four_pred$age_Francis_predictive)) -->
-<!-- ObamavNaruhito = data.frame(as.numeric(four_pred$age_Obama_predictive-four_pred$age_Naruhito_predictive)) -->
-
-<!-- colnames(DalaivFrancis) = "diff" -->
-<!-- colnames(ObamavNaruhito) = "diff" -->
-
-<!-- meandf = mean(DalaivFrancis$diff) -->
-<!-- p1=ggplot(DalaivFrancis, aes(x=diff)) +  -->
-<!--   geom_histogram(aes(y = ..density..), binwidth = 1) + -->
-<!--    geom_vline(xintercept = c(meandf),color="blue")+ -->
-<!--       ylim(c(0,0.08)) + -->
-<!--       xlab("Difference in Lifespan") + -->
-<!--       theme(axis.title.y = element_blank()) +  -->
-<!--   annotate("text", x = 2, y = 0.04, label = paste("mean =", round(meandf,2)), size=3.5, color = "blue") +  -->
-<!--   labs(caption = paste("Figure 4a. This histogram shows the posterior predictive distribution of the", "difference in lifespan (14th Dalai Lama - Pope Francis).", sep = "\n")) + -->
-<!--     theme(plot.caption = element_text(hjust = 0)) -->
-
-<!-- meandf = mean(ObamavNaruhito$diff) -->
-<!-- p2=ggplot(ObamavNaruhito, aes(x=diff)) +  -->
-<!--   geom_histogram(aes(y = ..density..), binwidth = 1) + -->
-<!--    geom_vline(xintercept = c(meandf),color="blue")+ -->
-<!--       ylim(c(0,0.04)) + -->
-<!--       xlab("Difference in Lifespan") + -->
-<!--       theme(axis.title.y = element_blank()) +  -->
-<!--   annotate("text", x = 0, y = 0.02, label = paste("mean =", round(meandf,2)), size=3.5, color = "blue") +  -->
-<!--   labs(caption = paste("Figure 4b. This histogram shows the posterior predictive distribution of the", "difference in lifespan (Obama - Emperor Naruhito).", sep = "\n")) + -->
-<!--     theme(plot.caption = element_text(hjust = 0)) -->
-
-<!-- grid.arrange(p1, p2, left = "Density", ncol=2) -->
-
-
 ```{r posterior-pred-dist-prob-francisvdalai, echo = F}
 all_betas = c("beta_0", "beta_1", "beta_2", "beta_3", "beta_4", "beta_5", "beta_6",
               "beta_7", "beta_8", "beta_9", "beta_10",  "beta_1_8", "beta_1_9",
@@ -1294,7 +1163,7 @@ p1 = ggplot(DalaivFrancis) +
       xlab("Probability") +
       theme(axis.title.y = element_blank()) + 
   annotate("text", x = meandf+0.06, y = 0.5, label = paste("mean =", round(meandf,2)), size=3.5, color = "blue") + 
-  labs(caption = paste("Figure 5a. This density plot shows the posterior distribution of the", "probability that the 14th Dalai Lama outlives Pope Francis.", sep = "\n"), size = 4) +
+  labs(caption = paste("Figure 4a. This density plot shows the posterior distribution of the", "probability that the 14th Dalai Lama outlives Pope Francis.", sep = "\n"), size = 4) +
     theme(plot.caption = element_text(hjust = 0))
 
 meandf = mean(ObamavNaruhito$pdp)
@@ -1304,13 +1173,13 @@ p2 = ggplot(ObamavNaruhito) +
       xlab("Probability") +
       theme(axis.title.y = element_blank()) + 
   annotate("text", x = meandf+0.06, y = 0.5, label = paste("mean =", round(meandf,2)), size=3.5, color = "blue") + 
-  labs(caption = paste("Figure 5b. This density plot shows the posterior distribution of the", "probability that Obama outlives Emperor Naruhito.", sep = "\n"), size = 4) +
+  labs(caption = paste("Figure 4b. This density plot shows the posterior distribution of the", "probability that Obama outlives Emperor Naruhito.", sep = "\n"), size = 4) +
     theme(plot.caption = element_text(hjust = 0))
 
 grid.arrange(p1, p2, left = "Density", ncol=2)
 ```
 
-Figure 5 depicts the posterior distribution of the probability that Dalai Lama outlives Pope Francis, and that Obama outlives Emperor Naruhito. The probability that the 14th Dalai Lama will have a longer lifespan than Pope Francis is `r round(mean(DalaivFrancis$pdp),2)` with a 95% confidence interval of (`r round(quantile(DalaivFrancis$pdp, 0.025),2)`, `r round(quantile(DalaivFrancis$pdp, 0.975),2)`). The probability that President Obama will have a longer lifespan than Emperor Naruhito is `r round(mean(ObamavNaruhito$pdp),2)` with a 95% confidence interval of (`r round(quantile(ObamavNaruhito$pdp, 0.025),2)`, `r round(quantile(ObamavNaruhito$pdp, 0.975),2)`).
+Figure 4 depicts the posterior distribution of the probability that Dalai Lama outlives Pope Francis, and that Obama outlives Emperor Naruhito. The probability that the 14th Dalai Lama will have a longer lifespan than Pope Francis is `r round(mean(DalaivFrancis$pdp),2)` with a 95% confidence interval of (`r round(quantile(DalaivFrancis$pdp, 0.025),2)`, `r round(quantile(DalaivFrancis$pdp, 0.975),2)`). The probability that President Obama will have a longer lifespan than Emperor Naruhito is `r round(mean(ObamavNaruhito$pdp),2)` with a 95% confidence interval of (`r round(quantile(ObamavNaruhito$pdp, 0.025),2)`, `r round(quantile(ObamavNaruhito$pdp, 0.975),2)`). For histograms on the posterior predictive distribution of lifespans for the 4 leaders, see Appendix A.5.
 
 ## V c. MCMC and Model Diagnostics 
 
@@ -1733,7 +1602,7 @@ sampled_beta = sampled_vals["mean"]
 ggplot(sa_df_plot) + geom_density(aes(x = beta_6)) + 
   facet_wrap(~type,  scales = "free_y", nrow = 2) + 
   geom_vline(xintercept = sampled_beta, color = "blue") +
-  labs(x = expression(beta[6]), caption = paste("Fig. 9 The above plots show sensitivity analysis for different priors on r and the coefficients. The blue line indicates the", "estimate of the coefficient from our model. It appears that the analysis is generally not sensitive to different priors.", sep = "\n")) +
+  labs(x = expression(beta[6]), caption = paste("Fig. 8 The above plots show sensitivity analysis for different priors on r and the coefficients. The blue line indicates the", "estimate of the coefficient from our model. It appears that the analysis is generally not sensitive to different priors.", sep = "\n")) +
   theme(plot.caption = element_text(hjust = 0.5, vjust = -0.5, size = 12))
 ``` 
 
@@ -2025,4 +1894,103 @@ curve(dweibull(x, shape=0.8, scale = 1), from=0, to=4, main = 'Weibull Distribut
 curve(dweibull(x, shape=1, scale = 1), from=0, to=4, main = 'Weibull Distribution (shape = 1, scale = 1)')
 ```
 
+## A.5 Histograms of Posterior Predictive Distribution for Lifespan of the 4 Selected Leaders
 
+```{r, francis-dalai, message = F, fig.height=5, fig.width=10, echo = FALSE}
+people = c("age_Francis_predictive", "age_Obama_predictive", "age_Dalai_predictive",
+"age_Naruhito_predictive")
+four_pred = data.frame(model_output$BUGSoutput$sims.matrix)[,people]
+
+francis_dalai = data.frame(plifespans = c(four_pred$age_Francis_predictive, four_pred$age_Dalai_predictive), person = c(rep("Francis", nrow(four_pred)), rep("Dalai", nrow(four_pred))))
+
+
+francis = data.frame(plifespans = four_pred$age_Francis_predictive)
+dalai = data.frame(plifespans = four_pred$age_Dalai_predictive)
+
+
+flab = paste(paste("Current age:", round(min(francis$plifespans),2), "yrs"),
+      paste("Median:", round(median(francis$plifespans),2), "yrs"),
+      paste("95% quantile:", round(quantile(francis$plifespans, 0.95),2), "yrs"),
+      sep = "\n")
+
+dlab = paste(paste("Current age:", round(min(dalai$plifespans),2), "yrs"),
+      paste("Median:", round(median(dalai$plifespans),2),"yrs"),
+      paste("95% quantile:", round(quantile(dalai$plifespans, 0.95),2), "yrs"),
+      sep = "\n")
+
+p1=ggplot(francis, aes(x=plifespans)) + 
+  geom_histogram(aes(y=..density..), binwidth = 0.8, boundary=min(francis$plifespans)) +
+  geom_vline(aes(xintercept = min(plifespans)), color = "black")+
+  geom_vline(aes(xintercept = median(plifespans)), color = "blue")+
+  geom_vline(aes(xintercept = quantile(plifespans, 0.95)), color = "red")+
+  geom_hline(aes(yintercept = 0), colour = "black") +
+  ylim(c(0, 0.1)) + 
+  xlab("Lifespan (yrs)") + 
+  ggtitle("Pope Francis") +
+  theme(plot.title = element_text(hjust = 0.5), axis.title.y = element_blank()) +
+  geom_text(mapping = aes(x = 88.5, y = 0.09, label = flab), size = 3)
+
+p2=ggplot(dalai, aes(x=plifespans)) + 
+  geom_histogram(aes(y=..density..), binwidth = 0.8, boundary=min(dalai$plifespans)) +
+  geom_vline(aes(xintercept = min(plifespans)), color = "black")+
+  geom_vline(aes(xintercept = median(plifespans)), color = "blue")+
+  geom_vline(aes(xintercept = quantile(plifespans, 0.95)), color = "red")+
+  geom_hline(aes(yintercept = 0), colour = "black") +
+  ylim(c(0, 0.1)) +
+  xlab("Lifespan (yrs)") + 
+  ggtitle("Dalai Lama") +
+  theme(plot.title = element_text(hjust = 0.5), axis.title.y = element_blank()) +
+  geom_text(mapping = aes(x = 89, y = 0.09, label = dlab), size = 3)
+
+cap = paste("Fig. 4a The posterior predictive probability density function of the lifespan for hypothetical leaders with the same attributes as Pope Francis (right) and the 14th Dalai Lama (left).", "The black vertical line marks current age the blue marks posterior median, and the red marks the posterior 95% quantile.", sep = "\n")
+
+grid.arrange(p1,p2, bottom = textGrob(cap, x =0, just = "left", gp = gpar(fontsize = 9) ),
+                    left = "Predictive Posterior density", ncol=2)
+```
+
+
+```{r obama-naru-plot, message = F, fig.height=5, fig.width=10, echo = FALSE}
+obama = data.frame(plifespans = four_pred$age_Obama_predictive)
+naru = data.frame(plifespans = four_pred$age_Naruhito_predictive)
+
+olab = paste(paste("Current age:", round(min(obama$plifespans),2), "yrs"),
+      paste("Median:", round(median(obama$plifespans),2),"yrs"),
+      paste("95% quantile:", round(quantile(obama$plifespans, 0.95),2), "yrs"),
+      sep = "\n")
+
+nlab = paste(paste("Current age:", round(min(naru$plifespans),2), "yrs"),
+      paste("Median:", round(median(naru$plifespans),2),"yrs"),
+      paste("95% quantile:", round(quantile(naru$plifespans, 0.95),2), "yrs"),
+      sep = "\n")
+
+p1=ggplot(obama, aes(x=plifespans)) + 
+  geom_histogram(aes(y=..density..), binwidth = 0.8, boundary=min(obama$plifespans)) +
+  geom_vline(aes(xintercept = min(plifespans)), color = "black")+
+  geom_vline(aes(xintercept = median(plifespans)), color = "blue")+
+  geom_vline(aes(xintercept = quantile(plifespans, 0.95)), color = "red")+
+  geom_hline(aes(yintercept = 0), colour = "black") +
+  ylim(c(0, 0.07)) + 
+  xlab("Lifespan (yrs)") + 
+  ggtitle("President Obama") +
+  theme(plot.title = element_text(hjust = 0.5), axis.title.y = element_blank()) + 
+  geom_text(mapping = aes(x = 72, y = 0.06, label = olab), size = 3)
+
+p2=ggplot(naru, aes(x=plifespans)) + 
+  geom_histogram(aes(y=..density..), binwidth = 0.8, boundary=min(naru$plifespans)) +
+  geom_vline(aes(xintercept = min(plifespans)), color = "black")+
+  geom_vline(aes(xintercept = median(plifespans)), color = "blue")+
+  geom_vline(aes(xintercept = quantile(plifespans, 0.95)), color = "red")+
+  geom_hline(aes(yintercept = 0), colour = "black") +
+  ylim(c(0, 0.07)) +
+  xlab("Lifespan (yrs)") + 
+  ggtitle("Emperor Naruhito") +
+  theme(plot.title = element_text(hjust = 0.5), axis.title.y = element_blank()) +
+  geom_text(mapping = aes(x = 73, y = 0.06, label = nlab), size = 3)
+
+cap = paste("Fig. 4b The posterior predictive probability density function of the lifespan for hypothetical leaders with the same attributes as Obama (right) and Emperor", "Naruhito (left). The black vertical line marks current age, the blue marks posterior median, and the red marks the posterior 95% quantile.", sep = "\n")
+
+grid.arrange(p1,p2, bottom = textGrob(cap, x =0, just = "left", gp = gpar(fontsize = 10)),
+                    left = "Predictive Posterior density", ncol=2)
+```
+
+The histogram of the posterior predictive distributions of the lifespans for a leader with the same birth year and leadership type as Pope Francis and that of a leader with the same above attributes as the 14th Dalai Lama are more uniform. The histogram for a leader with the same birth year and leadership type as President Obama and that of a leader with the same above attributes as Emperor Naruhito are both left skewed, with modes around the 90s.
