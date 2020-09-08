@@ -1,7 +1,7 @@
 ---
 title: "Predicting the Lifespan of World Leaders"
 author: "Cathy Lee, Alice Liao, Ashley Murray, and Matty Pahren"
-date: "8-30-20"
+date: "8-31-20"
 output: pdf_document
 ---
 
@@ -13,14 +13,14 @@ knitr::opts_chunk$set(echo = TRUE)
 
 World leaders are influential people that have the power to impact millions of people's lives. Some leaders are elected for terms while others serve for life, so their expected survival is of great interest. In this paper, we seek to examine Popes, US Presidents, Dalai Lamas, Chinese Emperors, and Japanese Emperors to see how their lifespans compare. Additionally, we want to analyze the impact of a leader's birth year on survival, and whether or not this impact might vary depending on the type of leadership. After we build a model to analyze the effects, we also wish to obtain predictions for the lifespans of leaders that are currently alive, as well as make comparative statements about the survival times of these leaders. We will accomplish this by using survival analysis. We use Bayesian Inference to estimate the model parameters with the help of the JAGS program. 
 
-The rest of the paper is structured as follows. First, we will describe the data used to carry out our analysis. Then, we will discuss the Weibull model and Bayesian framework used for analysis to ground our analysis plan. Then, we will show how we carried out our analysis plan and recount our results. After that, we discuss our conclusions and areas for further research. Finally, our code and some additional information can be found in the Appendix. 
+The rest of the paper is structured as follows. First, we will describe the data used to carry out our analysis. Then, we will discuss the Weibull model and Bayesian framework used to ground our analysis plan. Then, we will show how we carried out our analysis plan and recount our results. After that, we discuss our conclusions and areas for further research. Finally, our code and some additional information can be found in the Appendix. 
 
 
 # II. Data
 
 ## II a. Description of the Data
 
-The data used in this analysis contains entries for 177 different world leaders. The types of world leaders present in the data include Popes, US Presidents, Dalai Lamas, Chinese Emperors, and Japanese Emperors. Each individual's birth date and their leadership position is recorded. We calculated each leader's birth year from the birth date column. For some of these groups, we have data dating all the way back to the 14th century. Additionally, leaders who have passed away also have their death date and age of death recorded. For leaders that are still living, these columns instead contain the date the dataset was created (July 31, 2020) and their current age on that date. We updated that date to the due date of the report, August 31, 2020. In order to further clarify who is dead or alive, there is a column titled "Censored," which takes a value of 0 if the person is dead and a value of 1 if that person is still alive. Related to this, there is another column called "Fail," which takes on a value of 1 if the person is dead and a value of 0 if the person is alive. The problem with censored data is that we don't know exactly when a person will die. Thus, we have to come up with a way to model a censored person's death date if we use them in building our model. In total, there are 10 living leaders in our dataset, 4 of whose age of death we are trying to predict. 
+The data used in this analysis contains entries for 177 different world leaders. The types of world leaders present in the data include Popes, US Presidents, Dalai Lamas, Chinese Emperors, and Japanese Emperors. Each individual's birth date and their leadership position is recorded. We calculated each leader's birth year from the birth date column. For some of these groups, we have data dating all the way back to the 14th century. Additionally, leaders who have passed away also have their death date and age of death recorded. For leaders that are still living, these columns instead contain the date the dataset was created (July 31, 2020) and their current age on that date. We updated that date to the due date of the report, August 31, 2020. In order to further clarify who is dead or alive, there is a column titled "Censored," which takes a value of 0 if the person is dead and a value of 1 if that person is still alive. Related to this, there is another column called "Fail," which takes on a value of 1 if the person is dead and a value of 0 if the person is alive. The problem with censored data is that we don't know exactly when a person will die. Thus, we have to come up with a way to model a censored person's death date if we use them in building our model. In total, there are 10 living leaders in our dataset, whose ages we are trying to predict. 
 
 ```{r, message=F, include=F}
 # import libraries
@@ -65,26 +65,26 @@ leaders_data$Birth.Year <- year(leaders_data$Birth.Date)
 
 ## II b. Exploratory Data Analysis
 
-```{r, fig.height = 2, fig.wdith=5, echo=F}
+```{r, fig.height = 4, fig.wdith=5, echo=F}
 ggplot(data=leaders_data, aes(x=Birth.Year, y = Age.Event, color = Type)) +geom_point() + geom_smooth(method="lm", se = F) + ggtitle("Birth Year vs. Age") + labs(subtitle = "by leadership type", x = "Birth Year", y = "Age of Death/Censorship")
 ```
 
-Based on this scatterplot, it appears that birth year's association with lifespan does depends on type of leadership. In particular, Dalai Lama's lifespans are negatively correlated with birth year, whereas the rest of the leader types have positive correlations with birth year. 
+Based on this scatterplot, it appears that birth year's association with lifespan does depends on type of leadership. In particular, Dalai Lamas' lifespans are negatively correlated with birth year, whereas the rest of the leader types have positive correlations with birth year. 
 
-```{r, fig.height=2, fig.width=5,echo=F}
+```{r, fig.height=2.5, fig.width=5,echo=F}
 # create EDA plots
 ggplot(data = leaders_data) +
   geom_boxplot(aes(x = Type, y = Age.Event)) + ggtitle("Distribution of Leader Survival Time") + labs(x = "Type of Leader", y = "Age of Death/Censorship")
 ```
 
-```{r, fig.height=2, fig.width=2,echo=F}
+```{r, fig.height=5, fig.width=5,echo=F}
 ggplot(data = leaders_data) +
   geom_histogram(aes(x = Age.Event), binwidth = 5) + 
   ggtitle("Distribution of Age of Death/Censorshiop \nby Leadership Types") + 
   labs(x = "Age of Death / Censorship") + facet_wrap(~ Type, ncol = 3)
 ```
 
-From the boxplot, the distribution of the lifespans of Popes and US Presidents is centered higher, which makes intuitive sense given that these leaders are elected later in life, while Dalai Lamas and Emperors can be elected at much younger ages. For instance, if a person is a toddler and dies at age five, that person can never be president (and therefore would not have their age be part of the dataset). However, that person can become a Dalai Lama as a toddler and have their age at death influence the distribution plotted. These same patterns can also be observed in the histograms. Also, in the histograms, there is no extreme skewing, so it does not appear tha log transformations are needed. 
+From the boxplot, we see that the distribution of the lifespans of Popes and US Presidents is centered higher, which makes intuitive sense given that these leaders are elected later in life, while Dalai Lamas and Emperors can be elected at much younger ages. For instance, if a person is a toddler and dies at age five, that person can never be president (and therefore would not have their age be part of the dataset). However, a person can become a Dalai Lama as a toddler and have their age at death be a lot smaller. These same patterns can also be observed in the histograms. Also, in the histograms, there is no extreme skewing, so it does not appear tha log transformations are needed. 
 
 # III. Methods
 
