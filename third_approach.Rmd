@@ -65,7 +65,7 @@ leaders_data$Birth.Year <- year(leaders_data$Birth.Date)
 
 ## II b. Exploratory Data Analysis
 
-```{r, fig.height = 4, fig.wdith=9, echo=F,message=FALSE}
+```{r, fig.height = 4, fig.width=9, echo=F,message=FALSE}
 p1 <- ggplot(data=leaders_data, aes(x=Birth.Year, y = Age.Event, color = Type)) +
   geom_point() + geom_smooth(method="lm", se = F) + 
   labs(title = "Figure 1: Birth Year vs. Lifespan by Leadership Types", x = "Birth Year", y = "Age of Death/Censorship") + 
@@ -1562,7 +1562,7 @@ priors6 = "
 sensitivity_6 <- run_model(priors6, "sensitivity6")
 ```
 
-```{r, sensitivity-analysis, warnings = F, fig.width=10, fig.height = 5, echo = F}
+```{r, sensitivity-analysis, warnings = F, fig.width=10, fig.height = 4, echo = F}
 parameter = "beta_6"
 sa1 = data.frame(sensitivity_1$BUGSoutput$sims.matrix) %>%
   select(all_of(parameter))
