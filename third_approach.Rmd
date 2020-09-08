@@ -124,7 +124,7 @@ To handle censored observations, we specify their contribution to the likelihood
 
 We assume that our priors are independent because intuitively a given observation could not be two types of leaders. Additionally, we do not have sufficiently strong prior knowledge about the relationship between birth year and type of leadership to specify an informative prior. Therefore, we use uninformative priors for the betas in our model, in which we chose normal betas with mean 0 and precision 1.0E-3, this includes the coefficients and the intercept in our model.
 
-For our prior for r, we chose a prior of $r \sim exp(0.1)$, as we believe the hazard of death increases with time. This is supported by the fact that older people have higher risk of mortality. For example, in an article by Eurostat (n.d.), in the European Union in 2016, 82.9% of all deaths happened among people over 65. Within the Appendix A.4, different Weibull distributions are plotted with different values of $r$ in order to showcase the fact that $r \sim exp(0.1)$ gives an increasing rate of hazard, as the shape of the Weibull Distribution starts to have an increasing level of density toward the upper $x$ values for $r \sim exp(0.1)$, compared to smaller values of $r$. 
+For our prior for r, we chose a prior of $r \sim exp(0.1)$, as we believe the hazard of death increases with time. This is supported by the fact that older people have higher risk of mortality. For example, in an article by Eurostat, in the European Union in 2016, 82.9% of all deaths happened among people over 65. Within the Appendix A.4, different Weibull distributions are plotted with different values of $r$ in order to showcase the fact that $r \sim exp(0.1)$ gives an increasing rate of hazard, as the shape of the Weibull Distribution starts to have an increasing level of density toward the upper $x$ values for $r \sim exp(0.1)$, compared to smaller values of $r$. 
 
 ```{r, include=F}
 # create dummy variables
@@ -1722,9 +1722,9 @@ ggplot(data = monarchs, aes(x = V2, y = resid/sd)) + geom_point() +
   labs(x = "Birth Year", y = "Standardized Residual")
 ```
 
-As shown in the standardized residuals plots above, the our model didn't do a good job predicting how long British monarchs could live based on their birth year - standardized residuals are very large. In the plot showing Predicted Lifespan and the standardized residuals, there is a downward trend, underpredicting a lot of the leaders' lifespans. *is there a downward trend?* Additionally, as the birth year of the monarchs increases, there is an upward trend. 
+As shown in the standardized residuals plots above, the our model didn't do a good job predicting how long British monarchs could live based on their birth year - standardized residuals are very large. In the plot showing Predicted Lifespan and the standardized residuals, it appears to be random. As the birth year of the monarchs increases, there is an upward trend. It seems that our model is overpredicting for leaders in the later centuries. 
 
-The reuslt, however, is perhaps not surprising to see because British monarchs and Japanese emperors are different types of leaders in different cultures and geographical regions, not to mention our model itself lacks other important variables such as leaders' health conditions, access to healthcare, etc. 
+The result, however, is perhaps not surprising to see because British monarchs and Japanese emperors are different types of leaders in different cultures and geographical regions, not to mention our model itself lacks other important variables such as leaders' health conditions, access to healthcare, etc. 
 
 # VI. Conclusion and Further Discussion
 
