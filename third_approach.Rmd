@@ -129,7 +129,7 @@ For example, for Pope Francis who was born in 1963, his birth year century is th
 
 Note that the first U.S. President, George Washington, was born in 1732 (18th century, $j = 4$) and hence the interactions between $Birth \ Century_i= 1,2,3$ (born in the 15th century, 16th century or 17th century) and $Leadership_7$ (being a U.S. President) are meaningless. As such, we didn't include those interaction terms in our model. 
 
-Prior to using this model, we considered a model that used leaders' birth years as a continuous variable instead of binning them into centuries. However, that model resulted in a less desirable model predictive ability as we ran model diagnostics. The residual plot showed a clear trend between residuals and predicted lifespans. Using a quadratic polynomial improved the residuals, but our current model is still superior. Model diagnostics of the current model can be found in section V.c and more details on previous models can be found in the Appendix A.2. *make sure we include them in the Appendix*
+Prior to using this model, we considered a model that used leaders' birth years as a continuous variable instead of binning them into centuries. However, that model resulted in a less desirable model predictive ability as we ran model diagnostics. The residual plot showed a clear trend between residuals and predicted lifespans. Using a quadratic polynomial improved the residuals, but our current model is still superior. Model diagnostics of the current model can be found in section V.c and more details on previous models can be found in the Appendix A.2. 
 
 ## III b. Addressing Censored Data
 
@@ -911,7 +911,7 @@ The interpretation of coefficients depends on the interaction terms (i.e. both b
 
 ## V a. Output and Interpretation of the Model
 
-The table below shows the model output of the multiplicative factors, $\alpha$s. Note that since $\alpha = -\beta/r$ is a monotone transformation, if $\beta$ is statistically significant (i.e. 95% credible interval doesn't contain 0), it should be the same for the corresponding $\alpha$. 
+Our analysis below will be based on the multiplicative factors, $\alpha$s. Note that since $\alpha = -\beta/r$ is a monotone transformation, if $\beta$ is statistically significant (i.e. 95% credible interval doesn't contain 0), it should be the same for the corresponding $\alpha$. A compete table of the model output can be found in Appendix A.3.
 
 ```{r tidy-model-table-alpha, echo = F}
 # table of multiplicative factor (alphas)
@@ -956,16 +956,17 @@ While $\alpha_1, \cdots,\alpha_5$ have 95% credible intervals containing 0 (an i
 The specific interpretation of these parameters depends on inputs from birth year and type of leadership. Below are some examples. 
 
 - A Japanese emperor born in different centuries
-    + 14th century: $\log(T_{14th,JapanEmp}) = \alpha_0+\alpha_{10}+\frac{1}{r}\log(\epsilon)$
-    + 15th century: $\log(T_{15th,JapanEmp}) = \alpha_0+\alpha_1+\alpha_{10}+\alpha_{1,10}+\frac{1}{r}\log(\epsilon)$
-    + 16th century: $\log(T_{16th,JapanEmp}) = \alpha_0+\alpha_2+\alpha_{10}+\alpha_{2,10}+\frac{1}{r}\log(\epsilon)$
-    + 17th century: $\log(T_{17th,JapanEmp}) = \alpha_0+\alpha_3+\alpha_{10}+\alpha_{3,10}+\frac{1}{r}\log(\epsilon)$
-    + 18th century: $\log(T_{18th,JapanEmp}) = \alpha_0+\alpha_4+\alpha_{10}+\alpha_{4,10}+\frac{1}{r}\log(\epsilon)$
-    + 19th century: $\log(T_{19th,JapanEmp}) = \alpha_0+\alpha_5+\alpha_{10}+\alpha_{5,10}+\frac{1}{r}\log(\epsilon)$
-    + 20th century: $\log(T_{20th,JapanEmp}) = \alpha_0+\alpha_6+\alpha_{10}+\alpha_{6,10}+\frac{1}{r}\log(\epsilon)$
 
 The summary table is shown below if we compare the expected lifespans of later Japanese emperors with that of a Japanese emperor born in the 14th century. 
 ```{r, echo=F}
+#    + 14th century: $\log(T_{14th,JapanEmp}) = \alpha_0+\alpha_{10}+\frac{1}{r}\log(\epsilon)$
+#    + 15th century: $\log(T_{15th,JapanEmp}) = \alpha_0+\alpha_1+\alpha_{10}+\alpha_{1,10}+\frac{1}{r}\log(\epsilon)$
+#    + 16th century: $\log(T_{16th,JapanEmp}) = \alpha_0+\alpha_2+\alpha_{10}+\alpha_{2,10}+\frac{1}{r}\log(\epsilon)$
+#    + 17th century: $\log(T_{17th,JapanEmp}) = \alpha_0+\alpha_3+\alpha_{10}+\alpha_{3,10}+\frac{1}{r}\log(\epsilon)$
+#    + 18th century: $\log(T_{18th,JapanEmp}) = \alpha_0+\alpha_4+\alpha_{10}+\alpha_{4,10}+\frac{1}{r}\log(\epsilon)$
+#    + 19th century: $\log(T_{19th,JapanEmp}) = \alpha_0+\alpha_5+\alpha_{10}+\alpha_{5,10}+\frac{1}{r}\log(\epsilon)$
+#    + 20th century: $\log(T_{20th,JapanEmp}) = \alpha_0+\alpha_6+\alpha_{10}+\alpha_{6,10}+\frac{1}{r}\log(\epsilon)$
+
 leader_vec <- c("Born in 14th Century","Born in 15th Century", "Born in 16th Century", "Born in 17th Century", "Born in 18th Century", "Born in 19th Century", "Born in 20th Century")
 alpha_vals<- c(0, coef_alpha[2,3] + coef_alpha[14,3], coef_alpha[3,3]+coef_alpha[17,3], coef_alpha[4,3]+coef_alpha[20,3], coef_alpha[5,3]+coef_alpha[24,3], coef_alpha[6,3]+coef_alpha[28,3],coef_alpha[7,3]+coef_alpha[32,3])
 multiplicative_factor <- round(exp(alpha_vals),2)
@@ -1008,6 +1009,8 @@ kable(Dalai_diff_time)
 ```
 
 - Different leaders born in the 18th and 19th centuries
+
+The two tables below highlight that the effect of birth year century is depend on leader types. Popes born in the 18th and 19th centuries are expected to live longer than other leaders born in the same century. If born in the 18th century, a U.S. president and a Chinese emperor are expected to enjoy comparable lifespans as a Pope. However, if born in the 19th century instead, the expected lifespans of a U.S. president and a Chinese emperor are significantly shorter than that of a Pope (`r (-1)*diff_leaders_20[2,3]`% and `r (-1)*diff_leaders_20[3,3]`% shorter respectively). 
    
 ```{r, echo=F}
 # different types of leaders born in the 18th century
@@ -1054,8 +1057,6 @@ diff_leaders_20 <- data.frame(leader_vec) %>%
   select("Leaders born in 19th Century","Multiplicative Factor","% Increase / Decrease in Lifespan")
 kable(diff_leaders_20,1)
 ```
-
-Popes born in the 18th and 19th centuries are expected to live longer than other leaders born in the same century. If born in the 18th century, a U.S. president and a Chinese emperor are expected to enjoy comparable lifespans as a Pope. However, if born in the 19th century instead, the expected lifespans of a U.S. president and a Chinese emperor are significantly shorter than that of a Pope (`r (-1)*diff_leaders_20[2,3]`% and `r (-1)*diff_leaders_20[3,3]`% shorter respectively). 
 
 The table below shows the estimate and 95% credible interval (the bounds are the 2.5% quantile and 97.5% quantile) for all 10 living leaders in the dataset.
 
