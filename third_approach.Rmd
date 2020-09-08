@@ -1028,7 +1028,7 @@ diff_leaders_20 <- data.frame(leader_vec) %>%
   select("Leaders born in 19th Century","Multiplicative Factor","% Increase / Decrease in Lifespan")
 kable(diff_leaders_20,1)
 ```
-Popes born in the 18th and 19th century are expected to longer lifespans than other leaders born in the same century. If born in the 18th century, a U.S. president and a Chinese emperor are expected to enjoy comparable lifespans as a Pope. However, if born in the 19th century instead, the expected lifespans of a U.S. president and a Chinese emperor are significantly shorter than that of a Pope (`r (-1)*diff_leaders_20[2,3]`% and `r (-1)*diff_leaders_20[3,3]`% shorter respectively). 
+Popes born in the 18th and 19th century are expected to live longer than other leaders born in the same century. If born in the 18th century, a U.S. president and a Chinese emperor are expected to enjoy comparable lifespans as a Pope. However, if born in the 19th century instead, the expected lifespans of a U.S. president and a Chinese emperor are significantly shorter than that of a Pope (`r (-1)*diff_leaders_20[2,3]`% and `r (-1)*diff_leaders_20[3,3]`% shorter respectively). 
 
 *do we need more interpretation examples?*
 
@@ -1138,14 +1138,15 @@ p2 = ggplot(ObamavNaruhito) +
   labs(caption = paste("Figure 4b. This density plot shows the posterior distribution of the", "probability that Obama outlives Emperor Naruhito.", sep = "\n"), size = 4) +
     theme(plot.caption = element_text(hjust = 0))
 
-grid.arrange(p1, p2, left = "Density", ncol=2)
+grid.arrange(p1, p2, left = "Density", ncol=2,
+             top = "Figure 4: Posterior Distribution Density Plots")
 ```
 
 Figure 4 depicts the posterior distribution of the probability that Dalai Lama outlives Pope Francis, and that Obama outlives Emperor Naruhito. The probability that the 14th Dalai Lama will have a longer lifespan than Pope Francis is `r round(mean(DalaivFrancis$pdp),2)` with a 95% confidence interval of (`r round(quantile(DalaivFrancis$pdp, 0.025),2)`, `r round(quantile(DalaivFrancis$pdp, 0.975),2)`). The probability that President Obama will have a longer lifespan than Emperor Naruhito is `r round(mean(ObamavNaruhito$pdp),2)` with a 95% confidence interval of (`r round(quantile(ObamavNaruhito$pdp, 0.025),2)`, `r round(quantile(ObamavNaruhito$pdp, 0.975),2)`). For histograms on the posterior predictive distribution of lifespans for the 4 leaders, see Appendix A.5.
 
 ## V c. MCMC and Model Diagnostics 
 
-The combination of traceplots, lag-1 scatterplots, and acf plots suggest the chain for each parameters converges. Code for those plots are included in Appendix A.2. The Rhat's are all close to 1, which is another indicator of convergence. Most of the effective sample sizes are greater than 1000 (the effective sample size of 400 for r is lower, but the number of iterations was kept at 50,000 for computational efficiency).
+The combination of traceplots, lag-1 scatterplots, and acf plots suggest the chain for each parameters converges. Code for those plots are included in Appendix A.2. The Rhat's are all close to 1, which is another indicator of convergence. Most of the effective sample sizes are greater than 1000 (the effective sample size of 400 for $r$ is lower, but the number of iterations was kept at 50,000 for computational efficiency).
 
 ```{r standardized-resid, include = F}
 # calculate and create graphs for standardized residuals
@@ -1191,7 +1192,8 @@ sd = sqrt((1/n)*(sum((diff)^2)) * (1+ (1/n) + (diff)^2/sum((diff)^2)))
 
 ```{r resid-v-predictor, fig.height=2, fig.width=5, echo = FALSE}
 ggplot(data = leaders_nopred, aes(x = Ts, y = resid/sd)) + geom_point() + 
-  labs(x = "Predicted Lifespan", y = "Standardized Residual")
+  labs(x = "Predicted Lifespan", y = "Standardized Residual", 
+       title = "Figure 5: Residual Plots")
 ```
 
 ```{r resid-v-year, fig.height=2, fig.width=5, echo = FALSE}
@@ -1199,9 +1201,11 @@ ggplot(data = leaders_nopred, aes(x = Birth.Year, y = resid/sd)) + geom_point() 
   labs(x = "Birth Year", y = "Standardized Residual")
 ```
 
-The standardized residual plot for predicted lifespan shows patterning. It appears that our model tends to overpredict lifespan compared to what was actually observed in many cases. This might be due to the fact that we only have two predictors, Birth Year and Type of Leader. Therefore, we are missing information that might help predict whether or not a leader will die earlier, for example if they have some underlying health condition, etc. 
+The standardized residual plot for predicted lifespan shows some patterning. *It appears that our model tends to overpredict lifespan compared to what was actually observed in many cases.* This might be due to the fact that we only have two predictors, Birth Year and Type of Leader. Therefore, we are missing information that might help predict whether or not a leader will die earlier, for example if they have some underlying health condition, etc. However, 
 
 The standardized residuals when plotted against Birth Year show random scattering, however, and this means that our model is not over or underpredicting lifespan according to the year a leader was born.
+
+In order to perform posterior predictive checks, a simulated dataset was created by first extracting the leaders that were non-censored. There were ten different iterations that performed the same task: every single row of the non-censored leaders were put into our defined Weibull posterior model alongside a random sample from the JAGS model output. 
 
 ```{r, include=F, warning = F}
 all_betas = c("beta_0", "beta_1", "beta_2", "beta_3", "beta_4", "beta_5", "beta_6",
@@ -1237,7 +1241,7 @@ all_betas = c("beta_0", "beta_1", "beta_2", "beta_3", "beta_4", "beta_5", "beta_
 }
 ```
 
-```{r echo =FALSE}
+```{r include =FALSE}
 d <- data.frame(ysims) #create a dataframe from the ysims matrix
 d[sapply(d, is.infinite)] <- 100 #set all of the Inf values to the upper truncation value as defined in the previous weibull distribution
 ```
@@ -1256,19 +1260,21 @@ fun <- cbind(d, data) %>%
   }) %>%
 reshape2::melt() 
 colnames(fun) <- c("Simulation_Number_or_the_Actual_Data", "Age")
-ggplot(aes(x = Age, group = Simulation_Number_or_the_Actual_Data, color = Simulation_Number_or_the_Actual_Data), data = fun) + geom_density(alpha = .2) + xlab("Age") + guides(color = guide_legend(title = 'Simulation Number or the Actual Data')) + ggtitle("Posterior Predictive Checks Density Plot")
+ggplot(aes(x = Age, group = Simulation_Number_or_the_Actual_Data, 
+           color = Simulation_Number_or_the_Actual_Data), data = fun) + 
+  geom_density(alpha = .2) + xlab("Age of Death") + 
+  guides(color = guide_legend(title = 'Simulation Number or the Actual Data')) + 
+  ggtitle("Figure 6: Posterior Predictive Checks Density Plot")
 ```
 
-In order to perform posterior predictive checks, a simulated dataset was created by first extracting the leaders that were non-censored. There were ten different iterations that performed the same task: every single row of the non-censored leaders were put into our defined Weibull posterior model alongside a random sample from the JAGS model output. 
-
-The Posterior Predictive Checks Density Plot showcases the curvatures of the ten different simulations done in the posterior predictive checks and how they relate to the actual age of the non-censored individuals. There appears to be a peak within the non-censored individuals at around 70, but most of the simulations are seeing a peak at 100.For the posterior predictive checks, it appears that our model returns values that are more concentrated around the upper truncation limit, which is why the dataframe's Inf values are encoded as 100 (the upper truncation limit defined in our function). This follows what the standardized residuals found, where most of the values from the model are left-skewed, and the posterior predictive checks is showing that a lot of the leaders are being predicted to having a larger lifespan.
+The Posterior Predictive Checks Density Plot showcases the curvatures of the ten different simulations done in the posterior predictive checks and how they relate to the actual age of the non-censored individuals. There appears to be a peak within the non-censored individuals at around 70, but most of the simulations are seeing a peak at near 100.For the posterior predictive checks, it appears that our model returns values that are more concentrated around the upper truncation limit, which is why the dataframe's Inf values are encoded as 100 (the upper truncation limit defined in our function). This follows what the standardized residuals found, where most of the values from the model are left-skewed, and the posterior predictive checks is showing that a lot of the leaders are being predicted to having a larger lifespan.
 
 
 # VI. Sensitivity Analysis
 
 ```{r, sensitivity-1, include = F}
 priors1 = "
-  beta_0 ~ dnorm(0.0, 1) # Prior on betas are normal with low precision
+  beta_0 ~ dnorm(0.0, 1) # Prior on betas are normal with mean 0, precision 1
   beta_1 ~ dnorm(0.0, 1) 
   beta_2 ~ dnorm(0.0, 1) 
   beta_3 ~ dnorm(0.0, 1)
@@ -1312,10 +1318,10 @@ sensitivity_1 <- run_model(priors1, "sensitivity1")
 
 ```{r, sensitivity-2, include = F}
 priors2 = "
-  beta_0 ~ dnorm(0.0, 1) # Prior on beta_0 is normal with low precision
-  beta_1 ~ dnorm(0.0, 1) # Prior on beta_1 is normal with low precision
-  beta_2 ~ dnorm(0.0, 1) # Prior on beta_2 is normal with low precision
-  beta_3 ~ dnorm(0.0, 1) # Prior on beta_3 is normal with low precision
+  beta_0 ~ dnorm(0.0, 1) # Priors on betas are normal with mean 0, precision 1
+  beta_1 ~ dnorm(0.0, 1) 
+  beta_2 ~ dnorm(0.0, 1) 
+  beta_3 ~ dnorm(0.0, 1) 
   beta_4 ~ dnorm(0.0, 1) # Prior on beta_4 is normal with low precision
   beta_5 ~ dnorm(0.0, 1) # Prior on beta_5 is normal with low precision
   beta_6 ~ dnorm(0.0, 1) # Prior on beta_6 is normal with low precision
