@@ -1201,7 +1201,7 @@ The standardized residual plot for predicted lifespan shows some patterning. *It
 
 The standardized residuals when plotted against Birth Year show random scattering, however, and this means that our model is not over or underpredicting lifespan according to the year a leader was born.
 
-In order to perform posterior predictive checks, a simulated dataset was created by first extracting the leaders that were non-censored. There were ten different iterations that performed the same task: every single row of the non-censored leaders were put into our defined Weibull posterior model alongside a random sample from the JAGS model output. 
+In order to perform posterior predictive checks, ten simulated datasets were created by first extracting the leaders that were non-censored. There were ten different iterations that performed the same task: every single row of the non-censored leaders and a random sample of the model parameters (from the MCMC chain) was used to define a set of $\mu$'s, and those $\mu$'s were used to simulate a set of lifespans from the Weibull distribution.
 
 ```{r, include=F, warning = F}
 all_betas = c("beta_0", "beta_1", "beta_2", "beta_3", "beta_4", "beta_5", "beta_6",
@@ -1263,7 +1263,7 @@ ggplot(aes(x = Age, group = Simulation_Number_or_the_Actual_Data,
   ggtitle("Figure 6: Posterior Predictive Checks Density Plot")
 ```
 
-The Posterior Predictive Checks Density Plot showcases the curvatures of the ten different simulations done in the posterior predictive checks and how they relate to the actual age of the non-censored individuals. There appears to be a peak within the non-censored individuals at around 70, but most of the simulations are seeing a peak at near 100.For the posterior predictive checks, it appears that our model returns values that are more concentrated around the upper truncation limit, which is why the dataframe's Inf values are encoded as 100 (the upper truncation limit defined in our function). This follows what the standardized residuals found, where most of the values from the model are left-skewed, and the posterior predictive checks is showing that a lot of the leaders are being predicted to having a larger lifespan.
+The Posterior Predictive Checks Density Plot showcases the curvatures of the ten different simulations done in the posterior predictive checks and how they relate to the actual age of the non-censored individuals. There appears to be a peak within the non-censored individuals at around 70, but most of the simulations are seeing a peak at near 100. For the posterior predictive checks, it appears that our model returns values that are more concentrated around the upper truncation limit, which is why the dataframe's Inf values are encoded as 100 (the upper truncation limit defined in our function). This follows what the standardized residuals found, where most of the values from the model are left-skewed, and the posterior predictive checks is showing that a lot of the leaders are being predicted to having a larger lifespan.
 
 
 # VI. Sensitivity Analysis
