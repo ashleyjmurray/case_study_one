@@ -1278,7 +1278,7 @@ ggplot(aes(x = Age, group = Simulation_Number_or_the_Actual_Data,
   ggtitle("Figure 6: Posterior Predictive Checks Density Plot")
 ```
 
-Figure 6 showcases the curvatures of the ten different simulations done in the posterior predictive checks and how they relate to the actual age of the non-censored individuals. There appears to be a peak within the non-censored individuals at around 70, but most of the simulations are seeing a peak at near 100. For the posterior predictive checks, it appears that our model returns values that are more concentrated around the upper truncation limit, which is why the dataframe's Inf values are encoded as 100 (the upper truncation limit defined in our function). This follows what the standardized residuals found, where most of the values from the model are left-skewed, and the posterior predictive checks is showing that a lot of the leaders are being predicted to having a larger lifespan.
+Figure 6 showcases the curvatures of the ten different simulations done in the posterior predictive checks and how they relate to the actual age of the non-censored individuals. There appears to be a peak within the non-censored individuals at around 70, but most of the simulations are seeing a peak at near 100. For the posterior predictive checks, it appears that our model returns values that are more concentrated around the upper truncation limit, which is why the dataframe's Inf values are encoded as 100 (the upper truncation limit defined in our function). This follows what the standardized residuals found, where some of the values from the model are left-skewed, and the posterior predictive checks is showing that a lot of the leaders are being predicted to having a larger lifespan.
 
 
 # VI. Sensitivity Analysis
@@ -1603,7 +1603,7 @@ We tested $N(0,1)$ and $N(0,10000)$ priors for the $\beta$s and $Exp(0.001)$ (St
 
 # VII. Cross Validation
 
-We sought to perform external cross-validation on our model to assess how useful our model would be to predict lifespans of other leaders. The data that we used for the cross-validation was from all of England's monarchs born in or after the 1300s, accessed from Wikipedia. This dataset only included one person that was still alive (Queen Elisabeth II). We assigned leader type `JapanEmp` to all British monarchs since we felt this might be the closest match, given China doesn't have any emperors after 1911. 
+We sought to perform external cross-validation on our model to assess how useful our model would be to predict lifespans of other leaders. The data that we used for the cross-validation was from all of England's monarchs born in or after the 1300s, accessed from Wikipedia. This dataset only included one person that was still alive (Queen Elizabeth II). We assigned leader type `JapanEmp` to all British monarchs since we felt this might be the closest match, given China doesn't have any emperors after 1911. 
 
 ```{r include = F}
 #read data
