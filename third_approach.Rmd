@@ -1372,7 +1372,7 @@ The standardized residual plot for predicted lifespan shows patterning. It appea
 
 The standardized residuals when plotted against Birth Year show random scattering, however, and this means that our model is not over or underpredicting lifespan according to the year a leader was born.
 
-```{r, include=F}
+```{r, include=F, warning = F}
 all_betas = c("beta_0", "beta_1", "beta_2", "beta_3", "beta_4", "beta_5", "beta_6",
               "beta_7", "beta_8", "beta_9", "beta_10",  "beta_1_8", "beta_1_9",
               "beta_1_10",  "beta_2_8", "beta_2_9", "beta_2_10", "beta_3_8",
@@ -1411,7 +1411,7 @@ d <- data.frame(ysims) #create a dataframe from the ysims matrix
 d[sapply(d, is.infinite)] <- 100 #set all of the Inf values to the upper truncation value as defined in the previous weibull distribution
 ```
 
-```{r, echo=F}
+```{r, echo=F, warning = F}
 #Scatterplot showing Birth Year of the Leaders versues their Age
 df2 <- data.frame(a = c(d[,1], d[,2], d[,3], d[,4], d[,5], d[,6], d[,7], d[,8], d[,9], d[,10]))
 df2$b <- c(non_censored_prediction[,"Birth.Year"], non_censored_prediction[,"Birth.Year"], non_censored_prediction[,"Birth.Year"], non_censored_prediction[,"Birth.Year"], non_censored_prediction[,"Birth.Year"], non_censored_prediction[,"Birth.Year"], non_censored_prediction[,"Birth.Year"], non_censored_prediction[,"Birth.Year"], non_censored_prediction[,"Birth.Year"], non_censored_prediction[,"Birth.Year"])
@@ -1428,17 +1428,9 @@ colnames(fun) <- c("Simulation_Number_or_the_Actual_Data", "Age")
 ggplot(aes(x = Age, group = Simulation_Number_or_the_Actual_Data, color = Simulation_Number_or_the_Actual_Data), data = fun) + geom_density(alpha = .2) + xlab("Age") + guides(color = guide_legend(title = 'Simulation Number or the Actual Data')) + ggtitle("Posterior Predictive Checks Density Plot")
 ```
 
-```{r, echo = FALSE}
-r <- sample(nrow(non_censored_prediction), 2) #sample from the non_censored data
-hist(d[,1], main = "Histogram of Distribution of One Simulated Dataset", xlab = "simulated values for lifespan") #create a histogram for the first column of the dataframe
-abline(v=non_censored_prediction$Age.Event[r], col = "red")  #get the ages defined in the data
-```
-
 In order to perform posterior predictive checks, a simulated dataset was created by first extracting the leaders that were non-censored. There was ten different iterations that performed the same task: every single row of the non-censored leaders put into our defined Weibull posterior model alongside the random sample from the JAGS model output. These simulations were put into a matrix, and one of the simulated datasets (of which ten were created total) is displayed in the Histogram of Distribution of One Simulated Dataset. 
 
-The Posterior Predictive Checks Density Plot showcases the curvatures of the ten different simulations done in the posterior predictive checks and how they relate to the actual age of the non-censored individuals. There appears to be a peak within the non-censored individuals at around 70, but most of the simulations are seeing a peak at 100.
-
-For the posterior predictive checks, it appears that our model returns values that are more concentrated around the upper truncation limit, which is why the dataframe's Inf values are encoded as 100 (the upper truncation limit defined in our function). This follows what the standardized residuals found, where most of the values from the model are left-skewed, and the posterior predictive checks is showing that a lot of the leaders are being predicted to having a larger lifespan. On the Histogram of Distribution of One Simulated dataset, the red lines on our model are defined as the actual ages from two randomly sampled leaders that are non-censored. This emphasizes the previous point that the model is predicting leaders to have larger lifespans than in actuality. 
+The Posterior Predictive Checks Density Plot showcases the curvatures of the ten different simulations done in the posterior predictive checks and how they relate to the actual age of the non-censored individuals. There appears to be a peak within the non-censored individuals at around 70, but most of the simulations are seeing a peak at 100.For the posterior predictive checks, it appears that our model returns values that are more concentrated around the upper truncation limit, which is why the dataframe's Inf values are encoded as 100 (the upper truncation limit defined in our function). This follows what the standardized residuals found, where most of the values from the model are left-skewed, and the posterior predictive checks is showing that a lot of the leaders are being predicted to having a larger lifespan.
 
 
 # VI. Sensitivity Analysis
