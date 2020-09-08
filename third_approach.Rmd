@@ -970,7 +970,7 @@ kable(JapanEmp_diff_time)
 ```
 Surprisingly, the model suggests that longevity doesn't always increase with calendar time. The biggest increase in lifespan is in the 20th century, where the expected lifespan of a Japanese emperor increases by `r JapanEmp_diff_time[7,3]`% compared to a Japanese emperor born 6 centuries ago. This might make sense, given the last century saw the biggest number of technological breakthroughs and improvement in healthcare.   
 
-```{r, echo=F}
+```{r, include=F}
 
 #    + 14th century: $\log(T_{14th,Dalai}) = \alpha_0+\alpha_9+\frac{1}{r}\log(\epsilon)$
 #    + 15th century: $\log(T_{15th,Dalai}) = \alpha_0+\alpha_1+\alpha_9+\alpha_{1,9}+\frac{1}{r}\log(\epsilon)$
@@ -995,7 +995,7 @@ kable(Dalai_diff_time)
 
 - Different leaders born in the 18th and 19th centuries
 
-The two tables below highlight that the effect of birth year century is depend on leader types. Popes born in the 18th and 19th centuries are expected to live longer than other leaders born in the same century. If born in the 18th century, a U.S. president and a Chinese emperor are expected to enjoy comparable lifespans as a Pope. However, if born in the 19th century instead, the expected lifespans of a U.S. president and a Chinese emperor are significantly shorter than that of a Pope (`r (-1)*diff_leaders_20[2,3]`% and `r (-1)*diff_leaders_20[3,3]`% shorter respectively). 
+The two tables below highlight that the effect of birth year century is depend on leader types. 
    
 ```{r, echo=F}
 # different types of leaders born in the 18th century
@@ -1043,7 +1043,9 @@ diff_leaders_20 <- data.frame(leader_vec) %>%
 kable(diff_leaders_20,1)
 ```
 
-More examples of the interpretation of coeffients are in Appendix A.3. The table below shows the estimate and 95% credible interval (the bounds are the 2.5% quantile and 97.5% quantile) for all 10 living leaders in the dataset.
+Popes born in the 18th and 19th centuries are expected to live longer than other leaders born in the same century. If born in the 18th century, a U.S. president and a Chinese emperor are expected to enjoy comparable lifespans as a Pope. However, if born in the 19th century instead, the expected lifespans of a U.S. president and a Chinese emperor are significantly shorter than that of a Pope (`r (-1)*diff_leaders_20[2,3]`% and `r (-1)*diff_leaders_20[3,3]`% shorter respectively). More examples of the interpretation of coeffients are in Appendix A.3. 
+
+The table below shows the estimate and 95% credible interval (the bounds are the 2.5% quantile and 97.5% quantile) for all 10 living leaders in the dataset.
 
 ```{r, ci-table-all-living-leaders, echo = F}
 
