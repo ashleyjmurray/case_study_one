@@ -1569,7 +1569,7 @@ sampled_beta = sampled_vals["mean"]
 ggplot(sa_df_plot) + geom_density(aes(x = beta_6)) + 
   facet_wrap(~type,  scales = "free_y", nrow = 2) + 
   geom_vline(xintercept = sampled_beta, color = "blue") +
-  labs(x = expression(beta[6]), 
+  labs(x = expression(beta[6], y = "Density"), 
        title = "Figure 6: Sensitivity Analysis for Different Priors",
        caption = paste("The blue line indicates the estimate of the coefficient from our model. It appears that the analysis is generally not sensitive to different priors.")) +
   theme(plot.caption = element_text(hjust = 0.5, vjust = -0.5, size = 11),
