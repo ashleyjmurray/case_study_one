@@ -1577,13 +1577,13 @@ sa6 = data.frame(sensitivity_6$BUGSoutput$sims.matrix) %>%
 sa_df = data.frame(vals = rbind(sa1, sa2, sa3, sa4, sa5, sa6),
                    type = c(rep("r~Exp(0.001), B~N(0,1)", nrow(sa1)),
                             rep("r~Ga(10,10), B~N(0,1)", nrow(sa2)),
-                            rep("r~Ga(10,1000), B~N(0,1)", nrow(sa3)),
+                            rep("r~Ga(10,100), B~N(0,1)", nrow(sa3)),
                             rep("r~Exp(0.001), B~N(0,10000)", nrow(sa4)),
                             rep("r~Ga(10,10), B~N(0,10000)", nrow(sa5)),
-                            rep("r~Ga(10,1000), B~N(0,10000)", nrow(sa6))))
+                            rep("r~Ga(10,100), B~N(0,10000)", nrow(sa6))))
 
-neworder <- c("r~Exp(0.001), B~N(0,1)", "r~Ga(10,10), B~N(0,1)", "r~Ga(10,1000), B~N(0,1)",
-              "r~Exp(0.001), B~N(0,10000)", "r~Ga(10,10), B~N(0,10000)", "r~Ga(10,1000), B~N(0,10000)")
+neworder <- c("r~Exp(0.001), B~N(0,1)", "r~Ga(10,10), B~N(0,1)", "r~Ga(10,100), B~N(0,1)",
+              "r~Exp(0.001), B~N(0,10000)", "r~Ga(10,10), B~N(0,10000)", "r~Ga(10,100), B~N(0,10000)")
 
 sa_df_plot <- arrange(mutate(sa_df, type=factor(type,levels=neworder)), type)
 
@@ -1599,7 +1599,7 @@ ggplot(sa_df_plot) + geom_density(aes(x = beta_6)) +
   theme(plot.caption = element_text(hjust = 0.5, vjust = -0.5, size = 12))
 ``` 
 
-We tested $N(0,1)$ and $N(0,10000)$ priors for the $\beta$s and $Exp(0.001)$ (Stander et al prior), $Gamma(10,10)$ (mean = 1), and $Gamma(10,100)$ (mean = 0.1) priors for $r$. Distribution of $\beta_6$ was approximated using those different priors and plotted above. The blue line, which is the estimate for $\beta_6$ from our model, crosses (or is close to) the mode of all but one of the distributions, so our analysis is mostly robust against changes in prior. However, it is somewhat sensitive to the prior combination of $r \sim Gamma(10,1000)$ and $\beta_6 \sim N(0,1)$ Code to conduct sensitivity analysis for the remaining betas can be found in Appendix A.3.
+We tested $N(0,1)$ and $N(0,10000)$ priors for the $\beta$s and $Exp(0.001)$ (Stander et al prior), $Gamma(10,10)$ (mean = 1), and $Gamma(10,100)$ (mean = 0.1) priors for $r$. Distribution of $\beta_6$ was approximated using those different priors and plotted above. The blue line, which is the estimate for $\beta_6$ from our model, crosses (or is close to) the mode of all but one of the distributions, so our analysis is mostly robust against changes in prior. However, it is somewhat sensitive to the prior of $r \sim Gamma(10,100)$, which makes sense since that prior implies a decreasing hazard while we assumed increasing hazard. Code to conduct sensitivity analysis for the remaining betas can be found in Appendix A.3.
 
 # VII. Cross Validation
 
@@ -1772,8 +1772,7 @@ colnames(res) <- gsub("^.*\\.","", colnames(res) )
 tps <- function(var){
   ggplot(res, aes_(y=as.name(var), x=seq(1,nrow(res)))) +
     geom_line() +
-    labs(title=paste("Traceplot of ", as.name(var)),
-         x ="Iterations", y = as.name(var))
+    labs(x ="Iterations", y = as.name(var))
 }
 
 all_trace = lapply(names(res), tps)
@@ -1805,7 +1804,7 @@ res_lag1 = function(i) { # plot for all parameters
   plot(y=res[,i], x= lag1_df[[i]], 
        xlab = paste0(colnames(res)[i], "-1"),
        ylab = paste0(colnames(res)[i]),
-       main = paste("Lag-1 Scatter Plot of", colnames(res)[i]))
+       main = paste("Lag-1 Scatterplot of", colnames(res)[i]))
 }
 ```
 
@@ -1813,20 +1812,20 @@ res_lag1 = function(i) { # plot for all parameters
 plot(y=res[,2], x= lag1_df[[2]], 
        xlab = paste0(colnames(res)[2], "-1"),
        ylab = paste0(colnames(res)[2]),
-       main = paste("Lag-1 Scatter Plot of", colnames(res)[2]))
+       main = paste("Lag-1 Scatterplot of", colnames(res)[2]))
 ```
 
 ```{r, include= FALSE}
 # run acf plots
 acfs = lapply(seq(1,length(res)), function(i) { # plot for all parameters
   acf(res[,i], xlab = "Lag", ylab = "ACF", 
-            main = paste("ACF Plot of ", colnames(res)[i]))
+            main = paste("ACF Plot of", colnames(res)[i]))
 })
 ```
 
 ```{r, fig.width = 3, fig.height = 3, echo= FALSE}
 acf(res[,2], xlab = "Lag", ylab = "ACF", 
-    main = paste("ACF Plot of ", colnames(res)[2]))
+    main = paste("ACF Plot of", colnames(res)[2]))
 ```
 
 Display of lag-1 scatterplot and acf plot for $\beta_1$ is shown above, code provided allows generations of plots for all parameters.
@@ -1835,43 +1834,43 @@ Display of lag-1 scatterplot and acf plot for $\beta_1$ is shown above, code pro
 
 ## A.3 Code for Sensitivity Analysis
 
-```{r, include= F}
-parameter = "beta_6" # change parameter here to run for different betas
-
-sa1 = data.frame(sensitivity_1$BUGSoutput$sims.matrix) %>%
-  select(parameter)
-sa2 = data.frame(sensitivity_2$BUGSoutput$sims.matrix) %>%
-  select(parameter)
-sa3 = data.frame(sensitivity_3$BUGSoutput$sims.matrix) %>%
-  select(parameter)
-sa4 = data.frame(sensitivity_4$BUGSoutput$sims.matrix) %>%
-  select(parameter)
-sa5 = data.frame(sensitivity_5$BUGSoutput$sims.matrix) %>%
-  select(parameter)
-sa6 = data.frame(sensitivity_6$BUGSoutput$sims.matrix) %>%
-  select(parameter)
-
-sa_df = data.frame(vals = rbind(sa1, sa2, sa3, sa4, sa5, sa6),
-                   type = c(rep("r~Exp(0.001), B~N(0,1)", nrow(sa1)),
-                            rep("r~Ga(10,10), B~N(0,1)", nrow(sa2)),
-                            rep("r~Ga(10,1000), B~N(0,1)", nrow(sa3)),
-                            rep("r~Exp(0.001), B~N(0,100)", nrow(sa4)),
-                            rep("r~Ga(10,10), B~N(0,100)", nrow(sa5)),
-                            rep("r~Ga(10,1000), B~N(0,100)", nrow(sa6))))
-
-neworder <- c("r~Exp(0.001), B~N(0,1)", "r~Ga(10,10), B~N(0,1)", "r~Ga(10,1000), B~N(0,1)",
-              "r~Exp(0.001), B~N(0,100)", "r~Ga(10,10), B~N(0,100)", "r~Ga(10,1000), B~N(0,100)")
-
-sa_df_plot <- arrange(mutate(sa_df, type=factor(type,levels=neworder)), type)
-
-sampled_vals = model_output$BUGSoutput$summary[parameter, ]
-sampled_beta = sampled_vals["mean"]
-
-ggplot(sa_df_plot) + geom_density(aes(x = sa_df_plot[,1])) + 
-  facet_wrap(~type,  scales = "free_y", nrow = 2) + 
-  geom_vline(xintercept = sampled_beta, color = "blue") +
-  labs(x = expression(beta[6]), caption = paste("Fig. 8 The above plots show sensitivity analysis for different priors on r and the coefficients. The blue line indicates the estimate of the", "coefficient from the propsed model. It appears that the analysis is generally not sensitive to different priors."), size = 3) + # change beta[6] to beta being analyzed
-  theme(plot.caption = element_text(hjust = 0.5, vjust = -0.5, size = 4))
+```{r, sa-reproduce-code}
+# parameter = "beta_6" # change parameter here to run for different betas
+# 
+# sa1 = data.frame(sensitivity_1$BUGSoutput$sims.matrix) %>%
+#   select(parameter)
+# sa2 = data.frame(sensitivity_2$BUGSoutput$sims.matrix) %>%
+#   select(parameter)
+# sa3 = data.frame(sensitivity_3$BUGSoutput$sims.matrix) %>%
+#   select(parameter)
+# sa4 = data.frame(sensitivity_4$BUGSoutput$sims.matrix) %>%
+#   select(parameter)
+# sa5 = data.frame(sensitivity_5$BUGSoutput$sims.matrix) %>%
+#   select(parameter)
+# sa6 = data.frame(sensitivity_6$BUGSoutput$sims.matrix) %>%
+#   select(parameter)
+# 
+# sa_df = data.frame(vals = rbind(sa1, sa2, sa3, sa4, sa5, sa6),
+#                    type = c(rep("r~Exp(0.001), B~N(0,1)", nrow(sa1)),
+#                             rep("r~Ga(10,10), B~N(0,1)", nrow(sa2)),
+#                             rep("r~Ga(10,1000), B~N(0,1)", nrow(sa3)),
+#                             rep("r~Exp(0.001), B~N(0,100)", nrow(sa4)),
+#                             rep("r~Ga(10,10), B~N(0,100)", nrow(sa5)),
+#                             rep("r~Ga(10,1000), B~N(0,100)", nrow(sa6))))
+# 
+# neworder <- c("r~Exp(0.001), B~N(0,1)", "r~Ga(10,10), B~N(0,1)", "r~Ga(10,1000), B~N(0,1)",
+#               "r~Exp(0.001), B~N(0,100)", "r~Ga(10,10), B~N(0,100)", "r~Ga(10,1000), B~N(0,100)")
+# 
+# sa_df_plot <- arrange(mutate(sa_df, type=factor(type,levels=neworder)), type)
+# 
+# sampled_vals = model_output$BUGSoutput$summary[parameter, ]
+# sampled_beta = sampled_vals["mean"]
+# 
+# ggplot(sa_df_plot) + geom_density(aes(x = sa_df_plot[,1])) +
+#   facet_wrap(~type,  scales = "free_y", nrow = 2) +
+#   geom_vline(xintercept = sampled_beta, color = "blue") +
+#   labs(x = expression(beta[6]), caption = paste("Fig. 8 The above plots show sensitivity analysis for different priors on r and the coefficients. The blue line indicates the estimate of the", "coefficient from the propsed model. It appears that the analysis is generally not sensitive to different priors."), size = 3) + # change beta[6] to beta being analyzed
+#   theme(plot.caption = element_text(hjust = 0.5, vjust = -0.5, size = 4))
 ```
 
 ## A.4 Weibull Distributions with Differing r Values
@@ -1932,7 +1931,7 @@ p2=ggplot(dalai, aes(x=plifespans)) +
   theme(plot.title = element_text(hjust = 0.5), axis.title.y = element_blank()) +
   geom_text(mapping = aes(x = 89, y = 0.09, label = dlab), size = 3)
 
-cap = paste("Fig. 4a The posterior predictive probability density function of the lifespan for hypothetical leaders with the same attributes as Pope Francis (right) and the 14th Dalai Lama (left).", "The black vertical line marks current age the blue marks posterior median, and the red marks the posterior 95% quantile.", sep = "\n")
+cap = paste("The posterior predictive probability density function of the lifespan for hypothetical leaders with the same attributes as Pope Francis (right) and the 14th Dalai Lama (left).", "The black vertical line marks current age the blue marks posterior median, and the red marks the posterior 95% quantile.", sep = "\n")
 
 grid.arrange(p1,p2, bottom = textGrob(cap, x =0, just = "left", gp = gpar(fontsize = 9) ),
                     left = "Predictive Posterior density", ncol=2)
@@ -1977,7 +1976,7 @@ p2=ggplot(naru, aes(x=plifespans)) +
   theme(plot.title = element_text(hjust = 0.5), axis.title.y = element_blank()) +
   geom_text(mapping = aes(x = 73, y = 0.06, label = nlab), size = 3)
 
-cap = paste("Fig. 4b The posterior predictive probability density function of the lifespan for hypothetical leaders with the same attributes as Obama (right) and Emperor", "Naruhito (left). The black vertical line marks current age, the blue marks posterior median, and the red marks the posterior 95% quantile.", sep = "\n")
+cap = paste("The posterior predictive probability density function of the lifespan for hypothetical leaders with the same attributes as Obama (right) and Emperor", "Naruhito (left). The black vertical line marks current age, the blue marks posterior median, and the red marks the posterior 95% quantile.", sep = "\n")
 
 grid.arrange(p1,p2, bottom = textGrob(cap, x =0, just = "left", gp = gpar(fontsize = 10)),
                     left = "Predictive Posterior density", ncol=2)
