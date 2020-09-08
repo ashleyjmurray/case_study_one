@@ -1310,7 +1310,7 @@ p2 = ggplot(ObamavNaruhito) +
 grid.arrange(p1, p2, left = "Density", ncol=2)
 ```
 
-Figure 5 depicts the posterior distribution of the probability that Dalai Lama outlives Pope Francis, and that Obama outlives Emperor Naruhito. The probability that the 14th Dalai Lama will have a longer lifespan than Pope Francis is `r round(mean(DalaivFrancis$pdp),3)` with a 95% confidence interval of (`r round(quantile(DalaivFrancis$pdp, 0.025),3)`, `r round(quantile(DalaivFrancis$pdp, 0.975),3)`). The probability that President Obama will have a longer lifespan than Emperor Naruhito is `r round(mean(ObamavNaruhito$pdp),3)` with a 95% confidence interval of (`r round(quantile(ObamavNaruhito$pdp, 0.025),3)`, `r round(quantile(ObamavNaruhito$pdp, 0.975),3)`).
+Figure 5 depicts the posterior distribution of the probability that Dalai Lama outlives Pope Francis, and that Obama outlives Emperor Naruhito. The probability that the 14th Dalai Lama will have a longer lifespan than Pope Francis is `r round(mean(DalaivFrancis$pdp),2)` with a 95% confidence interval of (`r round(quantile(DalaivFrancis$pdp, 0.025),2)`, `r round(quantile(DalaivFrancis$pdp, 0.975),2)`). The probability that President Obama will have a longer lifespan than Emperor Naruhito is `r round(mean(ObamavNaruhito$pdp),2)` with a 95% confidence interval of (`r round(quantile(ObamavNaruhito$pdp, 0.025),2)`, `r round(quantile(ObamavNaruhito$pdp, 0.975),2)`).
 
 ## V c. MCMC and Model Diagnostics 
 
