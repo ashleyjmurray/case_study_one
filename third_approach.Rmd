@@ -69,7 +69,7 @@ leaders_data$Birth.Year <- year(leaders_data$Birth.Date)
 p1 <- ggplot(data=leaders_data, aes(x=Birth.Year, y = Age.Event, color = Type)) +
   geom_point() + geom_smooth(method="lm", se = F) + 
   labs(title = "Figure 1: Birth Year vs. Lifespan by Leadership Types", x = "Birth Year", y = "Age of Death/Censorship") + 
-  theme(plot.title = element_text(hjust = 0.5),
+  theme(plot.title = element_text(hjust = 0.5, size = 10),
         axis.title = element_text(size = 8),
         legend.title = element_text(size = 7))
 
@@ -78,7 +78,7 @@ p1 <- ggplot(data=leaders_data, aes(x=Birth.Year, y = Age.Event, color = Type)) 
 p2 <- ggplot(data = leaders_data) +
   geom_boxplot(aes(x = Type, y = Age.Event)) + 
   labs(title = "Figure 2: Distribution of Leader Survival Time", x = "Type of Leader", y = "Age of Death/Censorship") +
-  theme(plot.title = element_text(hjust = 0.5),
+  theme(plot.title = element_text(hjust = 0.5, size = 10),
         axis.title = element_text(size = 8))
 
 grid.arrange(p1, p2)
@@ -970,33 +970,6 @@ kable(JapanEmp_diff_time)
 ```
 Surprisingly, the model suggests that longevity doesn't always increase with calendar time. The biggest increase in lifespan is in the 20th century, where the expected lifespan of a Japanese emperor increases by `r JapanEmp_diff_time[7,3]`% compared to a Japanese emperor born 6 centuries ago. This might make sense, given the last century saw the biggest number of technological breakthroughs and improvement in healthcare.   
 
-- Dalai Lamai born in different centuries
-
-We can also compare how different Dalai Lamas born in different centuries are expected to live. The percentage increase in lifespan becomes generally more negative, which means later born Dalai Lamas are expected to live shorter, confirming the negative correlation between lifespan and birth year exihibited in Figure 1 of section II.b EDA. The Dalai Lama born in the 20th century, however, is expected to live abnormally longer than the 1st Dalai Lama born in the 14th century, due to the extremely large point estimate of $\alpha_{6,9}$ that corresponds to the interaction between born in the 20th century and being a Dalai Lama. As explained earlier, this might be because there is only one Dalai Lama born in the 20th century and he is censored. 
-    
-```{r, echo=F}
-
-#    + 14th century: $\log(T_{14th,Dalai}) = \alpha_0+\alpha_9+\frac{1}{r}\log(\epsilon)$
-#    + 15th century: $\log(T_{15th,Dalai}) = \alpha_0+\alpha_1+\alpha_9+\alpha_{1,9}+\frac{1}{r}\log(\epsilon)$
-#    + 16th century: $\log(T_{16th,Dalai}) = \alpha_0+\alpha_2+\alpha_9+\alpha_{2,9}+\frac{1}{r}\log(\epsilon)$
-#    + 17th century: $\log(T_{17th,Dalai}) = \alpha_0+\alpha_3+\alpha_9+\alpha_{3,9}+\frac{1}{r}\log(\epsilon)$
-#    + 18th century: $\log(T_{18th,Dalai}) = \alpha_0+\alpha_4+\alpha_9+\alpha_{4,9}+\frac{1}{r}\log(\epsilon)$
-#    + 19th century: $\log(T_{19th,Dalai}) = \alpha_0+\alpha_5+\alpha_9+\alpha_{5,9}+\frac{1}{r}\log(\epsilon)$
-#    + 20th century: $\log(T_{20th,Dalai}) = \alpha_0+\alpha_6+\alpha_9+\alpha_{6,9}+\frac{1}{r}\log(\epsilon)$
-
-leader_vec <- c("Born in 14th Century","Born in 15th Century", "Born in 16th Century", "Born in 17th Century", "Born in 18th Century", "Born in 19th Century", "Born in 20th Century")
-alpha_vals<- c(0, coef_alpha[2,3] + coef_alpha[13,3], coef_alpha[3,3]+coef_alpha[16,3], coef_alpha[4,3]+coef_alpha[19,3], coef_alpha[5,3]+coef_alpha[23,3], coef_alpha[6,3]+coef_alpha[27,3],coef_alpha[7,3]+coef_alpha[31,3])
-multiplicative_factor <- round(exp(alpha_vals),2)
-perc_increase <- round(100*(multiplicative_factor-1),1)
-
-Dalai_diff_time <- data.frame(leader_vec) %>%
-  mutate("Dalai Lama" = leader_vec,
-         "Multiplicative Factor" = multiplicative_factor,
-         "% Increase / Decrease in Lifespan" = perc_increase) %>%
-  select("Dalai Lama","Multiplicative Factor","% Increase / Decrease in Lifespan")
-kable(Dalai_diff_time)
-```
-
 - Different leaders born in the 18th and 19th centuries
 
 The two tables below highlight that the effect of birth year century is depend on leader types. Popes born in the 18th and 19th centuries are expected to live longer than other leaders born in the same century. If born in the 18th century, a U.S. president and a Chinese emperor are expected to enjoy comparable lifespans as a Pope. However, if born in the 19th century instead, the expected lifespans of a U.S. president and a Chinese emperor are significantly shorter than that of a Pope (`r (-1)*diff_leaders_20[2,3]`% and `r (-1)*diff_leaders_20[3,3]`% shorter respectively). 
@@ -1047,7 +1020,7 @@ diff_leaders_20 <- data.frame(leader_vec) %>%
 kable(diff_leaders_20,1)
 ```
 
-The table below shows the estimate and 95% credible interval (the bounds are the 2.5% quantile and 97.5% quantile) for all 10 living leaders in the dataset.
+More examples of the interpretation of coeffients are in Appendix A.3. The table below shows the estimate and 95% credible interval (the bounds are the 2.5% quantile and 97.5% quantile) for all 10 living leaders in the dataset.
 
 ```{r, ci-table-all-living-leaders, echo = F}
 
@@ -1861,11 +1834,37 @@ $$+ \beta_{10} ((Year \ of \ Birth_i)^2 * (Leadership_i = UsPres)) + + \beta_{11
 $$+ \beta_{12} ((Year \ of \ Birth_i)^2 * (Leadership_i = DalaiLama)) + + \beta_{13} ((Year \ of \ Birth_i)^2 * (Leadership_i = JapanEmp)) \\$$
 where $Leadership_i$ = $Pope$ is the baseline for comparison. 
 
-## A.3 Model Output (the alphas)
+## A.3 Model Output And More Interpretation Examples
 ```{r echo=F}
 kable(diff_leaders_20,1)
 ```
 
+- Dalai Lamai born in different centuries
+
+The percentage increase in lifespan becomes generally more negative, which means later born Dalai Lamas are expected to live shorter, confirming the negative correlation between lifespan and birth year exihibited in Figure 1 of section II.b EDA. The Dalai Lama born in the 20th century, however, is expected to live abnormally longer than the 1st Dalai Lama born in the 14th century, due to the extremely large point estimate of $\alpha_{6,9}$ that corresponds to the interaction between born in the 20th century and being a Dalai Lama. As explained earlier, this might be because there is only one Dalai Lama born in the 20th century and he is censored. 
+    
+```{r, echo=F}
+
+#    + 14th century: $\log(T_{14th,Dalai}) = \alpha_0+\alpha_9+\frac{1}{r}\log(\epsilon)$
+#    + 15th century: $\log(T_{15th,Dalai}) = \alpha_0+\alpha_1+\alpha_9+\alpha_{1,9}+\frac{1}{r}\log(\epsilon)$
+#    + 16th century: $\log(T_{16th,Dalai}) = \alpha_0+\alpha_2+\alpha_9+\alpha_{2,9}+\frac{1}{r}\log(\epsilon)$
+#    + 17th century: $\log(T_{17th,Dalai}) = \alpha_0+\alpha_3+\alpha_9+\alpha_{3,9}+\frac{1}{r}\log(\epsilon)$
+#    + 18th century: $\log(T_{18th,Dalai}) = \alpha_0+\alpha_4+\alpha_9+\alpha_{4,9}+\frac{1}{r}\log(\epsilon)$
+#    + 19th century: $\log(T_{19th,Dalai}) = \alpha_0+\alpha_5+\alpha_9+\alpha_{5,9}+\frac{1}{r}\log(\epsilon)$
+#    + 20th century: $\log(T_{20th,Dalai}) = \alpha_0+\alpha_6+\alpha_9+\alpha_{6,9}+\frac{1}{r}\log(\epsilon)$
+
+leader_vec <- c("Born in 14th Century","Born in 15th Century", "Born in 16th Century", "Born in 17th Century", "Born in 18th Century", "Born in 19th Century", "Born in 20th Century")
+alpha_vals<- c(0, coef_alpha[2,3] + coef_alpha[13,3], coef_alpha[3,3]+coef_alpha[16,3], coef_alpha[4,3]+coef_alpha[19,3], coef_alpha[5,3]+coef_alpha[23,3], coef_alpha[6,3]+coef_alpha[27,3],coef_alpha[7,3]+coef_alpha[31,3])
+multiplicative_factor <- round(exp(alpha_vals),2)
+perc_increase <- round(100*(multiplicative_factor-1),1)
+
+Dalai_diff_time <- data.frame(leader_vec) %>%
+  mutate("Dalai Lama" = leader_vec,
+         "Multiplicative Factor" = multiplicative_factor,
+         "% Increase / Decrease in Lifespan" = perc_increase) %>%
+  select("Dalai Lama","Multiplicative Factor","% Increase / Decrease in Lifespan")
+kable(Dalai_diff_time)
+```
 
 ## A.3 Code for Sensitivity Analysis
 
