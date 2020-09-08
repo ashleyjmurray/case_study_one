@@ -124,7 +124,7 @@ To handle censored observations, we specify their contribution to the likelihood
 
 We assume that our priors are independent because intuitively a given observation could not be two types of leaders. Additionally, we do not have sufficiently strong prior knowledge about the relationship between birth year and type of leadership to specify an informative prior. Therefore, we use uninformative priors for the betas in our model, in which we chose normal betas with mean 0 and precision 1.0E-3, this includes the coefficients and the intercept in our model.
 
-For our prior for r, we chose a prior of $r \sim exp(0.1)$, as we believe the hazard of death increases with time. This is supported by the fact that older people have higher risk of mortality. For example, in the European Union in 2016, 82.9% of all deaths happened among people over 65. Within the Appendix A.3, different Weibull distributions are plotted with different values of $r$ in order to showcase the fact that $r \sim exp(0.1)$ gives an increasing rate of hazard, as the shape of the Weibull Distribution starts to have an increasing level of density toward the upper $x$ values for $r \sim exp(0.1)$, compared to smaller values of $r$. 
+For our prior for r, we chose a prior of $r \sim exp(0.1)$, as we believe the hazard of death increases with time. This is supported by the fact that older people have higher risk of mortality. For example, in an article by Eurostat, in the European Union in 2016, 82.9% of all deaths happened among people over 65. Within the Appendix A.4, different Weibull distributions are plotted with different values of $r$ in order to showcase the fact that $r \sim exp(0.1)$ gives an increasing rate of hazard, as the shape of the Weibull Distribution starts to have an increasing level of density toward the upper $x$ values for $r \sim exp(0.1)$, compared to smaller values of $r$. 
 
 ```{r, include=F}
 # create dummy variables
@@ -1724,6 +1724,7 @@ This model could be improved by including more predictors; for example, health v
 
 Stander, J., Dalla Valle, L., and Cortina-Borja, M. (2018). A Bayesian Survival Analysis of a Historical Dataset: How Long Do Popes Live? The American Statistician 72(4):368-375.
 
+Causes of death statistics - people over 65. (n.d.). Retrieved September 08, 2020, from https://ec.europa.eu/eurostat/statistics-explained/index.php?title=Causes_of_death_statistics_-_people_over_65
 
 
 # VIII. Appendix
@@ -1850,7 +1851,7 @@ ggplot(sa_df_plot) + geom_density(aes(x = sa_df_plot[,1])) +
 
 ```{r}
 par(mfrow=c(2,2))
-curve(dweibull(x, shape=0.3, scale = 1), from=0, to=4, main = 'Weibull Distribution (shape = 0.3, scale = 1)')
+curve(dweibull(x, shape=0.1, scale = 1), from=0, to=4, main = 'Weibull Distribution (shape = 0.3, scale = 1)')
 curve(dweibull(x, shape=0.5, scale = 1), from=0, to=4, main = 'Weibull Distribution (shape = 0.5, scale = 1)')
 curve(dweibull(x, shape=0.8, scale = 1), from=0, to=4, main = 'Weibull Distribution (shape = 0.8, scale = 1)')
 curve(dweibull(x, shape=1, scale = 1), from=0, to=4, main = 'Weibull Distribution (shape = 1, scale = 1)')
