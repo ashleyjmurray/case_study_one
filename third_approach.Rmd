@@ -966,7 +966,7 @@ JapanEmp_diff_time <- data.frame(leader_vec) %>%
          "Multiplicative Factor" = multiplicative_factor,
          "% Increase / Decrease in Lifespan" = perc_increase) %>%
   select("Japanese Emperor","Multiplicative Factor","% Increase / Decrease in Lifespan")
-kable(JapanEmp_diff_time)
+kable(JapanEmp_diff_time, caption = "Change in Lifespan by Birth Century for Japan Emperors")
 ```
 Surprisingly, the model suggests that longevity doesn't always increase with calendar time. The biggest increase in lifespan is in the 20th century, where the expected lifespan of a Japanese emperor increases by `r JapanEmp_diff_time[7,3]`% compared to a Japanese emperor born 6 centuries ago. This might make sense, given the last century saw the biggest number of technological breakthroughs and improvement in healthcare.   
 
@@ -990,7 +990,7 @@ Dalai_diff_time <- data.frame(leader_vec) %>%
          "Multiplicative Factor" = multiplicative_factor,
          "% Increase / Decrease in Lifespan" = perc_increase) %>%
   select("Dalai Lama","Multiplicative Factor","% Increase / Decrease in Lifespan")
-kable(Dalai_diff_time)
+kable(Dalai_diff_time, caption = "Change in Lifespan by Birth Century for Dalai Lamas")
 ```
 
 - Different leaders born in the 18th and 19th centuries
@@ -1017,7 +1017,7 @@ diff_leaders_18 <- data.frame(leader_vec) %>%
          "Multiplicative Factor" = multiplicative_factor,
          "% Increase / Decrease in Lifespan" = perc_increase) %>%
   select("Leaders born in 18th Century","Multiplicative Factor","% Increase / Decrease in Lifespan")
-kable(diff_leaders_18)
+kable(diff_leaders_18, caption = "Change in Lifespan by Leader Type for Leaders Born in the 18th Century")
 ```
   
 
@@ -1040,7 +1040,7 @@ diff_leaders_20 <- data.frame(leader_vec) %>%
          "Multiplicative Factor" = multiplicative_factor,
          "% Increase / Decrease in Lifespan" = perc_increase) %>%
   select("Leaders born in 19th Century","Multiplicative Factor","% Increase / Decrease in Lifespan")
-kable(diff_leaders_20,1)
+kable(diff_leaders_20,1, caption = "Change in Lifespan by Leader Type for Leaders Born in 19th Century")
 ```
 
 Popes born in the 18th and 19th centuries are expected to live longer than other leaders born in the same century. If born in the 18th century, a U.S. president and a Chinese emperor are expected to enjoy comparable lifespans as a Pope. However, if born in the 19th century instead, the expected lifespans of a U.S. president and a Chinese emperor are significantly shorter than that of a Pope (`r (-1)*diff_leaders_20[2,3]`% and `r (-1)*diff_leaders_20[3,3]`% shorter respectively). More examples of the interpretation of coeffients are in Appendix A.3. 
@@ -1062,7 +1062,7 @@ coef <- output %>%
          "97.5% Quantile" = output$X97.5.
          ) %>%
   select("Variable", "Mean", "Standard Deviation", "2.5% Quantile","Median", "97.5% Quantile") 
-kable(coef, digits = 1)
+kable(coef, digits = 1, caption = "Predicted Lifespans for all Living Leaders")
 ```
 
 ## V b. Posterior Inference for Selected Leaders
