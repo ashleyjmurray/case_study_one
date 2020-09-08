@@ -100,9 +100,21 @@ We use survival analysis as a way to model $T_i$, the lifespan of a given leader
 
 We model the lifespan $T_i$ of an individual $i$ after the Weibull distribution specified below. We choose to use the Weibull distribution because it is often utilized in survival analysis and allows the user to specify a flexible shape parameter for the distribution. The first parameter $r$, also known as the shape parameter, is a positive scalar, and the second parameter $\mu$, the scale parameter, is a linear function of the covariates (in this case, the century of the birth year and types of leadership as well as their interactions). 
 
-$$T_i \sim Weibull(r, \mu_i) \\$$
+$$
+T_i \sim Weibull(r, \mu_i) \\
+$$
 
-$$\log(\mu_i) = \beta_0+ \sum_{j = 1, \cdots, 6} \beta_j I(Birth \ Century_i = j)+ \sum_{k = 7, \cdots, 10}\beta_k I(Leadership_i = k) \\ + \sum_{j = 4, \cdots, 6,\ k = 7}\beta_{j,k} I(Birth \ Century_i = j)*I(Leadership_i = k)  \\ + \sum_{j = 1, \cdots, 6,\ k = 8, \cdots, 10}\beta_{j,k} I(Birth \ Century_i = j)*I(Leadership_i = k)$$
+$$
+\log(\mu_i) = \beta_0+ \sum_{j = 1, \cdots, 6} \beta_j I(Birth \ Century_i = j)+ \sum_{k = 7, \cdots, 10}\beta_k I(Leadership_i = k)
+$$
+
+$$
++ \sum_{j = 4, \cdots, 6,\ k = 7}\beta_{j,k} I(Birth \ Century_i = j)*I(Leadership_i = k) 
+$$
+
+$$
++ \sum_{j = 1, \cdots, 6,\ k = 8, \cdots, 10}\beta_{j,k} I(Birth \ Century_i = j)*I(Leadership_i = k)
+$$
 
 where the indicator functions $Birth \ Century_i = 1, \cdots, 6$ corresponds to a leader $i$ born in the 15th, 16th, 17th, 18th, 19th and 20th century respectively. The 14th century is the baseline for comparison. $Leadership_i = 7, \cdots, 10$ corresponds to a leader $i$ being a U.S. President, a Chinese Emperor, a Dalai Lamai and a Japanese Emperor respectively. $Leadership_i$ uses Pope as the baseline for comparison. $\beta_{j,k}$ is the parameter for the interaction effect between brith year century $j$ and leadership type $k$. 
 
@@ -876,8 +888,13 @@ model_output = run_model(priors, "model_used_in_paper")
 
 As Stander et al (2018) pointed out, following this Weibull distribution, $\log(T) = \frac{1}{r}(\mu)+\frac{1}{r}(\epsilon)$, or
 
-$$\log(T) \sim -\frac{1}{r} (\beta_0 + \beta_1x_1+\cdots+\beta_6x_6+\beta_7x_7+\cdots\beta_{10}x_{10}+\beta_{1,8}x_1x_8+\cdots+\beta_{6,10}x_6x_{10}) +\frac{1}{r}\log(\epsilon) \\
-\ \ \ \ \ \ \ \ \ \ \ \ \ \ = \alpha_0 + \alpha_1x_1+\cdots+\alpha_6x_6+\alpha_7x_7+\cdots\alpha_{10}x_{10}+\alpha_{1,8}x_1x_8+\cdots+\alpha_{6,10}x_6x_{10}) +\frac{1}{r}\log(\epsilon)$$
+$$
+\log(T) \sim -\frac{1}{r} (\beta_0 + \beta_1x_1+\cdots+\beta_6x_6+\beta_7x_7+\cdots\beta_{10}x_{10}+\beta_{1,8}x_1x_8+\cdots+\beta_{6,10}x_6x_{10})+\frac{1}{r}\log(\epsilon) \\
+$$
+
+$$
+= \alpha_0 + \alpha_1x_1+\cdots+\alpha_6x_6+\alpha_7x_7+\cdots\alpha_{10}x_{10}+\alpha_{1,8}x_1x_8+\cdots+\alpha_{6,10}x_6x_{10}) +\frac{1}{r}\log(\epsilon)
+$$
 
 where $\epsilon \sim exp(1)$ and $\epsilon > 0$. $\alpha = -\beta/r$ is thus a monotone transformation of $\beta$. $x_1,\cdots,x_6$ are indicator values (i.e., 0s and 1s) corresponding to birth year's century, and $x_7,\cdots,x_{10}$ are indicator values corresponding to types of leadership.
 
@@ -1544,20 +1561,20 @@ priors6 = "
 sensitivity_6 <- run_model(priors6, "sensitivity6")
 ```
 
-```{r, sensitivity-analysis, warning = F, fig.width=10, fig.height = 5, echo = F}
+```{r, sensitivity-analysis, warnings = F, fig.width=10, fig.height = 5, echo = F}
 parameter = "beta_6"
 sa1 = data.frame(sensitivity_1$BUGSoutput$sims.matrix) %>%
-  select(parameter)
+  select(all_of(parameter))
 sa2 = data.frame(sensitivity_2$BUGSoutput$sims.matrix) %>%
-  select(parameter)
+  select(all_of(parameter))
 sa3 = data.frame(sensitivity_3$BUGSoutput$sims.matrix) %>%
-  select(parameter)
+  select(all_of(parameter))
 sa4 = data.frame(sensitivity_4$BUGSoutput$sims.matrix) %>%
-  select(parameter)
+  select(all_of(parameter))
 sa5 = data.frame(sensitivity_5$BUGSoutput$sims.matrix) %>%
-  select(parameter)
+  select(all_of(parameter))
 sa6 = data.frame(sensitivity_6$BUGSoutput$sims.matrix) %>%
-  select(parameter)
+  select(all_of(parameter))
 
 sa_df = data.frame(vals = rbind(sa1, sa2, sa3, sa4, sa5, sa6),
                    type = c(rep("r~Exp(0.001), B~N(0,1)", nrow(sa1)),
