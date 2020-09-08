@@ -65,25 +65,25 @@ leaders_data$Birth.Year <- year(leaders_data$Birth.Date)
 
 ## II b. Exploratory Data Analysis
 
-```{r, fig.height = 4, fig.wdith=5, echo=F,message=FALSE}
-ggplot(data=leaders_data, aes(x=Birth.Year, y = Age.Event, color = Type)) +
+```{r, fig.height = 4, fig.wdith=10, echo=F,message=FALSE}
+p1 <- ggplot(data=leaders_data, aes(x=Birth.Year, y = Age.Event, color = Type)) +
   geom_point() + geom_smooth(method="lm", se = F) + 
   ggtitle("Figure 1: Birth Year vs. Lifespan by Leadership Types") + 
   labs(x = "Birth Year", y = "Age of Death/Censorship")
 
                        #This histogram shows the posterior predictive distribution of the", "difference in lifespan (14th Dalai Lama - Pope Francis).", sep = "\n"))
+
+p2 <- ggplot(data = leaders_data) +
+  geom_boxplot(aes(x = Type, y = Age.Event)) + 
+  ggtitle("Figure 2: Distribution of Leader Survival Time") + 
+  labs(x = "Type of Leader", y = "Age of Death/Censorship")
+
+grid.arrange(p1, p2,, ncol=2)
 ```
 
 Based on Figure 1, it appears that birth year's association with lifespan does depend on type of leadership. In particular, Dalai Lamas' lifespans are negatively correlated with birth year, whereas the rest of the leader types have positive correlations with birth year. 
 
-```{r, fig.height=2.5, fig.width=5,echo=F}
-ggplot(data = leaders_data) +
-  geom_boxplot(aes(x = Type, y = Age.Event)) + 
-  ggtitle("Figure 2: Distribution of Leader Survival Time") + 
-  labs(x = "Type of Leader", y = "Age of Death/Censorship")
-```
-
-```{r, fig.height=5, fig.width=9,echo=F}
+```{r, fig.height=3, fig.width=9,echo=F}
 ggplot(data = leaders_data) +
   geom_histogram(aes(x = Age.Event), binwidth = 5) + 
   ggtitle("Figure 3: Distribution of Age of Death/Censorshiop by Leadership Types") + 
@@ -1203,20 +1203,20 @@ diff = Ts - meanTs
 sd = sqrt((1/n)*(sum((diff)^2)) * (1+ (1/n) + (diff)^2/sum((diff)^2)))
 ```
 
-```{r resid-v-predictor, fig.height=2, fig.width=5, echo = FALSE}
-ggplot(data = leaders_nopred, aes(x = Ts, y = resid/sd)) + geom_point() + 
-  labs(x = "Predicted Lifespan", y = "Standardized Residual", 
-       title = "Figure 5: Residual Plots")
+```{r resid-v-year, fig.height=4, fig.width10, echo = FALSE}
+
+p1 <- ggplot(data = leaders_nopred, aes(x = Ts, y = resid/sd)) + geom_point() + 
+  labs(x = "Predicted Lifespan")
+
+p2 <- ggplot(data = leaders_nopred, aes(x = Birth.Year, y = resid/sd)) + geom_point() +
+  labs(x = "Birth Year")
+
+grid.arrange(p1, p2, left = "Standardized Residual", ncol=2,
+             top ="Figure 5: Residual Plots")
 ```
 
-```{r resid-v-year, fig.height=2, fig.width=5, echo = FALSE}
-ggplot(data = leaders_nopred, aes(x = Birth.Year, y = resid/sd)) + geom_point() +
-  labs(x = "Birth Year", y = "Standardized Residual")
-```
 
-The standardized residual plot for predicted lifespan shows some patterning. *It appears that our model tends to overpredict lifespan compared to what was actually observed in many cases.* This might be due to the fact that we only have two predictors, Birth Year and Type of Leader. Therefore, we are missing information that might help predict whether or not a leader will die earlier, for example if they have some underlying health condition, etc. However, 
-
-The standardized residuals when plotted against Birth Year show random scattering, however, and this means that our model is not over or underpredicting lifespan according to the year a leader was born.
+The standardized residuals plotted against birth year are randomly scattered, showing that our model doesn't systematically over- or under-predict lifespan based on birth year. The standardized residuals vs. predicted lifespan are all still fairly randomly scattered, however there might be some trending for predicted lifespans greater than 75. We tried several different model fits, including using age as a continuous variable and using polynomial transformations, and our choice of using binned age as opposed to one of these transformations gave us the best residual plot. Some of this trending that is left over might be because we do not have enough predictors in our model. It is also worth pointing out that we have a few standardized residuals above 2 and below -2, meaning we might have some outliers. However, none of them cross the 3 or -3 threshold, so none of them are extreme outliers.
 
 In order to perform posterior predictive checks, ten simulated datasets were created by first extracting the leaders that were non-censored. There were ten different iterations that performed the same task: every single row of the non-censored leaders and a random sample of the model parameters (from the MCMC chain) was used to define a set of $\mu$'s, and those $\mu$'s were used to simulate a set of lifespans from the Weibull distribution.
 
