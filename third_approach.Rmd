@@ -1260,9 +1260,7 @@ d[sapply(d, is.infinite)] <- 100 #set all of the Inf values to the upper truncat
 ```
 
 ```{r, echo=F, warning = F}
-#Scatterplot showing Birth Year of the Leaders versues their Age
-df2 <- data.frame(a = c(d[,1], d[,2], d[,3], d[,4], d[,5], d[,6], d[,7], d[,8], d[,9], d[,10]))
-df2$b <- c(non_censored_prediction[,"Birth.Year"], non_censored_prediction[,"Birth.Year"], non_censored_prediction[,"Birth.Year"], non_censored_prediction[,"Birth.Year"], non_censored_prediction[,"Birth.Year"], non_censored_prediction[,"Birth.Year"], non_censored_prediction[,"Birth.Year"], non_censored_prediction[,"Birth.Year"], non_censored_prediction[,"Birth.Year"], non_censored_prediction[,"Birth.Year"])
+#density distribution of the ten simulations + the actual non-censored data
 data <- non_censored_prediction %>%
   select(Age.Event)
 new <- seq(1, 167, by=1)
