@@ -139,7 +139,7 @@ To handle censored observations, we specify their contribution to the likelihood
 
 We assume that our priors are independent because intuitively a given observation could not be two types of leaders. Additionally, we do not have sufficiently strong prior knowledge about the relationship between birth year and type of leadership to specify an informative prior. Therefore, we use uninformative priors for the betas in our model, in which we chose normal betas with mean 0 and precision 1.0E-3, this includes the coefficients and the intercept in our model.
 
-For our prior for r, we chose a prior of $r \sim exp(0.1)$, as we believe the hazard of death increases with time. This is supported by the fact that older people have higher risk of mortality. For example, in an article by Eurostat, in the European Union in 2016, 82.9% of all deaths happened among people over 65. Within the Appendix A.4, different Weibull distributions are plotted with different values of $r$ in order to showcase the fact that $r \sim exp(0.1)$ gives an increasing rate of hazard, as the shape of the Weibull Distribution starts to have an increasing level of density toward the upper $x$ values for $r \sim exp(0.1)$, compared to smaller values of $r$. 
+For our prior for r, we chose a prior of $r \sim exp(0.1)$, as we believe the hazard of death increases with time. This is supported by the fact that older people have higher risk of mortality. For example, in an article by Eurostat, in the European Union in 2016, 82.9% of all deaths happened among people over 65. Within the Appendix A.5, different Weibull distributions are plotted with different values of $r$ in order to showcase the fact that $r \sim exp(0.1)$ gives an increasing rate of hazard, as the shape of the Weibull Distribution starts to have an increasing level of density toward the upper $x$ values for $r \sim exp(0.1)$, compared to smaller values of $r$. 
 
 ```{r, include=F}
 # create dummy variables
@@ -1166,7 +1166,7 @@ grid.arrange(p1, p2, left = "Density", ncol=2,
              top ="Figure 4: Posterior Distribution Density Plots")
 ```
 
-Figure 4 depicts the posterior distribution of the probability that Dalai Lama outlives Pope Francis, and that Obama outlives Emperor Naruhito. The probability that the 14th Dalai Lama will have a longer lifespan than Pope Francis is `r round(mean(DalaivFrancis$pdp),2)` with a 95% confidence interval of (`r round(quantile(DalaivFrancis$pdp, 0.025),2)`, `r round(quantile(DalaivFrancis$pdp, 0.975),2)`). The probability that President Obama will have a longer lifespan than Emperor Naruhito is `r round(mean(ObamavNaruhito$pdp),2)` with a 95% confidence interval of (`r round(quantile(ObamavNaruhito$pdp, 0.025),2)`, `r round(quantile(ObamavNaruhito$pdp, 0.975),2)`). For histograms on the posterior predictive distribution of lifespans for the 4 leaders, see Appendix A.5.
+Figure 4 depicts the posterior distribution of the probability that Dalai Lama outlives Pope Francis, and that Obama outlives Emperor Naruhito. The probability that the 14th Dalai Lama will have a longer lifespan than Pope Francis is `r round(mean(DalaivFrancis$pdp),2)` with a 95% confidence interval of (`r round(quantile(DalaivFrancis$pdp, 0.025),2)`, `r round(quantile(DalaivFrancis$pdp, 0.975),2)`). The probability that President Obama will have a longer lifespan than Emperor Naruhito is `r round(mean(ObamavNaruhito$pdp),2)` with a 95% confidence interval of (`r round(quantile(ObamavNaruhito$pdp, 0.025),2)`, `r round(quantile(ObamavNaruhito$pdp, 0.975),2)`). For histograms on the posterior predictive distribution of lifespans for the 4 leaders, see Appendix A.6.
 
 ## V c. MCMC and Model Diagnostics 
 
@@ -1612,7 +1612,7 @@ ggplot(sa_df_plot) + geom_density(aes(x = beta_6)) +
   theme(plot.caption = element_text(hjust = 0.5, vjust = -0.5, size = 12))
 ``` 
 
-We tested $N(0,1)$ and $N(0,10000)$ priors for the $\beta$s and $Exp(0.001)$ (Stander et al prior), $Gamma(10,10)$ (mean = 1), and $Gamma(10,100)$ (mean = 0.1) priors for $r$. Distribution of $\beta_6$ was approximated using those different priors and plotted above. The blue line, which is the estimate for $\beta_6$ from our model, crosses (or is close to) the mode of all but one of the distributions, so our analysis is mostly robust against changes in prior. However, it is somewhat sensitive to the prior combination of $r \sim Gamma(10,1000)$ and $\beta_6 \sim N(0,1)$ Code to conduct sensitivity analysis for the remaining betas can be found in Appendix A.3.
+We tested $N(0,1)$ and $N(0,10000)$ priors for the $\beta$s and $Exp(0.001)$ (Stander et al prior), $Gamma(10,10)$ (mean = 1), and $Gamma(10,100)$ (mean = 0.1) priors for $r$. Distribution of $\beta_6$ was approximated using those different priors and plotted above. The blue line, which is the estimate for $\beta_6$ from our model, crosses (or is close to) the mode of all but one of the distributions, so our analysis is mostly robust against changes in prior. However, it is somewhat sensitive to the prior combination of $r \sim Gamma(10,1000)$ and $\beta_6 \sim N(0,1)$ Code to conduct sensitivity analysis for the remaining betas can be found in Appendix A.4.
 
 # VII. Cross Validation
 
@@ -1867,7 +1867,11 @@ $$+ \beta_{10} ((Year \ of \ Birth_i)^2 * (Leadership_i = UsPres)) + + \beta_{11
 $$+ \beta_{12} ((Year \ of \ Birth_i)^2 * (Leadership_i = DalaiLama)) + + \beta_{13} ((Year \ of \ Birth_i)^2 * (Leadership_i = JapanEmp)) \\$$
 where $Leadership_i$ = $Pope$ is the baseline for comparison. 
 
-*add resid code here*
+## A.3 Model Output (the alphas)
+```{r echo=F}
+kable(diff_leaders_20,1)
+```
+
 
 ## A.3 Code for Sensitivity Analysis
 
@@ -1910,7 +1914,7 @@ ggplot(sa_df_plot) + geom_density(aes(x = sa_df_plot[,1])) +
   theme(plot.caption = element_text(hjust = 0.5, vjust = -0.5, size = 4))
 ```
 
-## A.4 Weibull Distributions with Differing r Values
+## A.5 Weibull Distributions with Differing r Values
 
 ```{r echo = FALSE}
 par(mfrow=c(2,2))
@@ -1920,7 +1924,7 @@ curve(dweibull(x, shape=0.8, scale = 1), from=0, to=4, main = 'Weibull Distribut
 curve(dweibull(x, shape=1, scale = 1), from=0, to=4, main = 'Weibull Distribution (shape = 1, scale = 1)')
 ```
 
-## A.5 Histograms of Posterior Predictive Distribution for Lifespan of the 4 Selected Leaders
+## A.6 Histograms of Posterior Predictive Distribution for Lifespan of the 4 Selected Leaders
 
 ```{r, francis-dalai, message = F, fig.height=5, fig.width=10, echo = FALSE}
 people = c("age_Francis_predictive", "age_Obama_predictive", "age_Dalai_predictive",
