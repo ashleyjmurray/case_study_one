@@ -1259,7 +1259,7 @@ colnames(fun) <- c("Simulation_Number_or_the_Actual_Data", "Age")
 ggplot(aes(x = Age, group = Simulation_Number_or_the_Actual_Data, color = Simulation_Number_or_the_Actual_Data), data = fun) + geom_density(alpha = .2) + xlab("Age") + guides(color = guide_legend(title = 'Simulation Number or the Actual Data')) + ggtitle("Posterior Predictive Checks Density Plot")
 ```
 
-In order to perform posterior predictive checks, a simulated dataset was created by first extracting the leaders that were non-censored. There was ten different iterations that performed the same task: every single row of the non-censored leaders put into our defined Weibull posterior model alongside the random sample from the JAGS model output. These simulations were put into a matrix, and one of the simulated datasets (of which ten were created total) is displayed in the Histogram of Distribution of One Simulated Dataset. 
+In order to perform posterior predictive checks, a simulated dataset was created by first extracting the leaders that were non-censored. There were ten different iterations that performed the same task: every single row of the non-censored leaders were put into our defined Weibull posterior model alongside a random sample from the JAGS model output. 
 
 The Posterior Predictive Checks Density Plot showcases the curvatures of the ten different simulations done in the posterior predictive checks and how they relate to the actual age of the non-censored individuals. There appears to be a peak within the non-censored individuals at around 70, but most of the simulations are seeing a peak at 100.For the posterior predictive checks, it appears that our model returns values that are more concentrated around the upper truncation limit, which is why the dataframe's Inf values are encoded as 100 (the upper truncation limit defined in our function). This follows what the standardized residuals found, where most of the values from the model are left-skewed, and the posterior predictive checks is showing that a lot of the leaders are being predicted to having a larger lifespan.
 
@@ -1712,7 +1712,7 @@ We sought to perform external cross-validation on our model. The data that we us
 
 # VI. Conclusion and Further Discussion
 
-We sought to compare Popes, US Presidents, Dalai Lamas, Chinese Emperors, and Japanese Emperors to see how their lifespans compare. Our model has found that the impact of birth year on lifespan does not change based on leadership type. Additionally, our model has found that lifespan does depend on year of birth, but the association is not strong. 
+We sought to compare Popes, US Presidents, Dalai Lamas, Chinese Emperors, and Japanese Emperors to see how their lifespans compare. Our model has found that the impact of birth year on lifespan does not change based on leadership type. Additionally, our model has found that lifespan does depend on year of birth, but the association is not strong.
 
 One limitation worth noting is that our data does not include election year, so we have no way to control for the fact that Presidents and Popes must have a minimum lifespan. On the other hand, Dalai Lamas can be chosen close to birth and thus have a younger death date. 
 
