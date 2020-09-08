@@ -1610,7 +1610,7 @@ We tested $N(0,1)$ and $N(0,10000)$ priors for the $\beta$s and $Exp(0.001)$ (St
 
 # VII. Cross Validation
 
-```{r}
+```{r include = F}
 #read data
 monarchs <- read.csv("english_monarchs.csv", header = FALSE)
 monarchs$Age <- as.numeric(monarchs$V3) - as.numeric(monarchs$V2)
@@ -1618,21 +1618,21 @@ monarchs <- monarchs %>%
   filter(V2 >= 1300)
 ```
 
-```{r}
+```{r include = F}
 monarchs$Age[monarchs$V1 == "Elizabeth II"] <- 94
 ```
 
-```{r}
+```{r include = F}
 monarchs$Censored <- 0
 monarchs$Censored[monarchs$V1 == "Elizabeth II"] <- 1
 ```
 
-```{r}
+```{r include = F}
 monarchs$survival <- monarchs$Age
 monarchs$survival[monarchs$V1 == "Elizabeth II"] <- NA
 ```
 
-```{r}
+```{r include = F}
 monarchs$TypeJapanEmp <- 1
 monarchs <- monarchs %>%
   mutate(Yr14 = as.factor(case_when(V2 <= 1400 ~1,
