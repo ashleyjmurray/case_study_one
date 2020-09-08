@@ -83,11 +83,11 @@ ggplot(data = leaders_data) +
   labs(x = "Type of Leader", y = "Age of Death/Censorship")
 ```
 
-```{r, fig.height=5, fig.width=5,echo=F}
+```{r, fig.height=5, fig.width=9,echo=F}
 ggplot(data = leaders_data) +
   geom_histogram(aes(x = Age.Event), binwidth = 5) + 
   ggtitle("Figure 3: Distribution of Age of Death/Censorshiop by Leadership Types") + 
-  labs(x = "Age of Death / Censorship") + facet_wrap(~ Type, ncol = 3)
+  labs(x = "Age of Death / Censorship") + facet_wrap(~ Type)
 ```
 
 From the boxplot (Figure 2), we see that the distribution of the lifespans of Popes and US Presidents is centered higher, which makes intuitive sense given that these leaders are elected later in life, while Dalai Lamas and Emperors can be elected at much younger ages. For instance, if a person is a toddler and dies at age five, that person can never be president (and therefore would not have their age be part of the dataset). However, a person can become a Dalai Lama as a toddler and have their age at death be a lot smaller. These same patterns can also be observed in the histograms in Figure 3. Also, in the histograms, there is no extreme skewing, so it does not appear that transformations are needed. 
