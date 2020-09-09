@@ -15,7 +15,6 @@ World leaders are influential people that have the power to impact millions of p
 
 The rest of the paper is structured as follows. First, we will describe the data used to carry out our analysis. Then, we will discuss the Weibull model and Bayesian framework used to ground our analysis plan. Then, we will show how we carried out our analysis plan and recount our results. After that, we discuss our conclusions and areas for further research. Finally, our code and some additional information can be found in the Appendix. 
 
-
 # II. Data
 
 ## II a. Description of the Data
@@ -894,7 +893,7 @@ The interpretation of coefficients depends on the interaction terms (i.e. both b
 
 ## V a. Output and Interpretation of the Model
 
-Our analysis below will be based on the multiplicative factors, $\alpha$s. Note that since $\alpha = -\beta/r$ is a monotone transformation, if $\beta$ is statistically significant (i.e. 95% credible interval doesn't contain 0), it should be the same for the corresponding $\alpha$. A compete table of the model output can be found in Appendix A.3.
+Our analysis below will be based on the multiplicative factors, $\alpha$s. Note that since $\alpha = -\beta/r$ is a monotone transformation, if $\beta$ is statistically significant (i.e. 95% credible interval doesn't contain 0), it should be the same for the corresponding $\alpha$. A compete table of the model output can be found in Appendix A.4.
 
 ```{r tidy-model-table-alpha, echo = F}
 # table of multiplicative factor (alphas)
@@ -1246,7 +1245,7 @@ d <- data.frame(ysims) #create a dataframe from the ysims matrix
 d[sapply(d, is.infinite)] <- 100 #set all of the Inf values to the upper truncation value as defined in the previous weibull distribution
 ```
 
-```{r, echo=F, warning = F, message=F, fig.width=9, fig.height = 3}
+```{r, echo=F, warning = F, message=F, fig.width=10, fig.height = 4}
 #density distribution of the ten simulations + the actual non-censored data
 data <- non_censored_prediction %>%
   select(Age.Event)
@@ -1851,7 +1850,7 @@ where $Leadership_i$ = $Pope$ is the baseline for comparison.
 
 ## A.3 Model Output And More Interpretation Examples
 ```{r echo=F}
-kable(diff_leaders_20,1)
+kable(coef_alpha, digits = 2)
 ```
 
 - Dalai Lamai born in different centuries
@@ -1881,7 +1880,7 @@ Dalai_diff_time <- data.frame(leader_vec) %>%
 kable(Dalai_diff_time)
 ```
 
-## A.3 Code for Sensitivity Analysis
+## A.4 Code for Sensitivity Analysis
 
 ```{r, sa-reproduce-code}
 # parameter = "beta_6" # change parameter here to run for different betas
