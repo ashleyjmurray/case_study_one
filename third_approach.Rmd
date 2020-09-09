@@ -1755,9 +1755,11 @@ This model could be improved by including more predictors; for example, health v
 
 # VII. References
 
-Stander, J., Dalla Valle, L., and Cortina-Borja, M. (2018). A Bayesian Survival Analysis of a Historical Dataset: How Long Do Popes Live? The American Statistician 72(4):368-375.
-
 Causes of death statistics - people over 65. (n.d.). Retrieved September 08, 2020, from https://ec.europa.eu/eurostat/statistics-explained/index.php?title=Causes_of_death_statistics_-_people_over_65
+
+List of English monarchs. (2020, September 08). Retrieved September 08, 2020, from https://en.wikipedia.org/wiki/List_of_English_monarchs
+
+Stander, J., Dalla Valle, L., and Cortina-Borja, M. (2018). A Bayesian Survival Analysis of a Historical Dataset: How Long Do Popes Live? The American Statistician 72(4):368-375.
 
 
 # VIII. Appendix
