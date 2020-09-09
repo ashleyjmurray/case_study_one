@@ -1981,7 +1981,7 @@ p2=ggplot(dalai, aes(x=plifespans)) +
   theme(plot.title = element_text(hjust = 0.5), axis.title.y = element_blank()) +
   geom_text(mapping = aes(x = 89, y = 0.09, label = dlab), size = 3)
 
-cap = paste("The posterior predictive probability density function of the lifespan for hypothetical leaders with the same attributes as Pope Francis (right) and the 14th Dalai Lama (left).", "The black vertical line marks current age the blue marks posterior median, and the red marks the posterior 95% quantile.", sep = "\n")
+cap = paste("The posterior predictive probability density function of the lifespan for hypothetical leaders with the same attributes as Pope Francis (left) and the 14th Dalai Lama (right).", "The black vertical line marks current age the blue marks posterior median, and the red marks the posterior 95% quantile.", sep = "\n")
 
 grid.arrange(p1,p2, bottom = textGrob(cap, x =0, just = "left", gp = gpar(fontsize = 9) ),
                     left = "Predictive Posterior density", ncol=2)
@@ -2026,7 +2026,7 @@ p2=ggplot(naru, aes(x=plifespans)) +
   theme(plot.title = element_text(hjust = 0.5), axis.title.y = element_blank()) +
   geom_text(mapping = aes(x = 73, y = 0.06, label = nlab), size = 3)
 
-cap = paste("The posterior predictive probability density function of the lifespan for hypothetical leaders with the same attributes as Obama (right) and Emperor", "Naruhito (left). The black vertical line marks current age, the blue marks posterior median, and the red marks the posterior 95% quantile.", sep = "\n")
+cap = paste("The posterior predictive probability density function of the lifespan for hypothetical leaders with the same attributes as Obama (left) and Emperor", "Naruhito (right). The black vertical line marks current age, the blue marks posterior median, and the red marks the posterior 95% quantile.", sep = "\n")
 
 grid.arrange(p1,p2, bottom = textGrob(cap, x =0, just = "left", gp = gpar(fontsize = 10)),
                     left = "Predictive Posterior density", ncol=2)
