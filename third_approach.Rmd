@@ -1202,7 +1202,7 @@ diff = Ts - meanTs
 sd = sqrt((1/n)*(sum((diff)^2)) * (1+ (1/n) + (diff)^2/sum((diff)^2)))
 ```
 
-```{r resid-v-year, fig.height=4, fig.width=10, echo = FALSE}
+```{r resid-v-year, fig.height=3, fig.width=10, echo = FALSE}
 
 p1 <- ggplot(data = leaders_nopred, aes(x = Ts, y = resid/sd)) + geom_point() + 
   labs(x = "Predicted Lifespan")
@@ -1211,7 +1211,7 @@ p2 <- ggplot(data = leaders_nopred, aes(x = Birth.Year, y = resid/sd)) + geom_po
   labs(x = "Birth Year")
 
 grid.arrange(p1, p2, left = "Standardized Residual", ncol=2,
-             top ="Figure 4: Residual Plots", heights=c(2, 2))
+             top ="Figure 4: Residual Plots")
 ```
 
 
@@ -1730,13 +1730,13 @@ p1 = ggplot(data = monarchs, aes(x = Ts, y = resid/sd)) + geom_point() +
   theme(axis.title.y = element_blank()) 
 ```
 
-```{r resid-v-yearcv, fig.height=4, fig.width=10, echo = FALSE}
+```{r resid-v-yearcv, fig.height=3, fig.width=10, echo = FALSE}
 p2 = ggplot(data = monarchs, aes(x = V2, y = resid/sd)) + geom_point() +
   labs(x = "Birth Year") +
   theme(axis.title.y = element_blank()) 
 
 grid.arrange(p1, p2, left = "Standardized Residual", ncol=2,
-             top ="Figure 7: Residual Plots for British Monarchs", heights(2, 2))
+             top ="Figure 7: Residual Plots for British Monarchs")
 ```
 
 As shown in the standardized residuals plots above, the our model didn't do a good job predicting how long British monarchs could live based on their birth year - standardized residuals are very large. In the plot showing Predicted Lifespan and the standardized residuals, it appears to be random. As the birth year of the monarchs increases, there is an upward trend. It seems that our model is overpredicting for leaders in the later centuries. 
