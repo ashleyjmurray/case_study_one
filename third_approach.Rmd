@@ -109,19 +109,19 @@ $$
 + \sum_{j = 1, \cdots, 6,\ k = 8, \cdots, 10}\beta_{j,k} I(Birth \ Century_i = j)*I(Leadership_i = k)
 $$
 
-where the indicator functions $Birth \ Century_i = 1, \cdots, 6$ corresponds to a leader $i$ born in the 15th, 16th, 17th, 18th, 19th and 20th century respectively. The 14th century is the baseline for comparison. $Leadership_i = 7, \cdots, 10$ corresponds to a leader $i$ being a U.S. President, a Chinese Emperor, a Dalai Lamai and a Japanese Emperor respectively. $Leadership_i$ uses Pope as the baseline for comparison. $\beta_{j,k}$ is the parameter for the interaction effect between brith year century $j$ and leadership type $k$. 
+where the indicator functions $Birth \ Century_i = 1, \cdots, 6$ corresponds to a leader $i$ born in the 15th, 16th, 17th, 18th, 19th and 20th century respectively. The 14th century is the baseline for comparison. $Leadership_i = 7, \cdots, 10$ corresponds to a leader $i$ being a U.S. President, a Chinese Emperor, a Dalai Lamai and a Japanese Emperor respectively. $Leadership_i$ uses Pope as the baseline for comparison. $\beta_{j,k}$ is the parameter for the interaction effect between birth year century $j$ and leadership type $k$. 
 
 For example, for Pope Francis who was born in 1963, his birth year century is the 20th century and his leadership type is Pope. $I(Birth \ Century_{Francis} = j)$ will all be 0 except for $j = 6$ (which indicates he was born in the 20th century) and $I(Leadership_i = k)$ will all be 0 since Pope is the baseline for comparison for leadership types. We can write $\log(\mu_{Francis}) = \beta_0 + \beta_6$ for Pope Francis. 
 
 Note that the first U.S. President, George Washington, was born in 1732 (18th century, $j = 4$) and hence the interactions between $Birth \ Century_i= 1,2,3$ (born in the 15th century, 16th century or 17th century) and $Leadership_7$ (being a U.S. President) are meaningless. As such, we didn't include those interaction terms in our model. 
 
-Prior to using this model, we considered a model that used leaders' birth years as a continuous variable instead of binning them into centuries. However, that model resulted in a less desirable model predictive ability as we ran model diagnostics. The residual plot showed a clear trend between residuals and predicted lifespans. Using a quadratic polynomial improved the residuals, but our current model is still superior. Model diagnostics of the current model can be found in section V.c and more details on previous models can be found in the Appendix A.2. 
+Prior to using this model, we considered a model that used leaders' birth years as a continuous variable instead of binning them into centuries. However, that model resulted in a less desirable model predictive ability as we ran model diagnostics. The residual plot showed a clear trend between residuals and predicted lifespans. Using a quadratic polynomial improved the residuals, but our current model is still superior. Model diagnostics of the current model can be found in section V c. and more details on previous models can be found in the Appendix A.2. 
 
 ## III c. Prior Choice
 
 We assume that our priors are independent because intuitively a given observation could not be two types of leaders. Additionally, we do not have sufficiently strong prior knowledge about the relationship between birth year and type of leadership to specify an informative prior. Therefore, we use uninformative priors for the betas in our model, in which we chose normal betas with mean 0 and precision 1.0E-3, this includes the coefficients and the intercept in our model.
 
-For our prior for r, we choose a prior of $r \sim exp(0.1)$, as we believe the hazard of death increases with time. This is supported by the fact that older people have higher risk of mortality. For example, in an article by Eurostat, in the European Union in 2016, 82.9% of all deaths happened among people over 65. Within Appendix A.5, different Weibull distributions are plotted with different values of $r$ in order to showcase the fact that $r \sim exp(0.1)$ gives an increasing rate of hazard, as the shape of the Weibull Distribution starts to have an increasing level of density toward the upper $x$ values for $r \sim exp(0.1)$, compared to smaller values of $r$. 
+For our prior for r, we choose a prior of $r \sim Exp(0.1)$, as we believe the hazard of death increases with time. This is supported by the fact that older people have higher risk of mortality. For example, in an article by Eurostat, in the European Union in 2016, 82.9% of all deaths happened among people over 65. Within Appendix A.5, different Weibull distributions are plotted with different values of $r$ in order to showcase the fact that $r \sim Exp(0.1)$ gives an increasing rate of hazard, as the shape of the Weibull Distribution starts to have an increasing level of density toward the upper $x$ values for $r \sim Exp(0.1)$, compared to smaller values of $r$. 
 
 ```{r, include=F}
 # create dummy variables
@@ -893,7 +893,7 @@ The interpretation of coefficients depends on the interaction terms (i.e. both b
 
 ## V a. Output and Interpretation of the Model
 
-Our analysis below will be based on the multiplicative factors, $\alpha$s. Note that since $\alpha = -\beta/r$ is a monotone transformation, if $\beta$ is statistically significant (i.e. 95% credible interval doesn't contain 0), it should be the same for the corresponding $\alpha$. A compete table of the model output can be found in Appendix A.4.
+Our analysis below will be based on the multiplicative factors, $\alpha$'s. Note that since $\alpha = -\beta/r$ is a monotone transformation, if $\beta$ is statistically significant (i.e. 95% credible interval doesn't contain 0), it should be the same for the corresponding $\alpha$. A compete table of the model output can be found in Appendix A.4.
 
 ```{r tidy-model-table-alpha, echo = F}
 # table of multiplicative factor (alphas)
@@ -1267,7 +1267,7 @@ ggplot(aes(x = Age, group = Simulation_Number_or_the_Actual_Data,
         legend.title = element_text(size = 7))
 ```
 
-Figure 6 showcases the curvatures of the ten different simulations done in the posterior predictive checks and how they relate to the actual age of the non-censored individuals. There appears to be a peak within the non-censored individuals at around 70, but most of the simulations are seeing a peak at near 100. For the posterior predictive checks, it appears that our model returns values that are more concentrated around the upper truncation limit, which is why the dataframe's Inf values are encoded as 100 (the upper truncation limit defined in our function). This follows what the standardized residuals found, where some of the values from the model are left-skewed, and the posterior predictive checks is showing that a lot of the leaders are being predicted to having a larger lifespan.
+Figure 5 showcases the curvatures of the ten different simulations done in the posterior predictive checks and how they relate to the actual age of the non-censored individuals. There appears to be a peak within the non-censored individuals at around 70, but most of the simulations are seeing a peak at near 100. For the posterior predictive checks, it appears that our model returns values that are more concentrated around the upper truncation limit, which is why the dataframe's Inf values are encoded as 100 (the upper truncation limit defined in our function). This follows what the standardized residuals found, where some of the values from the model are left-skewed, and the posterior predictive checks is showing that a lot of the leaders are being predicted to having a larger lifespan.
 
 # VI. Sensitivity Analysis
 
@@ -1588,7 +1588,7 @@ ggplot(sa_df_plot) + geom_density(aes(x = beta_6)) +
         plot.title = element_text(hjust = 0.5))
 ``` 
 
-We tested $N(0,1)$ and $N(0,10000)$ priors for the $\beta$s and $Exp(0.001)$ (Stander et al prior), $Gamma(10,10)$ (mean = 1), and $Gamma(10,100)$ (mean = 0.1) priors for $r$. Distribution of $\beta_6$ was approximated using those different priors and plotted above. The blue line, which is the estimate for $\beta_6$ from our model, crosses (or is close to) the mode of all but one of the distributions, so our analysis is mostly robust against changes in prior. However, it is somewhat sensitive to the prior of $r \sim Gamma(10,100)$, which makes sense since that prior implies a decreasing hazard while we assumed increasing hazard. Code to conduct sensitivity analysis for the remaining betas can be found in Appendix A.3.
+We tested $N(0,1)$ and $N(0,10000)$ priors for the $\beta$'s and $Exp(0.001)$ (Stander et al prior), $Gamma(10,10)$ (mean = 1), and $Gamma(10,100)$ (mean = 0.1) priors for $r$. Distribution of $\beta_6$ was approximated using those different priors and plotted above. The blue line, which is the estimate for $\beta_6$ from our model, crosses (or is close to) the mode of all but one of the distributions, so our analysis is mostly robust against changes in prior. However, it is somewhat sensitive to the prior of $r \sim Gamma(10,100)$, which makes sense since that prior implies a decreasing hazard while we assumed increasing hazard. Code to conduct sensitivity analysis for the remaining betas can be found in Appendix A.4.
 
 # VII. Cross Validation
 
@@ -1726,7 +1726,7 @@ grid.arrange(p1, p2, left = "Standardized Residual", ncol=2,
              top ="Figure 7: Residual Plots for British Monarchs")
 ```
 
-As shown in the standardized residuals plots above, the our model didn't do a good job predicting how long British monarchs could live based on their birth year - standardized residuals are very large. In the plot showing Predicted Lifespan and the standardized residuals, it appears to have a downward trend. As the birth year of the monarchs increases, there is an upward trend. It seems that our model is overpredicting for leaders in the later centuries. 
+As shown in the standardized residuals plots above, the our model didn't do a good job predicting how long British monarchs could live based on their birth year - standardized residuals are very large. In the plot showing Predicted Lifespan and the standardized residuals, it appears to have a downward trend. As the birth year of the monarchs increases, there is an upward trend. It seems that our model is underpredicting for leaders in the later centuries. 
 
 The result, however, is perhaps not surprising to see because British monarchs and Japanese emperors are different types of leaders in different cultures and geographical regions, not to mention our model itself lacks other important variables such as leaders' health conditions, access to healthcare, etc. 
 
