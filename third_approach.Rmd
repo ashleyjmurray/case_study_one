@@ -888,7 +888,7 @@ $$
 
 where $\epsilon \sim exp(1)$ and $\epsilon > 0$. $\alpha = -\beta/r$ is thus a monotone transformation of $\beta$. $x_1,\cdots,x_6$ are indicator values (i.e., 0s and 1s) corresponding to birth year's century, and $x_7,\cdots,x_{10}$ are indicator values corresponding to types of leadership.
 
-The interpretation of coefficients depends on the interaction terms (i.e. both birth year century and the types of leadership). For example, while keeping all else constant, if a Pope was born in the 20th century, he is expected to live longer by a multiplicative factor of $exp(\alpha_6)$ compared to a Pope born in the 14th century, or his lifespan is expected to increase by a percentage of $100*exp(\alpha_6-1)$. If a U.S. President was born in the 18th century, he is expected to live $exp(\alpha_0+\alpha_4+\alpha_7+\alpha_{4,7})$ years; if the president were born in the 20th century instead, he is expected to live $exp(\alpha_0+\alpha_6+\alpha_7+\alpha_{6,7})$ years. In other words, his lifespan is expected to increase by a multiplicative factor of $exp(\alpha_6-\alpha_4+\alpha_{6,7}-\alpha_{4,7})$. If a Chinese Emperor and a Dalai Lama were both born in the 19th century, the Chinese emperor is expected to live longer by a multiplicative factor of $exp(\alpha_8 - \alpha_9 + \alpha_{5,8}-\alpha_{5,9})$ and so on. 
+The interpretation of coefficients depends on the interaction terms (i.e. both birth year century and the types of leadership). For example, while keeping all else constant, if a Pope was born in the 20th century, he is expected to live longer by a multiplicative factor of $exp(\alpha_6)$ compared to a Pope born in the 14th century, or his lifespan is expected to increase by a percentage of $100*exp(\alpha_6-1)$. If a U.S. President was born in the 18th century, he is expected to live $exp(\alpha_0+\alpha_4+\alpha_7+\alpha_{4,7})$ years; if a Chinese Emperor and a Dalai Lama were both born in the 19th century, the Chinese emperor is expected to live longer by a multiplicative factor of $exp(\alpha_8 - \alpha_9 + \alpha_{5,8}-\alpha_{5,9})$ and so on. 
 
 # V. Results
 
@@ -938,9 +938,6 @@ While $\alpha_1, \cdots,\alpha_5$ have 95% credible intervals containing 0 (an i
 
 The specific interpretation of these parameters depends on inputs from birth year and type of leadership. Below are some examples. 
 
-- A Japanese emperor born in different centuries
-
-The summary table is shown below if we compare the expected lifespans of later Japanese emperors with that of a Japanese emperor born in the 14th century. 
 ```{r, echo=F}
 #    + 14th century: $\log(T_{14th,JapanEmp}) = \alpha_0+\alpha_{10}+\frac{1}{r}\log(\epsilon)$
 #    + 15th century: $\log(T_{15th,JapanEmp}) = \alpha_0+\alpha_1+\alpha_{10}+\alpha_{1,10}+\frac{1}{r}\log(\epsilon)$
@@ -962,6 +959,7 @@ JapanEmp_diff_time <- data.frame(leader_vec) %>%
   select("Japanese Emperor","Multiplicative Factor","% Increase / Decrease in Lifespan")
 kable(JapanEmp_diff_time, caption = "Change in Lifespan by Birth Century for Japan Emperors")
 ```
+
 Surprisingly, the model suggests that longevity doesn't always increase with calendar time. The biggest increase in lifespan is in the 20th century, where the expected lifespan of a Japanese emperor increases by `r JapanEmp_diff_time[7,3]`% compared to a Japanese emperor born 6 centuries ago. This might make sense, given the last century saw the biggest number of technological breakthroughs and improvement in healthcare.   
 
 ```{r, include=F}
@@ -987,9 +985,6 @@ Dalai_diff_time <- data.frame(leader_vec) %>%
 kable(Dalai_diff_time, caption = "Change in Lifespan by Birth Century for Dalai Lamas")
 ```
 
-- Different leaders born in the 18th and 19th centuries
-
-The two tables below highlight that the effect of birth year century is depend on leader types. 
    
 ```{r, echo=F}
 # different types of leaders born in the 18th century
@@ -1037,7 +1032,7 @@ diff_leaders_20 <- data.frame(leader_vec) %>%
 kable(diff_leaders_20,1, caption = "Change in Lifespan by Leader Type for Leaders Born in 19th Century")
 ```
 
-Popes born in the 18th and 19th centuries are expected to live longer than other leaders born in the same century. If born in the 18th century, a U.S. president and a Chinese emperor are expected to enjoy comparable lifespans as a Pope. However, if born in the 19th century instead, the expected lifespans of a U.S. president and a Chinese emperor are significantly shorter than that of a Pope (`r (-1)*diff_leaders_20[2,3]`% and `r (-1)*diff_leaders_20[3,3]`% shorter respectively). More examples of the interpretation of coefficients are in Appendix A.3. 
+From Table 2 and Table 3 we can see the effect of birth year century depends on leader types. Popes born in the 18th and 19th centuries are expected to live longer than other leaders born in the same century. If born in the 18th century, a U.S. president and a Chinese emperor are expected to enjoy comparable lifespans as a Pope. However, if born in the 19th century instead, the expected lifespans of a U.S. president and a Chinese emperor are significantly shorter than that of a Pope (`r (-1)*diff_leaders_20[2,3]`% and `r (-1)*diff_leaders_20[3,3]`% shorter respectively). More examples of the interpretation of coefficients are in Appendix A.3. 
 
 The table below shows the estimate and 95% credible interval (the bounds are the 2.5% quantile and 97.5% quantile) for all 10 living leaders in the dataset.
 
@@ -1208,8 +1203,7 @@ grid.arrange(p1, p2, left = "Standardized Residual", ncol=2,
              top ="Figure 4: Residual Plots", heights=c(2, 2))
 ```
 
-
-The standardized residuals plotted against birth year are randomly scattered, showing that our model doesn't systematically over- or under-predict lifespan based on birth year. The standardized residuals vs. predicted lifespan are all still fairly randomly scattered, however there might be some trending for predicted lifespans greater than 75. We tried several different model fits, including using age as a continuous variable and using polynomial transformations, and our choice of using binned age as opposed to one of these transformations gave us the best residual plot. Some of this trending that is left over might be because we do not have enough predictors in our model. It is also worth pointing out that we have a few standardized residuals above 2 and below -2, meaning we might have some outliers. However, none of them cross the 3 or -3 threshold, so none of them are extreme outliers.
+The standardized residuals plotted against birth year are randomly scattered, showing that our model doesn't systematically over- or under-predict lifespan based on birth year. The standardized residuals vs. predicted lifespan are all still fairly randomly scattered, however there might be some trending for predicted lifespans greater than 75. Some of this trending might be because we do not have enough predictors in our model. It is also worth pointing out that we have a few standardized residuals above 2 and below -2, meaning we might have some outliers. However, none of them cross the 3 or -3 threshold, so none of them are extreme outliers.
 
 In order to perform posterior predictive checks, ten simulated datasets were created by first extracting the leaders that were non-censored. There were ten different iterations that performed the same task: every single row of the non-censored leaders and a random sample of the model parameters (from the MCMC chain) was used to define a set of $\mu$'s, and those $\mu$'s were used to simulate a set of lifespans from the Weibull distribution.
 
