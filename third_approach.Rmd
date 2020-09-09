@@ -86,13 +86,11 @@ grid.arrange(p1, p2)
 
 Based on Figure 1, it appears that birth year's association with lifespan does depend on type of leadership. In particular, Dalai Lamas' lifespans are negatively correlated with birth year, whereas the rest of the leader types have positive correlations with birth year. From the boxplot (Figure 2), we see that the distribution of the lifespans of Popes and US Presidents is centered higher, which makes intuitive sense given that these leaders are elected later in life, while Dalai Lamas and Emperors can be elected at much younger ages. For instance, if a person is a toddler and dies at age five, that person can never be president (and therefore would not have their age be part of the dataset). However, a person can become a Dalai Lama as a toddler and have their age at death be a lot smaller. 
 
-These same patterns can also be observed in the histograms in Figure 3. Also, in the histograms, there is no extreme skewing, so it does not appear that transformations are needed. 
-
 # III. Methods
 
 ## III a. Motivating the Model
 
-We use survival analysis as a way to model $T_i$, the lifespan of a given leader $i$ depending on the leader's year of birth and type of leadership. Survival analysis is useful in that it allows the consideration of "censored" data. This means that we do not always observe the outcome for each data point. For example, we do not know the death date of leaders that are still alive. Thus, we do not know their lifespans, we just know that their survival time $T_i$ will be greater than their current age. 
+We use survival analysis as a way to model $T_i$, the lifespan of a given leader $i$ depending on the leader's year of birth and type of leadership. Survival analysis is useful in that it allows the consideration of "censored" data. This means that we do not always observe the outcome for each data point. For example, we do not know the death date of leaders that are still alive. Thus, we do not know their lifespans, we just know that their survival time $T_i$ will be greater than their current age. We then used the Poisson "zeros trick" and set the upper limit of age of death to 100. Details on this method and how to implement it can be found in Appendix A.1. 
 
 We model the lifespan $T_i$ of an individual $i$ after the Weibull distribution specified below. We choose to use the Weibull distribution because it is often utilized in survival analysis and allows the user to specify a flexible shape parameter for the distribution. The first parameter $r$, also known as the shape parameter, is a positive scalar, and the second parameter $\mu$, the scale parameter, is a linear function of the covariates (in this case, the century of the birth year and types of leadership as well as their interactions). 
 
@@ -120,15 +118,11 @@ Note that the first U.S. President, George Washington, was born in 1732 (18th ce
 
 Prior to using this model, we considered a model that used leaders' birth years as a continuous variable instead of binning them into centuries. However, that model resulted in a less desirable model predictive ability as we ran model diagnostics. The residual plot showed a clear trend between residuals and predicted lifespans. Using a quadratic polynomial improved the residuals, but our current model is still superior. Model diagnostics of the current model can be found in section V.c and more details on previous models can be found in the Appendix A.2. 
 
-## III b. Addressing Censored Data
-
-To handle censored observations, we specify their contribution to the likelihood function using the Poisson "zeros trick" and set the upper limit of age of death to 100. Details on this method and how to implement it can be found in Appendix A.1. 
-
 ## III c. Prior Choice
 
 We assume that our priors are independent because intuitively a given observation could not be two types of leaders. Additionally, we do not have sufficiently strong prior knowledge about the relationship between birth year and type of leadership to specify an informative prior. Therefore, we use uninformative priors for the betas in our model, in which we chose normal betas with mean 0 and precision 1.0E-3, this includes the coefficients and the intercept in our model.
 
-For our prior for r, we chose a prior of $r \sim exp(0.1)$, as we believe the hazard of death increases with time. This is supported by the fact that older people have higher risk of mortality. For example, in an article by Eurostat, in the European Union in 2016, 82.9% of all deaths happened among people over 65. Within the Appendix A.5, different Weibull distributions are plotted with different values of $r$ in order to showcase the fact that $r \sim exp(0.1)$ gives an increasing rate of hazard, as the shape of the Weibull Distribution starts to have an increasing level of density toward the upper $x$ values for $r \sim exp(0.1)$, compared to smaller values of $r$. 
+For our prior for r, we choose a prior of $r \sim exp(0.1)$, as we believe the hazard of death increases with time. This is supported by the fact that older people have higher risk of mortality. For example, in an article by Eurostat, in the European Union in 2016, 82.9% of all deaths happened among people over 65. Within Appendix A.5, different Weibull distributions are plotted with different values of $r$ in order to showcase the fact that $r \sim exp(0.1)$ gives an increasing rate of hazard, as the shape of the Weibull Distribution starts to have an increasing level of density toward the upper $x$ values for $r \sim exp(0.1)$, compared to smaller values of $r$. 
 
 ```{r, include=F}
 # create dummy variables
@@ -882,7 +876,7 @@ model_output = run_model(priors, "model_used_in_paper")
 
 # IV. Analysis
 
-As Stander et al (2018) pointed out, following this Weibull distribution, $\log(T) = \frac{1}{r}(\mu)+\frac{1}{r}(\epsilon)$, or
+As Stander et al (2018) pointed out, following this Weibull distribution, $\log(T)$ is identical in distribution to $\frac{1}{r}(\mu)+\frac{1}{r}(\epsilon)$, or
 
 $$
 \log(T) \sim -\frac{1}{r} (\beta_0 + \beta_1x_1+\cdots+\beta_6x_6+\beta_7x_7+\cdots\beta_{10}x_{10}+\beta_{1,8}x_1x_8+\cdots+\beta_{6,10}x_6x_{10})+\frac{1}{r}\log(\epsilon) \\
