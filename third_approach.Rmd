@@ -1246,7 +1246,7 @@ d <- data.frame(ysims) #create a dataframe from the ysims matrix
 d[sapply(d, is.infinite)] <- 100 #set all of the Inf values to the upper truncation value as defined in the previous weibull distribution
 ```
 
-```{r, echo=F, warning = F, message=F, fig.width=10, fig.height = 4}
+```{r, echo=F, warning = F, message=F, fig.width=9, fig.height = 3}
 #density distribution of the ten simulations + the actual non-censored data
 data <- non_censored_prediction %>%
   select(Age.Event)
@@ -1727,7 +1727,7 @@ grid.arrange(p1, p2, left = "Standardized Residual", ncol=2,
              top ="Figure 7: Residual Plots for British Monarchs")
 ```
 
-As shown in the standardized residuals plots above, the our model didn't do a good job predicting how long British monarchs could live based on their birth year - standardized residuals are very large. In the plot showing Predicted Lifespan and the standardized residuals, it appears to be random. As the birth year of the monarchs increases, there is an upward trend. It seems that our model is overpredicting for leaders in the later centuries. 
+As shown in the standardized residuals plots above, the our model didn't do a good job predicting how long British monarchs could live based on their birth year - standardized residuals are very large. In the plot showing Predicted Lifespan and the standardized residuals, it appears to have a downward trend. As the birth year of the monarchs increases, there is an upward trend. It seems that our model is overpredicting for leaders in the later centuries. 
 
 The result, however, is perhaps not surprising to see because British monarchs and Japanese emperors are different types of leaders in different cultures and geographical regions, not to mention our model itself lacks other important variables such as leaders' health conditions, access to healthcare, etc. 
 
