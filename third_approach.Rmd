@@ -65,7 +65,7 @@ leaders_data$Birth.Year <- year(leaders_data$Birth.Date)
 
 ## II b. Exploratory Data Analysis
 
-```{r, fig.height = 4, fig.width=9, echo=F,message=FALSE}
+```{r, fig.height = 3, fig.width=6, echo=F,message=FALSE}
 p1 <- ggplot(data=leaders_data, aes(x=Birth.Year, y = Age.Event, color = Type)) +
   geom_point() + geom_smooth(method="lm", se = F) + 
   labs(title = "Figure 1: Birth Year vs. Lifespan by Leadership Types", x = "Birth Year", y = "Age of Death/Censorship") + 
